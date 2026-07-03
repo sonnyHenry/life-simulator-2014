@@ -1,0 +1,432 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --paper: #f6f3ec;
+  --card: #fffdf8;
+  --ink: #2c2c2a;
+  --muted: #8a877e;
+  --accent: #b0492c;
+  --accent-soft: #f3e3dc;
+  --line: #e4dfd3;
+  --up: #2f6c48;
+  --down: #a33030;
+}
+
+html {
+  background: var(--paper);
+}
+
+body {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--ink);
+  line-height: 1.75;
+}
+
+.app {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+  min-height: 100vh;
+}
+
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.stats-year {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat {
+  white-space: nowrap;
+}
+
+.screen-wrap {
+  animation: fadeup 0.45s ease both;
+}
+
+@keyframes fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px 24px;
+}
+
+.card.center {
+  text-align: center;
+}
+
+.kicker {
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.game-title {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 34px;
+  margin-bottom: 14px;
+}
+
+h2 {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 21px;
+  margin-bottom: 12px;
+}
+
+.brief-year {
+  font-size: 40px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.event-text {
+  margin: 10px 0 18px;
+  white-space: pre-wrap;
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.choice-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.choice-btn:active {
+  transform: scale(0.99);
+}
+
+.choice-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.continue-btn {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 13px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+}
+
+.continue-btn + .continue-btn {
+  margin-top: 10px;
+}
+
+.continue-btn:hover {
+  filter: brightness(1.08);
+}
+
+.continue-btn:active {
+  transform: scale(0.99);
+}
+
+.continue-btn:disabled {
+  background: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+}
+
+.section-label {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 16px 0 8px;
+}
+
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pill.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.exam-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.badge {
+  font-size: 12.5px;
+  padding: 3px 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+}
+
+.score {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 64px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+  margin: 6px 0 10px;
+}
+
+.bg-card {
+  margin: 14px 0 6px;
+  padding: 20px;
+  border: 1px dashed var(--accent);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  text-align: left;
+  animation: flipin 0.5s ease both;
+}
+
+@keyframes flipin {
+  from {
+    opacity: 0;
+    transform: perspective(700px) rotateY(50deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bg-money {
+  margin-top: 8px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.delta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chip {
+  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.chip-up {
+  background: #e4efe7;
+  color: var(--up);
+}
+
+.chip-down {
+  background: #f6e2e2;
+  color: var(--down);
+}
+
+.settle-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 18px 0 6px;
+}
+
+.settle-grid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.settle-num {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.ending-title {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 32px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.ending-text {
+  text-align: left;
+}
+
+.seed-line {
+  margin-top: 14px;
+  font-size: 12.5px;
+}
+
+.share-card {
+  margin: 18px 0 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+  background: #fff8e8;
+}
+
+.share-card.tone-triumph {
+  background: #eef6ed;
+  border-color: #c9dfcb;
+}
+
+.share-card.tone-bitter {
+  background: #f8eeee;
+  border-color: #e3cccc;
+}
+
+.share-card.tone-warm {
+  background: #fff8e8;
+  border-color: #ead8b8;
+}
+
+.share-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.share-card h2 {
+  margin-bottom: 8px;
+}
+
+.share-card p {
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.share-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 10px 10px 32px;
+  }
+
+  .stats-bar {
+    gap: 6px;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .stats-year {
+    width: 100%;
+  }
+
+  .card {
+    padding: 20px 14px;
+    border-radius: 10px;
+  }
+
+  .game-title {
+    font-size: 29px;
+  }
+
+  h2 {
+    font-size: 19px;
+  }
+
+  .brief-year {
+    font-size: 34px;
+  }
+
+  .choice-btn,
+  .continue-btn {
+    padding: 12px 13px;
+    font-size: 14px;
+  }
+
+  .settle-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .share-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .share-card {
+    padding: 15px;
+  }
+}

@@ -2,6 +2,8 @@
 
 从 2014 年高考开始的人生模拟器。设计文档见 [GAME_DESIGN.md](./GAME_DESIGN.md),技术架构见 [TECH_ARCHITECTURE.md](./TECH_ARCHITECTURE.md)。
 
+当前开发交接记录见 [AGENT_HANDOFF.md](./AGENT_HANDOFF.md)。后续模型接手时建议先读它。
+
 ## 结构
 
 - `packages/core` — 游戏引擎(纯 TS,零平台依赖)
@@ -14,6 +16,7 @@
 ```bash
 pnpm install          # 安装依赖
 pnpm test             # 引擎单元测试
+pnpm validate         # 内容静态校验
 pnpm typecheck        # 全仓类型检查
 pnpm simulate -n 500  # 机器人自动打 500 局,输出结局分布
 pnpm simulate -v      # 详细模式:完整打印一局(可加 --seed 42 复现)

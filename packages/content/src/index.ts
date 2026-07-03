@@ -8,14 +8,15 @@ import { collegeEvents } from './events/college';
 import { workEvents } from './events/work';
 import { randomEvents } from './events/random';
 import { endings } from './endings/endings';
+import { npcs } from './npcs/npcs';
 
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.1.0',
-    title: '2014:我的十二年(M0 最小内容)',
+    version: '0.7.0',
+    title: '2014:我的十二年(M3 社会线原型)',
     fallbackEndingId: 'end_ordinary',
-    examQuestionCount: 4,
+    examQuestionCount: 10,
   },
   timeline: phases,
   events: [...collegeEvents, ...workEvents, ...randomEvents],
@@ -24,6 +25,6 @@ export const contentPack: ContentPack = {
   provinces,
   backgrounds,
   applications,
-  npcs: [],
+  npcs,
   fns: {},
 };

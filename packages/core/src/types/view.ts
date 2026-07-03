@@ -19,6 +19,13 @@ export type ViewModel =
       score: number;
       options: { id: string; label: string; university: string; major: string; risky: boolean }[];
     }
+  | {
+      kind: 'CROSSROAD';
+      year: number;
+      university: string;
+      major: string;
+      options: { id: string; label: string; text: string; recommendedFor?: readonly string[] }[];
+    }
   | { kind: 'BRIEF'; phaseLabel: string; year: number; text: string }
   | {
       kind: 'EVENT';
@@ -36,6 +43,13 @@ export type ViewModel =
       text: string;
       stats: Stats;
       historyLength: number;
+      shareCard: {
+        title: string;
+        tagline: string;
+        tone: 'triumph' | 'bitter' | 'warm';
+        seed: number;
+        years: string;
+      };
     };
 
 export type PlayerAction =
@@ -44,4 +58,5 @@ export type PlayerAction =
   | { type: 'CHOOSE_SETUP'; provinceId: string; track: Track }
   | { type: 'ANSWER'; optionIndex: number }
   | { type: 'APPLY'; optionId: string }
+  | { type: 'CHOOSE_CROSSROAD'; optionId: string }
   | { type: 'CHOOSE'; choiceId: string };

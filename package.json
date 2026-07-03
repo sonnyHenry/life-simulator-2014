@@ -5,6 +5,7 @@
   "scripts": {
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "validate": "pnpm --filter @life-sim/tools validate",
     "simulate": "pnpm --filter @life-sim/tools simulate"
   },
   "devDependencies": {

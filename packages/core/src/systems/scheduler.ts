@@ -27,6 +27,17 @@ export function pickRoundEvents(
     if (ev.mandatory && isEligible(ev)) picked.push(ev.id);
   }
 
+  for (const def of pack.npcs) {
+    const npc = state.npcs[def.id];
+    if (!npc) continue;
+    const stage = def.stages[npc.stage];
+    if (!stage?.eventId || !evalCondition(stage.advanceWhen, ctx)) continue;
+    if (picked.includes(stage.eventId)) continue;
+    if (state.triggeredEventIds.includes(stage.eventId)) continue;
+    picked.push(stage.eventId);
+    if (picked.length >= phase.eventSlots) return picked;
+  }
+
   while (picked.length < phase.eventSlots) {
     const candidates = pack.events.filter(ev => !ev.mandatory && isEligible(ev));
     if (candidates.length === 0) break;

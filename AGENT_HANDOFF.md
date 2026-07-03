@@ -1,0 +1,201 @@
+# Agent Handoff
+
+本文件用于给后续接手的 Claude Code、Codex 或其他模型快速同步项目最新进度。
+
+## 项目定位
+
+《2014:我的十二年》是一个从 2014 年高考开始、模拟到 2026 年的人生模拟器。
+
+核心架构见:
+
+- `GAME_DESIGN.md`
+- `TECH_ARCHITECTURE.md`
+
+当前实现仍是原型阶段,但已经可以从开局一路玩到 2026 结局。
+
+## 已完成里程碑
+
+### M0 / M1
+
+由 Claude Code 早期完成:
+
+- pnpm monorepo 骨架
+- `packages/core` 纯 TypeScript 引擎
+- `packages/content` 最小内容包
+- `packages/tools` simulate CLI
+- `packages/web` React + Vite 壳
+- Web 按 `ViewModel.kind` 分支渲染
+- 开局流程:家境抽卡 -> 省份/文理 -> 高考答题 -> 志愿填报
+
+### M2
+
+由 Codex 接手后完成:
+
+- 大学阶段扩展为 2014-2017 四个学年
+- 新增 `CROSSROAD` ViewModel/action
+- 新增 2018 大四三岔口:考研 / 求职 / 考公
+- 接入 NPC stage 调度机制
+- 初步实现创业室友和初恋线
+- Web 增加三岔口 screen
+- simulate CLI 支持三岔口自动选择和 verbose 输出
+
+### M3
+
+由 Codex 完成:
+
+- 社会阶段扩展到 2018-2026
+- 计算机线关键节点:
+  - 996
+  - 2021 平台风向变化
+  - 2022 裁员潮
+  - 2023 AI 冲击
+- 师范线关键节点:
+  - 第一堂课
+  - 2020 网课
+  - 2021 双减
+  - 2022 考编热
+- 投资线:
+  - P2P
+  - 2020 基金热
+  - 2021 抱团松动
+  - 2024 黄金/出海
+- 结局文案更新到 2026 语境
+- 新增结局:
+  - AI 浪潮里的幸存者
+  - 30岁,重新开始
+  - 双减幸存者
+
+### M4
+
+由 Codex 完成:
+
+- `ENDING` ViewModel 增加 `shareCard`
+- 每个结局增加 `tone/tagline`
+- Web 结局页增加分享卡
+- Web 结局页增加“复制分享文案”
+- Web 增加 localStorage 存档
+- 标题页支持“继续上次人生”
+- content version 用于避免旧存档误读新内容
+
+### M5 第一轮
+
+由 Codex 完成:
+
+- 新增 `pnpm validate`
+- `packages/tools/src/validate.ts` 做内容静态校验:
+  - 重复 ID
+  - 缺失事件/结局/NPC/phase 引用
+  - 空 choices/outcomes
+  - 题库数量、答案下标、难度范围
+- 内容扩展到当前:
+  - 事件:52
+  - 结局:8
+  - NPC:5
+  - 高考题:37
+- 固定 NPC 补齐为技术文档规划的 5 个:
+  - 创业室友
+  - 初恋
+  - 卷王同学
+  - 县城发小
+  - 职场贵人
+- 高考题库扩展并加入 `difficulty`
+- 高考分数改为按题目难度加权
+- 志愿选择写入长期 flags:
+  - `university_tier`
+  - `major_track`
+  - `elite_university`
+  - 滑档相关 flags
+- 三岔口选择写入长期 flags:
+  - `crossroad`
+  - `postgrad`
+  - `entered_job_market_2018`
+  - `civil_service_track`
+  - `first_job_track`
+- 志愿填报和三岔口现在都会进入 `OUTCOME` 结果页
+- `OUTCOME` 页面固定显示四项指标变化:学识 / 金钱 / 心态 / 人脉,未变化显示 `+0`
+- 修复 `换季重感冒` 重复出现问题
+- 做了一轮移动端样式压缩和结局分享卡适配
+
+## 当前内容版本
+
+`packages/content/src/index.ts`
+
+```ts
+version: '0.7.0'
+title: '2014:我的十二年(M3 社会线原型)'
+```
+
+注意:title 还保留 M3 字样,但功能进度已经推进到 M5 第一轮。后续可以改成更中性的 `2014:我的十二年`。
+
+## 常用验证命令
+
+```bash
+pnpm typecheck
+pnpm test
+pnpm validate
+pnpm simulate -n 200
+pnpm simulate -n 1 -v --seed 43
+pnpm --filter @life-sim/web build
+```
+
+如果在 Codex 沙箱里运行 `pnpm validate` 或 `pnpm simulate`,`tsx` 可能因 IPC pipe 权限失败。需要用非沙箱/批准方式运行。
+
+## 最近一次验证结果
+
+最近一次完整验证通过:
+
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm validate`
+- `pnpm simulate -n 100`
+- `pnpm --filter @life-sim/web build`
+
+最近一次 `pnpm validate`:
+
+```text
+事件 52, 结局 8, NPC 5, 题目 37
+完成: 0 errors, 0 warnings
+```
+
+最近一次 `pnpm simulate -n 100`:
+
+```text
+事件覆盖: 52/52
+```
+
+## 当前重要实现点
+
+- 引擎仍保持纯函数风格:`start / view / dispatch`
+- UI 仍只渲染 `ViewModel` 和 dispatch action
+- 浏览器存储只在 `packages/web/src/platform/storage.ts`
+- 内容长期影响主要通过 `flags` / `npcStage` / `npcFavor` / `history` 实现
+- NPC 主动推进在 `packages/core/src/systems/scheduler.ts`
+- 志愿和三岔口的特殊流程结果通过 `pendingFlowAdvance` 中转到 `OUTCOME`
+
+## 已知问题 / 后续建议
+
+- 内容量还没有达到设计文档里的约 125 个事件,当前是 52 个。
+- 结局数量仍偏少,当前是 8 个,设计目标是 12-15 个 MVP 结局。
+- Web 还没有真正导出图片分享卡,目前是 DOM 分享卡 + 复制文本。
+- 存档目前是 snapshot 存档,还没有 actionLog 重放和迁移链。
+- validate 已有基础校验,但还没有做结局分布目标校验。
+- title 仍写着 `M3 社会线原型`,建议上线前改掉。
+- 金钱/心态等数值已经可玩,但还需要继续根据 simulate 分布调平衡。
+
+## 给下一个模型的建议
+
+接手时先读:
+
+1. `README.md`
+2. `GAME_DESIGN.md`
+3. `TECH_ARCHITECTURE.md`
+4. 本文件 `AGENT_HANDOFF.md`
+
+然后先跑:
+
+```bash
+pnpm validate
+pnpm simulate -n 200
+```
+
+再决定是继续补内容、调平衡,还是做 Web 体验打磨。

@@ -41,9 +41,18 @@ export interface EndingDef {
   category: 'early' | 'final';
   priority: number;
   condition: Condition;
+  shareCard?: {
+    tone: 'triumph' | 'bitter' | 'warm';
+    tagline: string;
+  };
 }
 
-export type FlowStep = 'BACKGROUND_DRAW' | 'SETUP' | 'EXAM' | 'APPLICATION';
+export type FlowStep =
+  | 'BACKGROUND_DRAW'
+  | 'SETUP'
+  | 'EXAM'
+  | 'APPLICATION'
+  | 'CROSSROAD';
 
 export type PhaseConfig =
   | {
@@ -72,6 +81,7 @@ export interface ExamQuestion {
   text: string;
   options: string[];
   answerIndex: number;
+  difficulty?: 1 | 2 | 3 | 4 | 5;
 }
 
 export interface ProvinceOption {

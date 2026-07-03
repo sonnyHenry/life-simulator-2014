@@ -1,0 +1,117 @@
+import type { NpcDef } from '@life-sim/core';
+
+export const npcs: NpcDef[] = [
+  {
+    id: 'roommate',
+    name: '创业室友',
+    initialFavor: 20,
+    initialStage: 'freshman',
+    stages: {
+      freshman: {
+        advanceWhen: { year: { from: 2015, to: 2015 } },
+        eventId: 'ev_npc_roommate_startup_pitch',
+      },
+      cofounder: {
+        advanceWhen: { year: { from: 2017, to: 2017 } },
+        eventId: 'ev_npc_roommate_startup_reality',
+      },
+      observer: {
+        advanceWhen: { year: { from: 2017, to: 2017 } },
+        eventId: 'ev_npc_roommate_startup_reality',
+      },
+      distant: {},
+      close_friend: {},
+    },
+  },
+  {
+    id: 'first_love',
+    name: '初恋',
+    initialFavor: 10,
+    initialStage: 'club_acquaintance',
+    stages: {
+      club_acquaintance: {
+        advanceWhen: { year: { from: 2016, to: 2016 } },
+        eventId: 'ev_college_confession',
+      },
+      together: {
+        advanceWhen: { year: { from: 2018, to: 2018 } },
+        eventId: 'ev_love_distance',
+      },
+      missed: {},
+      separated: {},
+      steady: {},
+    },
+  },
+  {
+    id: 'grinder',
+    name: '卷王同学',
+    initialFavor: 15,
+    initialStage: 'freshman',
+    stages: {
+      freshman: {
+        advanceWhen: { year: { from: 2016, to: 2016 } },
+        eventId: 'ev_npc_grinder_baoyan',
+      },
+      big_tech: {
+        advanceWhen: { year: { from: 2018, to: 2019 } },
+        eventId: 'ev_npc_grinder_big_tech',
+      },
+      layoff_pending: {
+        advanceWhen: { year: { from: 2022, to: 2022 } },
+        eventId: 'ev_npc_grinder_layoff',
+      },
+      mirror_friend: {},
+      distant_star: {},
+    },
+  },
+  {
+    id: 'hometown_friend',
+    name: '县城发小',
+    initialFavor: 25,
+    initialStage: 'home',
+    stages: {
+      home: {
+        advanceWhen: { year: { from: 2015, to: 2015 } },
+        eventId: 'ev_npc_hometown_spring_festival',
+      },
+      civil_servant: {
+        advanceWhen: { year: { from: 2019, to: 2019 } },
+        eventId: 'ev_npc_hometown_settled',
+      },
+      settled: {
+        advanceWhen: { year: { from: 2025, to: 2025 } },
+        eventId: 'ev_npc_hometown_reunion',
+      },
+      distant: {},
+      close: {},
+    },
+  },
+  {
+    id: 'mentor',
+    name: '职场贵人',
+    initialFavor: 0,
+    initialStage: 'unknown',
+    stages: {
+      unknown: {
+        advanceWhen: {
+          all: [
+            { stat: 'network', op: '>=', value: 24 },
+            { year: { from: 2019, to: 2023 } },
+          ],
+        },
+        eventId: 'ev_npc_mentor_intro',
+      },
+      available: {
+        advanceWhen: {
+          all: [
+            { npcFavor: 'mentor', op: '>=', value: 20 },
+            { year: { from: 2024, to: 2024 } },
+          ],
+        },
+        eventId: 'ev_npc_mentor_advice',
+      },
+      missed: {},
+      ally: {},
+    },
+  },
+];

@@ -1,6 +1,8 @@
 import type { ContentPack, ExamQuestion, PhaseConfig } from '../types/content';
+import type { Effect } from '../types/dsl';
 import type { GameState } from '../types/state';
 import type { PlayerAction, ViewModel } from '../types/view';
+import type { StatDeltas, StatKey } from '../types/stats';
 import { Rng, randomSeed } from '../rng/rng';
 import { applyEffects } from '../dsl/apply';
 import { evalCondition } from '../dsl/evaluate';
@@ -15,6 +17,33 @@ export interface Engine {
 
 const EXAM_BASE_SCORE = 330;
 const EXAM_SCORE_RANGE = 270;
+
+const CROSSROAD_OPTIONS = [
+  {
+    id: 'postgrad',
+    label: '考研',
+    text: '再把青春押给一次考试。晚几年入场,也许能换一张更硬的门票。',
+    recommendedFor: ['计算机科学与技术', '软件工程', '师范类'],
+  },
+  {
+    id: 'job',
+    label: '求职',
+    text: '先上车再说。简历、群面、笔试、offer,毕业季的风会把人推着往前走。',
+    recommendedFor: ['计算机科学与技术', '软件工程', '计算机应用'],
+  },
+  {
+    id: 'civil_service',
+    label: '考公',
+    text: '回到一张安静的书桌前,把不确定的人生复习成确定的题型。',
+    recommendedFor: ['师范类', '工商管理'],
+  },
+] as const;
+
+function addDeltas(target: StatDeltas, source: StatDeltas): void {
+  for (const [key, value] of Object.entries(source) as [StatKey, number][]) {
+    target[key] = (target[key] ?? 0) + value;
+  }
+}
 
 function clone(state: GameState): GameState {
   return JSON.parse(JSON.stringify(state)) as GameState;
@@ -63,11 +92,13 @@ export function createEngine(pack: ContentPack): Engine {
       eventQueue: [],
       eventCursor: 0,
       pendingOutcome: null,
+      pendingFlowAdvance: false,
       forcedEndingId: null,
       pendingJumpPhaseId: null,
       examPaper: [],
       examCursor: 0,
       examCorrect: 0,
+      examEarnedPoints: 0,
       stats: { knowledge: 40, money: 0, mindset: 70, network: 10 },
       profile: {
         background: null,
@@ -128,6 +159,14 @@ export function createEngine(pack: ContentPack): Engine {
             risky: opt.admitChance < 1,
           })),
         };
+      case 'CROSSROAD':
+        return {
+          kind: 'CROSSROAD',
+          year: state.date.year,
+          university: state.profile.university ?? '这所大学',
+          major: state.profile.major ?? '你的专业',
+          options: CROSSROAD_OPTIONS.map(opt => ({ ...opt })),
+        };
       case 'BRIEF': {
         const phase = phaseAt(state.phaseIndex);
         return {
@@ -171,6 +210,13 @@ export function createEngine(pack: ContentPack): Engine {
           text: ending.text,
           stats: state.stats,
           historyLength: state.history.length,
+          shareCard: {
+            title: ending.title,
+            tagline: ending.shareCard?.tagline ?? '普通人的十二年,也有自己的重量。',
+            tone: ending.shareCard?.tone ?? 'warm',
+            seed: state.seed,
+            years: '2014-2026',
+          },
         };
       }
     }
@@ -215,11 +261,15 @@ export function createEngine(pack: ContentPack): Engine {
         state.examPaper = rng.sample(bank, pack.meta.examQuestionCount).map(q => q.id);
         state.examCursor = 0;
         state.examCorrect = 0;
+        state.examEarnedPoints = 0;
         state.screen = 'EXAM';
         break;
       }
       case 'APPLICATION':
         state.screen = 'APPLICATION';
+        break;
+      case 'CROSSROAD':
+        state.screen = 'CROSSROAD';
         break;
     }
   }
@@ -265,9 +315,12 @@ export function createEngine(pack: ContentPack): Engine {
   }
 
   function resolveExamScore(state: GameState, rng: Rng): void {
-    const total = Math.max(1, state.examPaper.length);
-    const rate = state.examCorrect / total;
-    const raw = Math.round(EXAM_BASE_SCORE + rate * EXAM_SCORE_RANGE + rng.int(-15, 15));
+    const maxPoints = Math.max(
+      1,
+      state.examPaper.reduce((sum, qid) => sum + (questionsById.get(qid)?.difficulty ?? 1), 0),
+    );
+    const rate = state.examEarnedPoints / maxPoints;
+    const raw = Math.round(EXAM_BASE_SCORE + rate * EXAM_SCORE_RANGE + rng.int(-18, 18));
     state.profile.examScore = Math.max(0, Math.min(750, raw));
     state.stats.knowledge = Math.round(20 + rate * 55);
     state.screen = 'EXAM_RESULT';
@@ -277,10 +330,13 @@ export function createEngine(pack: ContentPack): Engine {
     const option = availableApplications(state).find(o => o.id === optionId);
     if (!option) throw new Error(`Application option not available: ${optionId}`);
     const admitted = rng.chance(option.admitChance);
+    const deltas: StatDeltas = {};
+    let text: string;
     if (admitted) {
       state.profile.university = option.university;
       state.profile.major = option.major;
-      if (option.effects) applyEffects(option.effects, state, pack);
+      if (option.effects) addDeltas(deltas, applyEffects(option.effects, state, pack).deltas);
+      text = `录取结果出来了: ${option.university} · ${option.major}。志愿表上的一行字,从今天起变成了你接下来四年的城市、同学和专业。`;
     } else {
       const fallback = pack.applications
         .filter(o => o.admitChance >= 1 && admissionScore(state) >= o.minScore)
@@ -289,7 +345,9 @@ export function createEngine(pack: ContentPack): Engine {
       state.profile.university = fallback.university;
       state.profile.major = fallback.major;
       state.flags['slipped'] = true;
-      if (option.failEffects) applyEffects(option.failEffects, state, pack);
+      if (option.failEffects) addDeltas(deltas, applyEffects(option.failEffects, state, pack).deltas);
+      if (fallback.effects) addDeltas(deltas, applyEffects(fallback.effects, state, pack).deltas);
+      text = `你没有被 ${option.university} 录取,最后去了 ${fallback.university} · ${fallback.major}。滑档像一盆冷水,但人生不会因为一张录取通知书就停止加载。`;
     }
     state.history.push({
       kind: 'application',
@@ -297,6 +355,87 @@ export function createEngine(pack: ContentPack): Engine {
       optionId: option.id,
       admitted,
     });
+    state.pendingOutcome = { text, deltas };
+    state.pendingFlowAdvance = true;
+    state.screen = 'OUTCOME';
+  }
+
+  function handleCrossroad(state: GameState, optionId: string): void {
+    const major = state.profile.major ?? '';
+    const tier = state.flags['university_tier'];
+    const eliteBonus = tier === '985' || tier === '211';
+    const deltas: StatDeltas = {};
+    let text: string;
+    switch (optionId) {
+      case 'postgrad': {
+        const result = applyEffects(
+          [
+            { setFlag: 'crossroad', value: 'postgrad' },
+            { setFlag: 'postgrad' },
+            { setFlag: 'delayed_job_market' },
+            { stats: { knowledge: eliteBonus ? 10 : 8, network: eliteBonus ? 4 : 1, mindset: -4 } },
+          ],
+          state,
+          pack,
+        );
+        addDeltas(deltas, result.deltas);
+        text = '你选择考研。别人开始投简历、租房、领工资时,你重新坐回书桌前。晚几年入场,也意味着多几年打磨自己。';
+        break;
+      }
+      case 'job': {
+        const effects: Effect[] = [
+          { setFlag: 'crossroad', value: 'job' },
+          { setFlag: 'entered_job_market_2018' },
+          { stats: { money: eliteBonus ? 8000 : 3000, network: eliteBonus ? 4 : 1 } },
+        ];
+        if (major.includes('计算机') || major.includes('软件')) {
+          effects.push(
+            { setCareer: 'cs' },
+            { setFlag: 'career_cs' },
+            { setFlag: 'first_job_track', value: eliteBonus ? 'big_tech_candidate' : 'ordinary_tech_candidate' },
+          );
+        } else if (major.includes('师范')) {
+          effects.push(
+            { setCareer: 'education' },
+            { setFlag: 'career_edu' },
+            { setFlag: 'first_job_track', value: 'education_candidate' },
+          );
+        } else {
+          effects.push(
+            { setCareer: 'local' },
+            { setFlag: 'first_job_track', value: 'local_candidate' },
+          );
+        }
+        addDeltas(deltas, applyEffects(effects, state, pack).deltas);
+        text = '你选择直接求职。简历投出去的那一刻,学生时代开始松手,社会开始接管你的日程表。';
+        break;
+      }
+      case 'civil_service': {
+        const result = applyEffects(
+          [
+            { setFlag: 'crossroad', value: 'civil_service' },
+            { setFlag: 'civil_service_track' },
+            { setCareer: 'gov_candidate' },
+            { stats: { knowledge: major.includes('师范') ? 6 : 4, mindset: -3 } },
+          ],
+          state,
+          pack,
+        );
+        addDeltas(deltas, result.deltas);
+        text = '你选择考公。把不确定的人生重新复习成题型,也是一种勇气。只是这条路不保证上岸,只保证你会很熟悉申论格子纸。';
+        break;
+      }
+      default:
+        throw new Error(`Unknown crossroad option: ${optionId}`);
+    }
+    state.history.push({
+      kind: 'crossroad',
+      year: state.date.year,
+      optionId,
+    });
+    state.pendingOutcome = { text, deltas };
+    state.pendingFlowAdvance = true;
+    state.screen = 'OUTCOME';
   }
 
   function resolveChoice(state: GameState, rng: Rng, choiceId: string): void {
@@ -343,6 +482,11 @@ export function createEngine(pack: ContentPack): Engine {
       finishWithEnding(state, early.id);
       return;
     }
+    if (state.pendingFlowAdvance) {
+      state.pendingFlowAdvance = false;
+      nextFlowStep(state, rng);
+      return;
+    }
     state.eventCursor += 1;
     if (state.eventCursor < state.eventQueue.length) {
       state.screen = 'EVENT';
@@ -376,7 +520,10 @@ export function createEngine(pack: ContentPack): Engine {
         const qid = state.examPaper[state.examCursor];
         const q: ExamQuestion | undefined = qid ? questionsById.get(qid) : undefined;
         if (!q) throw new Error('ANSWER without a current question');
-        if (action.optionIndex === q.answerIndex) state.examCorrect += 1;
+        if (action.optionIndex === q.answerIndex) {
+          state.examCorrect += 1;
+          state.examEarnedPoints += q.difficulty ?? 1;
+        }
         state.examCursor += 1;
         if (state.examCursor >= state.examPaper.length) resolveExamScore(state, rng);
         return;
@@ -388,7 +535,10 @@ export function createEngine(pack: ContentPack): Engine {
       case 'APPLICATION':
         if (action.type !== 'APPLY') invalid(state, action);
         handleApplication(state, rng, action.optionId);
-        nextFlowStep(state, rng);
+        return;
+      case 'CROSSROAD':
+        if (action.type !== 'CHOOSE_CROSSROAD') invalid(state, action);
+        handleCrossroad(state, action.optionId);
         return;
       case 'BRIEF':
         if (action.type !== 'CONTINUE') invalid(state, action);

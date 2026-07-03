@@ -7,6 +7,7 @@ export type ScreenId =
   | 'EXAM'
   | 'EXAM_RESULT'
   | 'APPLICATION'
+  | 'CROSSROAD'
   | 'BRIEF'
   | 'EVENT'
   | 'OUTCOME'
@@ -37,6 +38,11 @@ export type HistoryEntry =
       year: number;
       optionId: string;
       admitted: boolean;
+    }
+  | {
+      kind: 'crossroad';
+      year: number;
+      optionId: string;
     };
 
 export interface NpcState {
@@ -58,11 +64,13 @@ export interface GameState {
   eventQueue: string[];
   eventCursor: number;
   pendingOutcome: { text: string; deltas: StatDeltas } | null;
+  pendingFlowAdvance: boolean;
   forcedEndingId: string | null;
   pendingJumpPhaseId: string | null;
   examPaper: string[];
   examCursor: number;
   examCorrect: number;
+  examEarnedPoints: number;
   stats: Stats;
   profile: Profile;
   flags: Flags;

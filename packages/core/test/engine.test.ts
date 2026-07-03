@@ -148,6 +148,74 @@ describe('Rng', () => {
   });
 });
 
+describe('M2 flow support', () => {
+  it('supports a crossroad flow step before later phases', () => {
+    const pack = miniPack();
+    pack.timeline.splice(1, 0, {
+      kind: 'flow',
+      id: 'crossroad',
+      label: '三岔口',
+      date: { year: 2018, month: 3 },
+      steps: ['CROSSROAD'],
+    });
+    const engine = createEngine(pack);
+    let state = engine.start(7);
+    state = engine.dispatch(state, { type: 'START' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    while (engine.view(state).kind === 'EXAM') {
+      state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 1 });
+    }
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
+
+    let view = engine.view(state);
+    expect(view.kind).toBe('OUTCOME');
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    view = engine.view(state);
+    expect(view.kind).toBe('CROSSROAD');
+    state = engine.dispatch(state, { type: 'CHOOSE_CROSSROAD', optionId: 'job' });
+    expect(state.history.some(h => h.kind === 'crossroad' && h.optionId === 'job')).toBe(true);
+    expect(engine.view(state).kind).toBe('OUTCOME');
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    expect(engine.view(state).kind).toBe('BRIEF');
+  });
+
+  it('schedules NPC stage events when their stage condition becomes true', () => {
+    const pack = miniPack();
+    pack.npcs = [
+      {
+        id: 'friend',
+        name: '朋友',
+        initialFavor: 10,
+        initialStage: 'start',
+        stages: {
+          start: {
+            advanceWhen: { year: { from: 2014, to: 2014 } },
+            eventId: 'ev_chain',
+          },
+        },
+      },
+    ];
+    const engine = createEngine(pack);
+    let state = engine.start(3);
+    state = engine.dispatch(state, { type: 'START' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    while (engine.view(state).kind === 'EXAM') {
+      state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 1 });
+    }
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+
+    const view = engine.view(state);
+    expect(view.kind).toBe('EVENT');
+    if (view.kind === 'EVENT') expect(view.eventId).toBe('ev_chain');
+  });
+});
+
 describe('evalCondition', () => {
   const pack = miniPack();
   const engine = createEngine(pack);

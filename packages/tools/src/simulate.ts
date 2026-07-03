@@ -44,6 +44,8 @@ function botAction(view: ViewModel, bot: Rng): PlayerAction {
       return { type: 'ANSWER', optionIndex: bot.int(0, view.question.options.length - 1) };
     case 'APPLICATION':
       return { type: 'APPLY', optionId: bot.pick(view.options).id };
+    case 'CROSSROAD':
+      return { type: 'CHOOSE_CROSSROAD', optionId: bot.pick(view.options).id };
     case 'EVENT':
       return { type: 'CHOOSE', choiceId: bot.pick(view.choices).id };
     case 'ENDING':
@@ -97,6 +99,12 @@ function runOne(seed: number, botSeed: number, verbose: boolean): RunResult {
         if (action.type === 'APPLY') {
           const opt = view.options.find(o => o.id === action.optionId);
           log(`🎓 志愿:${opt?.label}${opt?.risky ? '(有滑档风险)' : ''}`);
+        }
+        break;
+      case 'CROSSROAD':
+        if (action.type === 'CHOOSE_CROSSROAD') {
+          const opt = view.options.find(o => o.id === action.optionId);
+          log(`\n🎒 毕业三岔口:${opt?.label}`);
         }
         break;
       case 'BRIEF':
