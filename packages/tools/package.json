@@ -1,0 +1,18 @@
+{
+  "name": "@life-sim/tools",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "simulate": "tsx src/simulate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@life-sim/core": "workspace:*",
+    "@life-sim/content": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

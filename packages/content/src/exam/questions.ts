@@ -1,0 +1,73 @@
+import type { ExamQuestion } from '@life-sim/core';
+
+export const examBank: ExamQuestion[] = [
+  {
+    id: 'q_chinese_idiom',
+    track: 'both',
+    subject: '语文',
+    text: '下列句子中,加点成语使用恰当的一项是:',
+    options: [
+      '他的演讲抛砖引玉,赢得了满堂喝彩',
+      '这部小说情节跌宕起伏,读来令人爱不释手',
+      '比赛结束后,双方队员济济一堂地退场了',
+      '他做事一向首当其冲,从不推脱责任',
+    ],
+    answerIndex: 1,
+  },
+  {
+    id: 'q_math_set',
+    track: 'both',
+    subject: '数学',
+    text: '已知集合 A = {1, 2, 3, 4},B = {x | x² ≤ 4},则 A ∩ B =',
+    options: ['{1}', '{1, 2}', '{1, 2, 3}', '{2}'],
+    answerIndex: 1,
+  },
+  {
+    id: 'q_english_cloze',
+    track: 'both',
+    subject: '英语',
+    text: 'The movie was so boring that half of the audience left ___ it ended.',
+    options: ['after', 'since', 'before', 'until'],
+    answerIndex: 2,
+  },
+  {
+    id: 'q_math_func',
+    track: 'both',
+    subject: '数学',
+    text: '函数 f(x) = 2x + 1,若 f(a) = 7,则 a =',
+    options: ['2', '3', '4', '5'],
+    answerIndex: 1,
+  },
+  {
+    id: 'q_physics_fall',
+    track: '理',
+    subject: '理综·物理',
+    text: '一物体从静止开始自由下落,2 秒末的速度约为(g 取 10 m/s²):',
+    options: ['10 m/s', '20 m/s', '40 m/s', '5 m/s'],
+    answerIndex: 1,
+  },
+  {
+    id: 'q_chem_gas',
+    track: '理',
+    subject: '理综·化学',
+    text: '下列气体中,能使湿润的红色石蕊试纸变蓝的是:',
+    options: ['二氧化碳', '氯气', '氨气', '二氧化硫'],
+    answerIndex: 2,
+  },
+  {
+    id: 'q_history_jiawu',
+    track: '文',
+    subject: '文综·历史',
+    text: '甲午中日战争后签订的条约是:',
+    options: ['《南京条约》', '《马关条约》', '《辛丑条约》', '《北京条约》'],
+    answerIndex: 1,
+  },
+  {
+    id: 'q_geo_timezone',
+    track: '文',
+    subject: '文综·地理',
+    text: '当北京时间为 12:00 时,伦敦(中时区)的区时约为:',
+    options: ['4:00', '20:00', '12:00', '8:00'],
+    answerIndex: 0,
+  },
+];

@@ -1,0 +1,13 @@
+{
+  "name": "life-simulator-2014",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "simulate": "pnpm --filter @life-sim/tools simulate"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

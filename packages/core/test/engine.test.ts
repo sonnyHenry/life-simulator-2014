@@ -1,0 +1,198 @@
+import { describe, expect, it } from 'vitest';
+import {
+  createEngine,
+  evalCondition,
+  Rng,
+  type ContentPack,
+  type GameState,
+  type PlayerAction,
+} from '../src/index';
+
+function miniPack(): ContentPack {
+  return {
+    meta: {
+      id: 'test',
+      version: '0.0.1',
+      title: 'test pack',
+      fallbackEndingId: 'end_fallback',
+      examQuestionCount: 2,
+    },
+    timeline: [
+      {
+        kind: 'flow',
+        id: 'gaokao',
+        label: '高考',
+        date: { year: 2014, month: 6 },
+        steps: ['BACKGROUND_DRAW', 'SETUP', 'EXAM', 'APPLICATION'],
+      },
+      {
+        kind: 'rounds',
+        id: 'life',
+        label: '人生',
+        date: { year: 2014, month: 9 },
+        rounds: 2,
+        eventSlots: 1,
+        pools: ['main'],
+        briefs: ['第一年', '第二年'],
+        isFinal: true,
+      },
+    ],
+    events: [
+      {
+        id: 'ev_a',
+        pools: ['main'],
+        title: '事件A',
+        text: '一个测试事件',
+        choices: [
+          {
+            id: 'x',
+            text: '选X',
+            outcomes: [
+              {
+                weight: 1,
+                text: '结果X',
+                effects: [{ stats: { mindset: -10 } }, { setFlag: 'chose_x' }],
+              },
+            ],
+          },
+          {
+            id: 'y',
+            text: '选Y',
+            outcomes: [
+              { weight: 1, text: '结果Y', effects: [{ stats: { money: 1000 } }] },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'ev_chain',
+        pools: [],
+        title: '链式事件',
+        text: '由 schedule 触发',
+        choices: [
+          { id: 'ok', text: '好', outcomes: [{ weight: 1, text: '好的', effects: [] }] },
+        ],
+      },
+    ],
+    endings: [
+      {
+        id: 'end_fallback',
+        title: '普通结局',
+        text: '结束了',
+        category: 'final',
+        priority: 999,
+        condition: { always: true },
+      },
+    ],
+    examBank: [
+      { id: 'q1', track: 'both', subject: '数学', text: '1+1=?', options: ['1', '2'], answerIndex: 1 },
+      { id: 'q2', track: 'both', subject: '语文', text: '选对的', options: ['对', '错'], answerIndex: 0 },
+      { id: 'q3', track: '理', subject: '物理', text: 'g≈?', options: ['9.8', '3.7'], answerIndex: 0 },
+    ],
+    provinces: [{ id: 'p1', label: '某省', scoreShift: 0 }],
+    backgrounds: [{ id: 'bg1', label: '普通家庭', text: '普通', initialMoney: 5000 }],
+    applications: [
+      { id: 'app1', label: '保底大学', university: '某大学', major: '某专业', minScore: 0, admitChance: 1 },
+    ],
+    npcs: [],
+    fns: {},
+  };
+}
+
+function autoPlay(pack: ContentPack, seed: number): GameState {
+  const engine = createEngine(pack);
+  let state = engine.start(seed);
+  let guard = 0;
+  while (guard++ < 500) {
+    const view = engine.view(state);
+    if (view.kind === 'ENDING') return state;
+    let action: PlayerAction;
+    switch (view.kind) {
+      case 'TITLE':
+        action = { type: 'START' };
+        break;
+      case 'SETUP':
+        action = { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' };
+        break;
+      case 'EXAM':
+        action = { type: 'ANSWER', optionIndex: 0 };
+        break;
+      case 'APPLICATION':
+        action = { type: 'APPLY', optionId: view.options[0]!.id };
+        break;
+      case 'EVENT':
+        action = { type: 'CHOOSE', choiceId: view.choices[0]!.id };
+        break;
+      default:
+        action = { type: 'CONTINUE' };
+    }
+    state = engine.dispatch(state, action);
+  }
+  throw new Error('autoPlay did not finish');
+}
+
+describe('Rng', () => {
+  it('is deterministic for the same seed', () => {
+    const a = new Rng(12345);
+    const b = new Rng(12345);
+    for (let i = 0; i < 100; i++) expect(a.next()).toBe(b.next());
+  });
+
+  it('produces values in [0, 1)', () => {
+    const rng = new Rng(7);
+    for (let i = 0; i < 1000; i++) {
+      const v = rng.next();
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThan(1);
+    }
+  });
+});
+
+describe('evalCondition', () => {
+  const pack = miniPack();
+  const engine = createEngine(pack);
+  const state = engine.start(1);
+  const ctx = { state, pack, rng: new Rng(1) };
+
+  it('evaluates stat comparisons', () => {
+    expect(evalCondition({ stat: 'mindset', op: '>=', value: 70 }, ctx)).toBe(true);
+    expect(evalCondition({ stat: 'mindset', op: '<', value: 70 }, ctx)).toBe(false);
+  });
+
+  it('evaluates flag / all / any / not combinators', () => {
+    state.flags['foo'] = true;
+    expect(evalCondition({ flag: 'foo' }, ctx)).toBe(true);
+    expect(evalCondition({ not: { flag: 'foo' } }, ctx)).toBe(false);
+    expect(
+      evalCondition({ all: [{ flag: 'foo' }, { stat: 'mindset', op: '>', value: 0 }] }, ctx),
+    ).toBe(true);
+    expect(evalCondition({ any: [{ flag: 'nope' }, { flag: 'foo' }] }, ctx)).toBe(true);
+  });
+
+  it('throws on unknown fn reference', () => {
+    expect(() => evalCondition({ fn: 'missing' }, ctx)).toThrow(/unknown fn/);
+  });
+});
+
+describe('engine full game', () => {
+  it('plays to an ending', () => {
+    const final = autoPlay(miniPack(), 99);
+    expect(final.endingId).toBe('end_fallback');
+    expect(final.screen).toBe('ENDING');
+    expect(final.history.length).toBeGreaterThan(0);
+  });
+
+  it('is fully deterministic: same seed, same policy, same final state', () => {
+    const a = autoPlay(miniPack(), 2024);
+    const b = autoPlay(miniPack(), 2024);
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+
+  it('different seeds can draw different exam papers', () => {
+    const results = new Set<string>();
+    for (let seed = 1; seed <= 20; seed++) {
+      results.add(JSON.stringify(autoPlay(miniPack(), seed).examPaper));
+    }
+    expect(results.size).toBeGreaterThan(1);
+  });
+});
