@@ -1,6 +1,10 @@
 # 2014:我的十二年
 
-从 2014 年高考开始的人生模拟器。设计文档见 [GAME_DESIGN.md](./GAME_DESIGN.md),技术架构见 [TECH_ARCHITECTURE.md](./TECH_ARCHITECTURE.md)。
+从 2014 年高考开始的人生模拟器。**[▶ 在线试玩](https://sonnyhenry.github.io/life-simulator-2014/)**
+
+设计文档见 [GAME_DESIGN.md](./GAME_DESIGN.md),技术架构见 [TECH_ARCHITECTURE.md](./TECH_ARCHITECTURE.md)。
+
+推送到 main 会自动触发部署(`.github/workflows/deploy.yml`):质量门禁(typecheck/test/validate/simulate --check)通过后发布到 GitHub Pages。
 
 当前开发交接记录见 [AGENT_HANDOFF.md](./AGENT_HANDOFF.md)。后续模型接手时建议先读它。
 
