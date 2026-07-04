@@ -298,4 +298,137 @@ export const randomEvents: GameEvent[] = [
       },
     ],
   },
+  {
+    id: 'ev_random_gym_card',
+    pools: ['random'],
+    category: 'health',
+    title: '年卡',
+    text: '公司楼下的健身房在搞活动,销售小哥拦住你:"哥,办年卡吧,平均一天才六块钱,一杯奶茶都不到。"你捏了捏加班攒出来的肚子。',
+    trigger: { year: { from: 2019 } },
+    choices: [
+      {
+        id: 'a',
+        text: '办!这次一定坚持',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你去了七次:前四次拍了照,后三次只用了淋浴。年底销售问你续不续卡,你说考虑一下——考虑的过程持续到了健身房倒闭。',
+            effects: [{ stats: { money: -2000, mindset: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '出乎所有人意料,你坚持下来了。一年后你在工位抽屉里放的不再是护肝片,而是蛋白粉。体检报告第一次没有上箭头,你把它拍照发了朋友圈。',
+            effects: [{ stats: { money: -2000, mindset: 6 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '不办,跑步不要钱',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你说小区里跑跑就行。当然,"小区里跑跑"最终也停留在了口头。但至少,你省下了两千块——这是这个决定里唯一兑现的部分。',
+            effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_parents_video',
+    pools: ['random'],
+    category: 'family',
+    title: '视频通话',
+    text: '疫情之后,爸妈学会了视频通话。从此每周日晚上,你的手机都会准时响起。镜头永远怼在天花板或者鼻孔上,但他们乐此不疲。',
+    trigger: { year: { from: 2020 } },
+    choices: [
+      {
+        id: 'a',
+        text: '认真接,教他们把镜头端正',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你教了三遍,他们终于学会了把脸放进画面里。妈妈开始给你直播家里的菜地和新买的沙发。信号经常卡,但有些东西一点都没卡:比如她每次结尾都问"钱够不够花"。',
+            effects: [{ stats: { mindset: 5 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '正忙,挂了回头再说',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你按掉了,想着忙完这阵回过去。等你想起来,已经是三天后。爸妈没有怪你,这比怪你更让你难受。',
+            effects: [{ stats: { mindset: -3 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_health_report',
+    pools: ['random'],
+    category: 'health',
+    title: '体检报告',
+    text: '公司体检的报告出来了。你盯着 APP 上"查看报告"四个字看了半天,像大学时不敢查挂科成绩。点开:结节、脂肪肝倾向、几个向上的箭头。',
+    trigger: { year: { from: 2023 } },
+    choices: [
+      {
+        id: 'a',
+        text: '认真对待,复查+调作息',
+        outcomes: [
+          {
+            weight: 1,
+            text: '复查结果问题不大,医生说"多数是熬出来的,少熬就行"。你开始十二点前睡觉,外卖从"随便"改成了"少油"。身体是唯一跟你签了终身合同的同事,你想跟它搞好关系。',
+            effects: [{ stats: { money: -1500, mindset: 4 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '年轻人都这样,先放着',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把报告塞进了抽屉最深处,和去年的那份放在一起。它们在黑暗中安静地叠着,像两张还没到期的账单。',
+            effects: [{ stats: { mindset: -2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_classmates_group',
+    pools: ['random'],
+    category: 'friendship',
+    title: '十年群聊',
+    text: '大学班级群突然热闹起来——毕业快十年了,有人提议聚一次。接龙名单慢慢变长,你看到了很多熟悉又陌生的名字,包括那个你以为这辈子不会再打交道的人。',
+    trigger: { year: { from: 2024 } },
+    choices: [
+      {
+        id: 'a',
+        text: '报名,去看看大家都活成了什么样',
+        outcomes: [
+          {
+            weight: 1,
+            text: '聚会上没有想象中的攀比,大家聊的都是孩子、房贷和体检。散场时班长说"十年后再聚",所有人都笑着答应,所有人都知道很难。但今晚很好,今晚就够了。',
+            effects: [{ stats: { money: -1000, network: 5, mindset: 4 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '潜水,看他们发照片就好',
+        outcomes: [
+          {
+            weight: 1,
+            text: '聚会那晚你刷着群里的合影,一个个认过去。有人胖了,有人白了头发,有人笑得还和军训时一样。你点了个赞,忽然有点后悔没去。',
+            effects: [{ stats: { mindset: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
 ];

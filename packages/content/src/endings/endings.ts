@@ -7,8 +7,22 @@ export const endings: EndingDef[] = [
     text: '不知道从哪一天起,你早上睁开眼的第一个念头是"又要开始了"。你退掉了租的房子,买了一张回家的票。妈妈没问为什么,只是做了一桌你爱吃的菜。人生是长跑,中途停下来喘口气的人,不算输。',
     category: 'early',
     priority: 1,
-    condition: { stat: 'mindset', op: '<=', value: 12 },
+    condition: { stat: 'mindset', op: '<=', value: 15 },
     shareCard: { tone: 'warm', tagline: '中途停下来喘口气的人,不算输。' },
+  },
+  {
+    id: 'end_early_retire',
+    title: '提前退休',
+    text: '2017年那三千块钱的"彩票",最后变成了你账户里最大的一笔数字。你没有真的退休——你只是获得了说"不"的权利:不喜欢的活可以不接,不想卷的班可以不上。财务自由的门槛其实没那么高,自由的定义才高。',
+    category: 'final',
+    priority: 95,
+    condition: {
+      all: [
+        { flag: 'crypto_win' },
+        { stat: 'money', op: '>=', value: 300000 },
+      ],
+    },
+    shareCard: { tone: 'triumph', tagline: '暴富靠运气,但敢按确认键的是你自己。' },
   },
   {
     id: 'end_smalltown_win',
@@ -19,24 +33,11 @@ export const endings: EndingDef[] = [
     condition: {
       all: [
         { background: 'bg_rural' },
-        { stat: 'knowledge', op: '>=', value: 60 },
+        { stat: 'knowledge', op: '>=', value: 65 },
+        { stat: 'money', op: '>=', value: 80000 },
       ],
     },
     shareCard: { tone: 'triumph', tagline: '做题家怎么了?做题家做出了自己的人生。' },
-  },
-  {
-    id: 'end_gold',
-    title: '小有成就',
-    text: '毕业第二年,你的存款突破了六位数。这笔钱在这座城市买不起一个厕所,但它是你一份一份工资、一个一个选择攒出来的。深夜加完班,你请自己吃了顿好的。账单弹出来的时候,你没有犹豫。',
-    category: 'final',
-    priority: 105,
-    condition: {
-      all: [
-        { stat: 'money', op: '>=', value: 100000 },
-        { stat: 'mindset', op: '>=', value: 45 },
-      ],
-    },
-    shareCard: { tone: 'triumph', tagline: '六位数存款不够买梦,但够证明你走过路。' },
   },
   {
     id: 'end_ai_adapter',
@@ -48,6 +49,7 @@ export const endings: EndingDef[] = [
       all: [
         { flag: 'career_cs' },
         { flag: 'ai_adapted' },
+        { stat: 'knowledge', op: '>=', value: 60 },
         { stat: 'mindset', op: '>=', value: 35 },
       ],
     },
@@ -123,6 +125,34 @@ export const endings: EndingDef[] = [
       ],
     },
     shareCard: { tone: 'bitter', tagline: '城市没给我一个家,我把自己活成了据点。' },
+  },
+  {
+    id: 'end_married',
+    title: '围城之内',
+    text: '2026年的某个周末,你们在厨房为"番茄炒蛋放不放糖"争了十分钟,最后各做了一份。从2016年图书馆的那次表白算起,你们一起走过了异地、搬家、房租和所有需要商量的日子。围城里没有童话,只有一个愿意和你把日子过下去的人——这已经是极小概率事件了。',
+    category: 'final',
+    priority: 112,
+    condition: {
+      all: [
+        { npcStage: 'first_love', stage: 'married' },
+        { stat: 'mindset', op: '>=', value: 40 },
+      ],
+    },
+    shareCard: { tone: 'warm', tagline: '爱情最好的结局,是变成生活。' },
+  },
+  {
+    id: 'end_gold',
+    title: '小有成就',
+    text: '十二年攒下的存款,在这座城市还是买不起太多东西,但它是你一份一份工资、一个一个选择攒出来的。深夜加完班,你请自己吃了顿好的。账单弹出来的时候,你没有犹豫。',
+    category: 'final',
+    priority: 140,
+    condition: {
+      all: [
+        { stat: 'money', op: '>=', value: 180000 },
+        { stat: 'mindset', op: '>=', value: 45 },
+      ],
+    },
+    shareCard: { tone: 'triumph', tagline: '存款不够买梦,但够证明你走过路。' },
   },
   {
     id: 'end_ordinary',

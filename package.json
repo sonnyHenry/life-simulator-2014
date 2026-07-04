@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "pnpm --filter @life-sim/web dev",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "validate": "pnpm --filter @life-sim/tools validate",

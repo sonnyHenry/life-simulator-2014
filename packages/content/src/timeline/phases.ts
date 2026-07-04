@@ -15,7 +15,7 @@ export const phases: PhaseConfig[] = [
     date: { year: 2014, month: 9 },
     rounds: 4,
     eventSlots: 3,
-    pools: ['college', 'npc', 'random'],
+    pools: ['college', 'npc', 'invest', 'random'],
     briefs: [
       '2014年。4G牌照刚发,微信红包一夜爆红,打车软件在校门口疯狂发补贴。你拖着行李箱走进宿舍,室友已经在用你没见过的手机玩你没见过的游戏。大学生活开始了。',
       '2015年。"大众创业、万众创新"写进了政府工作报告,学校里的创业大赛比社团招新还热闹。6月股灾来了,你第一次在食堂听到有人讨论"两融余额"。',

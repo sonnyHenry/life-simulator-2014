@@ -13,7 +13,7 @@ import { npcs } from './npcs/npcs';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.8.0',
+    version: '0.9.0',
     title: '2014:我的十二年(M3 社会线原型)',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 10,

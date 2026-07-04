@@ -145,6 +145,12 @@ function main(): void {
   const eventsSeen = new Set<string>();
   let totalRounds = 0;
   const statSums = { knowledge: 0, money: 0, mindset: 0, network: 0 };
+  const moneySamples: number[] = [];
+  const mindsetSamples: number[] = [];
+  const earlyEndingIds = new Set(
+    contentPack.endings.filter(e => e.category === 'early').map(e => e.id),
+  );
+  let earlyEndingCount = 0;
 
   console.log(`模拟 ${args.runs} 局 (baseSeed=${baseSeed}) ...`);
   const t0 = Date.now();
@@ -161,6 +167,9 @@ function main(): void {
     statSums.money += result.finalState.stats.money;
     statSums.mindset += result.finalState.stats.mindset;
     statSums.network += result.finalState.stats.network;
+    moneySamples.push(result.finalState.stats.money);
+    mindsetSamples.push(result.finalState.stats.mindset);
+    if (earlyEndingIds.has(result.endingId)) earlyEndingCount++;
   }
   const elapsed = Date.now() - t0;
 
@@ -184,6 +193,18 @@ function main(): void {
   console.log(
     `平均最终数值: 学识${(statSums.knowledge / args.runs).toFixed(0)} 金钱¥${(statSums.money / args.runs).toFixed(0)} 心态${(statSums.mindset / args.runs).toFixed(0)} 人脉${(statSums.network / args.runs).toFixed(0)}`,
   );
+
+  const percentile = (sorted: number[], p: number): number =>
+    sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))] ?? 0;
+  moneySamples.sort((a, b) => a - b);
+  mindsetSamples.sort((a, b) => a - b);
+  console.log(
+    `金钱分位: p10=¥${percentile(moneySamples, 10)} p50=¥${percentile(moneySamples, 50)} p90=¥${percentile(moneySamples, 90)}`,
+  );
+  console.log(
+    `心态分位: p10=${percentile(mindsetSamples, 10)} p50=${percentile(mindsetSamples, 50)} p90=${percentile(mindsetSamples, 90)}`,
+  );
+  console.log(`提前结局占比: ${((earlyEndingCount / args.runs) * 100).toFixed(1)}%`);
 }
 
 main();

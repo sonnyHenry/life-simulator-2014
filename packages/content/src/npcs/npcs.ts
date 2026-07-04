@@ -47,7 +47,12 @@ export const npcs: NpcDef[] = [
       },
       missed: {},
       separated: {},
-      steady: {},
+      steady: {
+        advanceWhen: { year: { from: 2022, to: 2023 } },
+        eventId: 'ev_love_marriage',
+      },
+      married: {},
+      steady_long: {},
     },
   },
   {

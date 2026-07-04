@@ -130,6 +130,171 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_invest_stock_2015',
+    pools: ['invest'],
+    category: 'invest',
+    title: '牛市与股灾',
+    text: '2015年上半年,连食堂打饭的阿姨都在聊股票。室友开了户,把三个月生活费投了进去,收益率截图天天发群里。他把开户二维码推到你面前:"牛市不进场,等于白活。"',
+    trigger: { year: { from: 2015, to: 2015 } },
+    choices: [
+      {
+        id: 'a',
+        text: '拿出一部分生活费,跟着进场',
+        outcomes: [
+          {
+            weight: 3,
+            text: '五月你账户浮盈 40%,开始研究"财务自由要多少钱"。六月股灾来了,千股跌停,你在宿舍床上盯着绿色的分时图,第一次知道钱是怎么在十分钟里没有的。这一课,收费两千。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -2000, mindset: -6, knowledge: 3 } }, { setFlag: 'stock_lesson' }],
+          },
+          {
+            weight: 1,
+            text: '你五月底急着交学费,把钱撤了出来。六月股灾,你成了宿舍唯一"逃顶"的人。你反复强调那是运气,但没人信——从此室友炒股都先问你。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 1500, mindset: 2, network: 2 } }, { setFlag: 'stock_lesson' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '生活费就这么点,围观就好',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你看着室友的表情从五月的意气风发变成六月的沉默寡言。那个夏天你没赚一分钱,但白捡了一门风险教育课——学费是别人交的。',
+            effects: [{ stats: { knowledge: 2, mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_invest_house_2016',
+    pools: ['invest'],
+    category: 'money',
+    title: '六个钱包',
+    mandatory: true,
+    trigger: {
+      all: [
+        { year: { from: 2016, to: 2016 } },
+        { any: [{ background: 'bg_urban_middle' }, { background: 'bg_demolition' }] },
+      ],
+    },
+    text: '国庆回家,爸妈把你叫到客厅,茶几上摊着几张户型图。"家里凑一凑,首付够在省会买个小两居。你以后工作也用得上,现在不买,以后更买不起。"电视里正在播某地楼市新政的新闻。',
+    choices: [
+      {
+        id: 'a',
+        text: '听家里的,把房子定下来',
+        outcomes: [
+          {
+            weight: 1,
+            text: '房子签在你名下,首付掏空了家里大半积蓄。签字那天你手心全是汗,觉得自己还没开始工作就先背上了三十年。后来的事情你还不知道:这可能是你这辈子做过最划算的决定。',
+            effects: [
+              { stats: { money: -10000, mindset: -2 } },
+              { setFlag: 'has_house' },
+              { setFlag: 'early_house' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '我还在上学,买什么房',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你说想把钱留着,以后去大城市发展。爸妈对视了一眼,没再坚持。第二年,那个小区的价格你没敢再查。人生里有些门,关上的时候一点声音都没有。',
+            effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_invest_bitcoin_2017',
+    pools: ['invest'],
+    category: 'invest',
+    title: '论坛里的传说',
+    text: '2017年,你常逛的论坛里有个帖子火了:楼主晒出几年前买的比特币,已经翻了几百倍。评论区一半人喊骗子,一半人问怎么买。你查了查,一个要好几千,但可以买零点几个。',
+    trigger: { year: { from: 2017, to: 2017 } },
+    choices: [
+      {
+        id: 'a',
+        text: '拿几千块买一点,就当买彩票',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { flag: 'stock_lesson' },
+            text: '2015年的教训还在,你只拿了三千块——亏光也不心疼的数目。转完账你把 APP 藏进手机文件夹最深处,告诉自己:五年之内不看。',
+            effects: [
+              { stats: { money: -3000 } },
+              { schedule: { eventId: 'ev_invest_crypto_cashout', afterRounds: 4 } },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'stock_lesson' } },
+            text: '你转了三千块进去,买了零点几个看不见摸不着的东西。室友说你疯了,你也觉得自己有点疯。你把它忘在账户里,像忘掉一张彩票。',
+            effects: [
+              { stats: { money: -3000 } },
+              { schedule: { eventId: 'ev_invest_crypto_cashout', afterRounds: 4 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '看不懂的东西,不碰',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你关掉帖子,继续改简历。很多年后你还会想起这个晚上,但你也知道:就算买了,你也拿不住。能拿住的人,当年就不会只买三千块。',
+            effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_invest_crypto_cashout',
+    pools: [],
+    category: 'invest',
+    title: '下不下车',
+    text: '你想起了那笔被你藏起来的比特币。打开账户,这几年它翻了几十倍,三千块变成了一串你要数两遍的数字。群里有人说这才刚开始,有人说这是最后的疯狂。你的手悬在"卖出"上。',
+    choices: [
+      {
+        id: 'a',
+        text: '卖,落袋为安',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你清仓了。到账短信响起来的时候,你在工位上愣了很久。这笔钱不是工资,不是奖金,是那个晚上敢按下确认键的自己寄来的包裹。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 100000, mindset: 8 } }, { setFlag: 'crypto_win' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '再拿拿,万一还能翻倍',
+        outcomes: [
+          {
+            weight: 1,
+            text: '它真的又涨了一波,你在下一个疯狂的顶部附近卖掉了。运气好到你自己都害怕。你把截图发给当年的室友,他回了一个字:"服。"',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 160000, mindset: 10 } }, { setFlag: 'crypto_win' }],
+          },
+          {
+            weight: 2,
+            text: '后来的暴跌比涨得更快。你在腰斩再腰斩之后终于割了肉,三千块变成两万,算赚,但和你在最高点看到的数字比,像被没收了一套房。你终于理解了那句话:凭运气拿到的,凭什么拿得住。',
+            outcomeTag: 'partial',
+            effects: [{ stats: { money: 20000, mindset: -6 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_invest_p2p',
     pools: ['invest'],
     category: 'invest',
@@ -941,7 +1106,12 @@ export const workEvents: GameEvent[] = [
     category: 'money',
     title: '买房问题',
     text: '家里开始问你要不要考虑买房。首付、月供、城市、通勤、未来规划,每个词都像一块砖,压在聊天窗口里。',
-    trigger: { year: { from: 2021, to: 2023 } },
+    trigger: {
+      all: [
+        { year: { from: 2021, to: 2023 } },
+        { not: { flag: 'has_house' } },
+      ],
+    },
     choices: [
       {
         id: 'a',
@@ -980,7 +1150,7 @@ export const workEvents: GameEvent[] = [
     title: '房价回调',
     mandatory: true,
     trigger: { all: [{ flag: 'has_house' }, { year: { from: 2024, to: 2024 } }] },
-    text: '2024年,你所在小区的挂牌价比你买入时低了一截。中介的朋友圈从"再不上车就晚了"变成了"业主诚心急售"。月供短信还是每月 8 号准时到,像什么都没发生过。',
+    text: '2024年,你所在小区的挂牌价从最高点回落了一截。中介的朋友圈从"再不上车就晚了"变成了"业主诚心急售"。月供短信还是每月 8 号准时到,像什么都没发生过。',
     choices: [
       {
         id: 'a',
@@ -988,7 +1158,13 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            condition: { stat: 'money', op: '>=', value: 50000 },
+            condition: { all: [{ flag: 'early_house' }, { stat: 'money', op: '>=', value: 50000 }] },
+            text: '2016年上的车,跌掉的只是浮盈的零头。你提前还了一笔,月供轻了一大截。当年在客厅签字时手心冒汗的你,大概想不到有一天会感谢爸妈的固执。',
+            effects: [{ stats: { money: -50000, mindset: 8 } }],
+          },
+          {
+            weight: 1,
+            condition: { all: [{ not: { flag: 'early_house' } }, { stat: 'money', op: '>=', value: 50000 }] },
             text: '你提前还了一笔,月供轻了一些。房价的数字你决定不再天天看——住着的房子,跌的是别人嘴里的估值,亮的是自己家里的灯。',
             effects: [{ stats: { money: -50000, mindset: 6 } }],
           },
@@ -1006,6 +1182,13 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            condition: { flag: 'early_house' },
+            text: '你算了算,现在的价格还是 2016 年买入价的两倍多。你关掉 APP,该上班上班。上车早的人看回调,像坐在山腰看潮水——湿不到脚。',
+            effects: [{ stats: { mindset: 4 } }],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'early_house' } },
             text: '你把看房 APP 卸载了。周末你在自己家里煮火锅,窗户上全是雾气。账面浮亏是真的,锅里的热气也是真的。',
             effects: [{ stats: { mindset: 3 } }],
           },
@@ -1144,6 +1327,45 @@ export const workEvents: GameEvent[] = [
               { stats: { mindset: -1 } },
               { npcFavor: 'grinder', delta: -2 },
               { npcStage: 'grinder', stage: 'layoff_pending' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_love_marriage',
+    pools: [],
+    category: 'relationship',
+    title: '领证这件小事',
+    text: '异地熬过来了,租房换过三次,吵过架也复过合。这天吃完饭散步,她忽然说:"我爸妈问,我们到底什么打算。"你们在路灯下站了一会儿,谁都没先开口。',
+    choices: [
+      {
+        id: 'a',
+        text: '打算就是:我们去领证吧',
+        outcomes: [
+          {
+            weight: 1,
+            text: '没有跪地求婚,没有无人机灯光秀。你们挑了个工作日去了民政局,拍照的时候都有点想笑。婚礼办得不大,敬酒敬到你嗓子哑。那天晚上你想:十二年里做对的事不多,这件肯定算。',
+            effects: [
+              { stats: { money: -40000, mindset: 12, network: 5 } },
+              { npcFavor: 'first_love', delta: 20 },
+              { npcStage: 'first_love', stage: 'married' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '再等等,等我再稳定一点',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你说想再攒攒钱,给她一个更好的开始。她点点头,说理解。只是那晚之后,"以后"这个词在你们的对话里出现得越来越少了。有些等待是储蓄,有些等待是消耗,当时的你分不清。',
+            effects: [
+              { stats: { mindset: -4 } },
+              { npcFavor: 'first_love', delta: -10 },
+              { npcStage: 'first_love', stage: 'steady_long' },
             ],
           },
         ],

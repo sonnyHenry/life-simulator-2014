@@ -11,6 +11,28 @@
 - `packages/tools` — 校验与模拟 CLI
 - `packages/web` — Web 前端(M1)
 
+## 本地启动 / 停止
+
+```bash
+pnpm install          # 首次运行前安装依赖
+pnpm dev              # 启动 Web 开发服务器,浏览器打开 http://localhost:5173
+```
+
+停止:在运行 `pnpm dev` 的终端按 `Ctrl+C`。如果终端已经关掉、进程还占着端口,可以用:
+
+```bash
+lsof -ti:5173 | xargs kill   # 杀掉占用 5173 端口的进程
+```
+
+端口固定为 5173(`packages/web/vite.config.ts` 里 `strictPort: true`,被占用时会直接报错而不是换端口)。
+
+预览生产构建:
+
+```bash
+pnpm --filter @life-sim/web build     # 构建到 packages/web/dist
+pnpm --filter @life-sim/web preview   # 本地预览构建产物,同样 Ctrl+C 停止
+```
+
 ## 常用命令
 
 ```bash
