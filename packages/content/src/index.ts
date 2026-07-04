@@ -15,7 +15,7 @@ export const contentPack: ContentPack = {
   meta: {
     id: 'base',
     version: '0.10.0',
-    title: '2014:我的十二年(M3 社会线原型)',
+    title: '2014:我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 10,
     scoring: {

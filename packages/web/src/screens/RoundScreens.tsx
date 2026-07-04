@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { ViewModel } from '@life-sim/core';
+import { contentPack } from '@life-sim/content';
 import { useGame } from '../store';
 import { Card, ChoiceButton, ContinueButton, DeltaChips } from '../components/ui';
+import { downloadShareImage } from '../platform/shareImage';
 
 export function BriefScreen(props: { view: Extract<ViewModel, { kind: 'BRIEF' }> }) {
   const act = useGame(s => s.act);
@@ -93,6 +95,25 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
       setCopied(false);
     }
   };
+  const [saving, setSaving] = useState(false);
+  const saveImage = async () => {
+    setSaving(true);
+    try {
+      await downloadShareImage({
+        title: props.view.shareCard.title,
+        tagline: props.view.shareCard.tagline,
+        tone: props.view.shareCard.tone,
+        years: props.view.shareCard.years,
+        seed: props.view.shareCard.seed,
+        stats,
+        score: props.view.score,
+        grade: props.view.grade,
+        gameTitle: contentPack.meta.title,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <Card className="center">
       <p className="kicker">你的结局</p>
@@ -135,6 +156,9 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         </div>
       </div>
       <p className="muted seed-line">人生编号 #{seed}</p>
+      <button className="continue-btn secondary-btn" onClick={saveImage} disabled={saving}>
+        {saving ? '生成中…' : '保存分享图'}
+      </button>
       <button className="continue-btn secondary-btn" onClick={copyShare}>
         {copied ? '已复制' : '复制分享文案'}
       </button>

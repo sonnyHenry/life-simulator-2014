@@ -27,6 +27,8 @@ export function pickRoundEvents(
     if (ev.mandatory && isEligible(ev)) picked.push(ev.id);
   }
 
+  // NPC 阶段事件和强制事件一样保证入队,不受 eventSlots 限制:
+  // 阶段推进窗口多为单一年份,被挤掉一次就会永久卡死整条 NPC 线。
   for (const def of pack.npcs) {
     const npc = state.npcs[def.id];
     if (!npc) continue;
@@ -35,7 +37,6 @@ export function pickRoundEvents(
     if (picked.includes(stage.eventId)) continue;
     if (state.triggeredEventIds.includes(stage.eventId)) continue;
     picked.push(stage.eventId);
-    if (picked.length >= phase.eventSlots) return picked;
   }
 
   while (picked.length < phase.eventSlots) {
