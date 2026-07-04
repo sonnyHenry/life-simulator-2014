@@ -115,7 +115,10 @@ export interface IncomeRule {
   id: string;
   label: string;
   when: Condition;
+  /** 年度净储蓄(元/年,可为负) */
   amount: number;
+  /** 年度心态损耗/恢复(可选,职业压力的系统性建模) */
+  mindsetDelta?: number;
 }
 
 export interface ScoringConfig {

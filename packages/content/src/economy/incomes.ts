@@ -14,6 +14,7 @@ export const incomes: IncomeRule[] = [
       all: [{ flag: 'career_cs' }, { flag: 'big_platform_start' }, employed],
     },
     amount: 70000,
+    mindsetDelta: -5,
   },
   {
     id: 'inc_cs_normal',
@@ -22,6 +23,7 @@ export const incomes: IncomeRule[] = [
       all: [{ flag: 'career_cs' }, { not: { flag: 'big_platform_start' } }, employed],
     },
     amount: 45000,
+    mindsetDelta: -3,
   },
   {
     id: 'inc_unemployed_gap',
@@ -30,18 +32,21 @@ export const incomes: IncomeRule[] = [
       all: [{ flag: 'laid_off' }, { not: { flag: 'restarted_after_layoff' } }],
     },
     amount: -40000,
+    mindsetDelta: -8,
   },
   {
     id: 'inc_edu',
     label: '教育行业收入',
     when: { flag: 'career_edu' },
     amount: 30000,
+    mindsetDelta: -3,
   },
   {
     id: 'inc_gov',
     label: '体制内工资',
     when: { flag: 'career_gov' },
     amount: 22000,
+    mindsetDelta: -1,
   },
   {
     id: 'inc_generic_job',
@@ -61,5 +66,6 @@ export const incomes: IncomeRule[] = [
       ],
     },
     amount: 30000,
+    mindsetDelta: -3,
   },
 ];

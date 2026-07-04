@@ -321,6 +321,9 @@ export function createEngine(pack: ContentPack): Engine {
     for (const rule of pack.incomes) {
       if (!evalCondition(rule.when, ctx)) continue;
       state.stats.money = Math.max(0, Math.round(state.stats.money + rule.amount));
+      if (rule.mindsetDelta) {
+        state.stats.mindset = Math.max(0, Math.min(100, state.stats.mindset + rule.mindsetDelta));
+      }
     }
   }
 
@@ -328,6 +331,11 @@ export function createEngine(pack: ContentPack): Engine {
     const phase = phaseAt(state.phaseIndex);
     if (phase.kind !== 'rounds') throw new Error('settleRound outside rounds phase');
     applyAnnualIncome(state, rng);
+    const earlyAfterSettle = findEnding(state, pack, rng, ['early']);
+    if (earlyAfterSettle) {
+      finishWithEnding(state, earlyAfterSettle.id);
+      return;
+    }
     state.roundIndex += 1;
     state.roundCounter += 1;
     if (state.roundIndex < phase.rounds) {

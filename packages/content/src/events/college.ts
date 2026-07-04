@@ -315,12 +315,13 @@ export const collegeEvents: GameEvent[] = [
   },
   {
     id: 'ev_college_roommate_farewell',
-    pools: ['college'],
+    pools: ['work'],
     category: 'friendship',
-    order: 10,
+    mandatory: true,
+    order: -10,
     title: '散伙饭',
-    text: '毕业前,宿舍凑钱吃了顿散伙饭。大家说以后常联系,说到最后又都低头看手机。分别这件事,年轻时总以为可以用群聊解决。',
-    trigger: { year: { from: 2017, to: 2017 } },
+    text: '2018年6月,答辩结束,宿舍凑钱吃了顿散伙饭。大家说以后常联系,说到最后又都低头看手机。分别这件事,年轻时总以为可以用群聊解决。',
+    trigger: { year: { from: 2018, to: 2018 } },
     choices: [
       {
         id: 'a',
