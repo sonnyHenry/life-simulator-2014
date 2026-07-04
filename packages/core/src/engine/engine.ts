@@ -526,6 +526,21 @@ export function createEngine(pack: ContentPack): Engine {
       return;
     }
     state.eventCursor += 1;
+    if (state.eventCursor >= state.eventQueue.length) {
+      // 年内后果:本回合中 schedule(afterRounds: 0)的事件,追加到当年队列末尾弹出
+      const due = state.scheduled.filter(s => s.dueRound <= state.roundCounter);
+      if (due.length > 0) {
+        state.scheduled = state.scheduled.filter(s => s.dueRound > state.roundCounter);
+        for (const d of due) {
+          if (
+            !state.eventQueue.includes(d.eventId) &&
+            !state.triggeredEventIds.includes(d.eventId)
+          ) {
+            state.eventQueue.push(d.eventId);
+          }
+        }
+      }
+    }
     if (state.eventCursor < state.eventQueue.length) {
       state.screen = 'EVENT';
     } else {

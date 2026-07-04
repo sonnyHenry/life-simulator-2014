@@ -451,6 +451,7 @@ export const collegeEvents: GameEvent[] = [
               { setFlag: 'in_love' },
               { npcFavor: 'first_love', delta: 25 },
               { npcStage: 'first_love', stage: 'together' },
+              { schedule: { eventId: 'ev_love_winter', afterRounds: 0 } },
             ],
           },
           {
@@ -476,6 +477,26 @@ export const collegeEvents: GameEvent[] = [
               { stats: { mindset: 2 } },
               { npcStage: 'first_love', stage: 'missed' },
             ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_love_winter',
+    pools: [],
+    category: 'love',
+    title: '那年冬天',
+    text: '年底,你们一起跨了年。学校后街的小饭馆,一份水煮鱼两碗米饭,老板送了两罐冰糖雪梨。零点的时候外面有人放烟花——违规的,但很好看。TA 靠在你肩上说:"明年也要这样。"',
+    choices: [
+      {
+        id: 'a',
+        text: '把这个冬天记下来',
+        outcomes: [
+          {
+            weight: 1,
+            text: '后来你经历过更贵的跨年:江边的酒店、有观景位的餐厅、提前一个月订的位子。但每次零点倒数,你想起的都是那家小饭馆,和那句"明年也要这样"。有些夜晚在发生的时候,你就知道自己会记它很多年。',
+            effects: [{ stats: { mindset: 4 } }, { npcFavor: 'first_love', delta: 6 }],
           },
         ],
       },

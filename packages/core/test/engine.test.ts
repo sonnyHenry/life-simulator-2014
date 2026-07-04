@@ -270,6 +270,35 @@ describe('engine full game', () => {
   });
 });
 
+describe('same-round consequence (afterRounds: 0)', () => {
+  it('appends the scheduled event to the current round queue', () => {
+    const pack = miniPack();
+    const evA = pack.events.find(e => e.id === 'ev_a')!;
+    evA.choices[0]!.outcomes[0]!.effects.push({
+      schedule: { eventId: 'ev_chain', afterRounds: 0 },
+    });
+    const engine = createEngine(pack);
+    let state = engine.start(7);
+    state = engine.dispatch(state, { type: 'START' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    while (engine.view(state).kind === 'EXAM') {
+      state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 0 });
+    }
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
+    state = engine.dispatch(state, { type: 'CONTINUE' }); // OUTCOME → BRIEF(第一年)
+    state = engine.dispatch(state, { type: 'CONTINUE' }); // BRIEF → EVENT(ev_a)
+    const yearAtEvA = state.date.year;
+    state = engine.dispatch(state, { type: 'CHOOSE', choiceId: 'x' }); // 触发 schedule 0
+    state = engine.dispatch(state, { type: 'CONTINUE' }); // OUTCOME → 应追加 ev_chain
+    const view = engine.view(state);
+    expect(view.kind).toBe('EVENT');
+    if (view.kind === 'EVENT') expect(view.eventId).toBe('ev_chain');
+    expect(state.date.year).toBe(yearAtEvA); // 同一年内弹出
+  });
+});
+
 describe('save replay & migration', () => {
   it('restores via snapshot when content version matches, replay when it differs', () => {
     const pack = miniPack();

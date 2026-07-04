@@ -204,6 +204,7 @@ export const workEvents: GameEvent[] = [
               { stats: { money: -10000, mindset: -2 } },
               { setFlag: 'has_house' },
               { setFlag: 'early_house' },
+              { schedule: { eventId: 'ev_house_progress_2016', afterRounds: 0 } },
             ],
           },
         ],
@@ -216,6 +217,26 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你说:"我还没毕业,连以后在哪个城市都不知道,现在买房太早了。钱留着,以后我去大城市打拼也用得上。"爸妈对视了一眼,妈妈想说什么,被爸爸摆手拦住了:"孩子有自己的想法,是好事。"户型图被收进了抽屉,这个话题在饭桌上再没被提起。第二年春天,你在新闻里看到那座城市的名字和"环比上涨"出现在同一行,你点开又关掉。到了第三年,那个小区的价格你已经不敢再查了。人生里有些门,关上的时候一点声音都没有,要过很多年,你路过原地,才听见那声迟到的"咔哒"。',
             effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_house_progress_2016',
+    pools: [],
+    category: 'money',
+    title: '工地照片',
+    text: '寒假前,爸爸开始隔三差五给你发照片:一片工地,塔吊,和一根他用红圈标出来的桩子。"看,这是咱家那栋。"其实那个角度什么都看不出来,但他每次路过都要拍一张。',
+    choices: [
+      {
+        id: 'a',
+        text: '回一句"等我毕业去住"',
+        outcomes: [
+          {
+            weight: 1,
+            text: '爸爸回了个大拇指,然后又发来三张不同角度的塔吊。你忽然明白,那不是房子的照片,那是他后半辈子的底气,一层一层往上盖。',
+            effects: [{ stats: { mindset: 3 } }],
           },
         ],
       },
@@ -498,7 +519,51 @@ export const workEvents: GameEvent[] = [
               { stats: { mindset: -8, money: 3000 } },
               { setCareer: 'local' },
               { setFlag: 'civil_service_failed' },
+              { schedule: { eventId: 'ev_gov_second_try', afterRounds: 1 } },
             ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_gov_second_try',
+    pools: [],
+    category: 'career',
+    title: '二战还是收手',
+    text: '一年过去了。你一边打着一份过渡的工,一边看着新一年的招考公告挂出来。去年那个"只差一点"的排名,你到现在还背得出来。报名截止还有一周,缴费页面在浏览器里开着。同事说你魔怔了,你妈说"要不再试一次",你自己知道:再考,是和不甘心谈判;不考,是和不甘心和解。',
+    choices: [
+      {
+        id: 'a',
+        text: '再战一年,把那一点补回来',
+        outcomes: [
+          {
+            weight: 2,
+            condition: { stat: 'knowledge', op: '>=', value: 55 },
+            text: '这一年你白天上班,晚上刷题,周末全天模考。出成绩那晚你的手比去年抖得更厉害——然后你看到了自己的名字,在录取线上面。你给家里打电话,你妈"哎"了一声就没了动静,过了几秒你才听出来,她在哭。有些迟到一年的门票,拿到手反而更知道珍惜。',
+            outcomeTag: 'success',
+            effects: [
+              { stats: { mindset: 12, knowledge: 3 } },
+              { setCareer: 'gov' },
+              { setFlag: 'career_gov' },
+            ],
+          },
+          {
+            weight: 1,
+            text: '又是面试线附近。这次你没有盯着排名看很久,只是把打印的申论范文收进纸箱,和去年那摞放在一起。第二天你正常上班,把简历里"求职意向"改成了眼前这份工作。不是认输,是决定把力气花在能长出东西的地方。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { mindset: -5, knowledge: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '收手,把现在的日子过好',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你关掉了缴费页面。那晚你睡得很沉,第二天把去年的教材挂上了二手平台,备注"九成新,仅刷过一遍,有缘人拿走"。三天后书被一个应届生买走,你在祝福语里写:上岸顺利。你没上的那趟船,真心希望别人赶上。',
+            effects: [{ stats: { mindset: 4 } }],
           },
         ],
       },
@@ -876,19 +941,19 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             condition: { flag: 'p2p_burned' },
             text: '被 P2P 咬过之后,你只敢每月定投一点宽基。收益不惊艳,但每次点开账户,你想到的不再是"暴富",而是"这次至少跑得掉"。学费没有白交。',
-            effects: [{ stats: { money: 15000, mindset: 3 } }, { setFlag: 'fund_dca' }],
+            effects: [{ stats: { money: 15000, mindset: 3 } }, { setFlag: 'fund_dca' }, { schedule: { eventId: 'ev_invest_crash_2021', afterRounds: 1 } }],
           },
           {
             weight: 1,
             condition: { flag: 'dodged_p2p' },
             text: '当年躲过 P2P 的那点直觉还在。你设了每月定投,涨了不追,跌了不停。同事笑你保守,你笑笑没说话。',
-            effects: [{ stats: { money: 16000, mindset: 3 } }, { setFlag: 'fund_dca' }],
+            effects: [{ stats: { money: 16000, mindset: 3 } }, { setFlag: 'fund_dca' }, { schedule: { eventId: 'ev_invest_crash_2021', afterRounds: 1 } }],
           },
           {
             weight: 1,
             condition: { all: [{ not: { flag: 'p2p_burned' } }, { not: { flag: 'dodged_p2p' } }] },
             text: '你没有赚到截图里那种夸张收益,但也没有被波动吓跑。慢慢来这三个字,在牛市里很难听进去。',
-            effects: [{ stats: { money: 15000, mindset: 2 } }, { setFlag: 'fund_dca' }],
+            effects: [{ stats: { money: 15000, mindset: 2 } }, { setFlag: 'fund_dca' }, { schedule: { eventId: 'ev_invest_crash_2021', afterRounds: 1 } }],
           },
         ],
       },
@@ -899,7 +964,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '短期收益很好看,你甚至开始研究提前退休。那时候你还不知道,市场最擅长在你觉得自己懂了的时候讲下一课。',
-            effects: [{ stats: { money: 60000, mindset: 5 } }, { setFlag: 'fund_chased' }],
+            effects: [{ stats: { money: 60000, mindset: 5 } }, { setFlag: 'fund_chased' }, { schedule: { eventId: 'ev_invest_crash_2021', afterRounds: 1 } }],
           },
         ],
       },
@@ -1148,12 +1213,36 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             condition: { stat: 'money', op: '>=', value: 300000 },
             text: '你买了一个不大的房子。首付划出去的那一刻,账户余额少了一个量级。钥匙拿到手时很激动,还贷日到来时也很真实。家变成了资产,也变成了责任。',
-            effects: [{ stats: { money: -300000, mindset: 5 } }, { setFlag: 'has_house' }],
+            effects: [
+              { stats: { money: -300000, mindset: 5 } },
+              { setFlag: 'has_house' },
+              { schedule: { eventId: 'ev_mortgage_first_year', afterRounds: 1 } },
+            ],
           },
           {
             weight: 1,
             text: '你算了几遍,发现首付还是差一截。中介说"再不买就晚了",但你的银行卡说"现在就很晚"。',
             effects: [{ stats: { mindset: -4 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_mortgage_first_year',
+    pools: [],
+    category: 'money',
+    title: '还贷第一年',
+    text: '每月 8 号,雷打不动,一条扣款短信。头几个月你还会点开看一眼,后来只扫一眼通知栏。这一年你推掉了两次换手机的念头和一次说走就走的旅行,外卖从"随便点"变成了"先看满减"。房子还是毛坯的时候你去看过一次,站在没装门的门框里,给未来的沙发选了个位置。',
+    choices: [
+      {
+        id: 'a',
+        text: '日子紧一点,但心里踏实',
+        outcomes: [
+          {
+            weight: 1,
+            text: '年底你算了笔账:这一年还进去的钱,一半交给了银行的利息。你愣了一会儿,然后想通了——上一年这时候,你交给房东的可是百分之百。紧日子是真的,踏实也是真的,成年人的账本上,这两样经常记在同一行。',
+            effects: [{ stats: { mindset: 3 } }],
           },
         ],
       },
@@ -1368,6 +1457,7 @@ export const workEvents: GameEvent[] = [
               { stats: { money: -40000, mindset: 12, network: 5 } },
               { npcFavor: 'first_love', delta: 20 },
               { npcStage: 'first_love', stage: 'married' },
+              { schedule: { eventId: 'ev_married_first_year', afterRounds: 1 } },
             ],
           },
         ],
@@ -1384,6 +1474,37 @@ export const workEvents: GameEvent[] = [
               { npcFavor: 'first_love', delta: -10 },
               { npcStage: 'first_love', stage: 'steady_long' },
             ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_married_first_year',
+    pools: [],
+    category: 'relationship',
+    title: '婚后第一个春节',
+    text: '婚后的第一个春节眼看就到了,一个此前从未认真想过的问题摆上了桌:回谁家过年?两边的爸妈都在电话里说"你们商量着来,都行",但每个"都行"后面,都拖着一点听得出来的期待。',
+    choices: [
+      {
+        id: 'a',
+        text: '一家一半,三十在这边,初二去那边',
+        outcomes: [
+          {
+            weight: 1,
+            text: '除夕在一家吃年夜饭,初二一早拖着行李赶去另一家,后备箱塞满两边互赠的特产——有两样是重的。累是累,但两桌饭你们都没缺席。回程的高速上她睡着了,你忽然觉得,所谓成家,就是从"回家过年"变成"带着家回家过年"。',
+            effects: [{ stats: { money: -3000, mindset: 5 } }, { npcFavor: 'first_love', delta: 6 }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '今年不折腾,把两边爸妈接过来',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你们订了张大桌,把四位老人接到了自己的小家。厨房挤了四个指挥官,一顿年夜饭做出了满汉全席的阵仗。饭桌上两位爸爸从白酒聊到孙辈,你和她在桌下交换了一个"完了"的眼神。房子很挤,挤得很像一个家。',
+            effects: [{ stats: { money: -6000, mindset: 6 } }, { npcFavor: 'first_love', delta: 8 }],
           },
         ],
       },
