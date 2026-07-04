@@ -37,6 +37,17 @@ pnpm --filter @life-sim/web build     # 构建到 packages/web/dist
 pnpm --filter @life-sim/web preview   # 本地预览构建产物,同样 Ctrl+C 停止
 ```
 
+## 微信小程序
+
+Taro 小程序工程在 `apps/miniprogram`,复用同一份 `packages/core` 引擎和 `packages/content` 内容包。
+
+```bash
+pnpm --filter @life-sim/miniprogram typecheck
+pnpm --filter @life-sim/miniprogram build:weapp
+```
+
+构建产物在 `apps/miniprogram/dist`。微信开发者工具导入项目时选择 `apps/miniprogram`,它的 `project.config.json` 已指向 `dist/`。
+
 ## 常用命令
 
 ```bash

@@ -267,6 +267,24 @@
 - 基金 2020 → 2021 抱团松动改为 schedule 硬链:买了基金必然次年遇到崩塌,
   不再依赖随机抽取(trigger 保留作双保险,调度器自动去重)
 
+### M6 小程序移植续接
+
+由 Codex 完成:
+
+- 接手 Claude Code 已生成的 Taro 小程序壳,确认 `apps/miniprogram` 已覆盖全部当前 `ViewModel.kind`
+  screen:标题、抽卡、设置、高考、志愿、三岔口、年度简报、事件、结果、结算、结局。
+- 小程序 store 接入 `createEngine(contentPack)`、微信 `Taro.getStorageSync/setStorageSync/removeStorageSync`
+  和 v2 存档迁移/重放逻辑,与 Web 端读档策略一致。
+- 修复 Taro 配置校验问题:`mini.compile.include` 从正则改为函数,让 Taro 4 配置 schema 接受,
+  同时继续把 `packages/core` / `packages/content` 源码纳入小程序编译。
+- 补齐 Taro React 构建所需 peer/dev 依赖:
+  `@babel/preset-react`、`@babel/plugin-proposal-class-properties`。
+- `pnpm-workspace.yaml` 纳入 `apps/*`,并把 Taro/构建链 postinstall 包显式列入 `allowBuilds`。
+- `build:weapp` / `dev:weapp` 使用 `--no-check` 跳过 Taro 4.0.9 的 native doctor 配置校验;
+  原因是在 pnpm lifecycle 环境里 `@tarojs/plugin-doctor` 会触发 macOS `system-configuration`
+  native panic。配置已通过 TypeScript 与实际 Taro webpack 构建验证。
+- 当前小程序构建产物约 548KB,低于微信小程序主包 2MB 限制。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
@@ -285,6 +303,8 @@ pnpm validate
 pnpm simulate -n 200
 pnpm simulate -n 1 -v --seed 43
 pnpm --filter @life-sim/web build
+pnpm --filter @life-sim/miniprogram typecheck
+pnpm --filter @life-sim/miniprogram build:weapp
 ```
 
 如果在 Codex 沙箱里运行 `pnpm validate` 或 `pnpm simulate`,`tsx` 可能因 IPC pipe 权限失败。需要用非沙箱/批准方式运行。
