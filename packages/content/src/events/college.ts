@@ -85,6 +85,7 @@ export const collegeEvents: GameEvent[] = [
     id: 'ev_college_gaming',
     pools: ['college'],
     category: 'campus',
+    trigger: { year: { from: 2014, to: 2015 } },
     title: '室友的开黑邀请',
     text: '晚上十点,宿舍里此起彼伏的键盘声。室友摘下耳机喊你:"三缺一!就差你了!"你看了看桌上摊开的高数课本——明天有早课。',
     choices: [
@@ -155,6 +156,7 @@ export const collegeEvents: GameEvent[] = [
     id: 'ev_college_tutor',
     pools: ['college'],
     category: 'campus',
+    trigger: { year: { from: 2014, to: 2016 } },
     title: '家教兼职',
     text: '学长转给你一个家教单:高二数学,一周三次,一次一百五。地方有点远,倒两趟公交。',
     choices: [
@@ -218,6 +220,7 @@ export const collegeEvents: GameEvent[] = [
     id: 'ev_college_major_doubt',
     pools: ['college'],
     category: 'campus',
+    trigger: { year: { from: 2014, to: 2015 } },
     title: '专业课劝退',
     text: '一门专业课把全班打沉默了。老师在黑板上写满公式或概念,你在笔记本上写下三个字:"我是谁?"',
     choices: [
@@ -281,6 +284,7 @@ export const collegeEvents: GameEvent[] = [
     id: 'ev_college_thesis',
     pools: ['college'],
     category: 'campus',
+    order: 5,
     title: '论文开题',
     text: '毕业论文开题会,老师说选题不要太大。你看着自己写下的题目,感觉它大到可以装下整个宇宙,也空到什么都没有。',
     trigger: { year: { from: 2017, to: 2017 } },
@@ -313,6 +317,7 @@ export const collegeEvents: GameEvent[] = [
     id: 'ev_college_roommate_farewell',
     pools: ['college'],
     category: 'friendship',
+    order: 10,
     title: '散伙饭',
     text: '毕业前,宿舍凑钱吃了顿散伙饭。大家说以后常联系,说到最后又都低头看手机。分别这件事,年轻时总以为可以用群聊解决。',
     trigger: { year: { from: 2017, to: 2017 } },

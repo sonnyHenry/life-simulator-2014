@@ -46,5 +46,10 @@ export function pickRoundEvents(
     picked.push(chosen.id);
   }
 
-  return picked;
+  // 同回合内按 order 稳定排序(默认 0),让"毕业散伙饭"这类年末事件排在最后
+  const orderOf = new Map(pack.events.map(ev => [ev.id, ev.order ?? 0]));
+  return picked
+    .map((id, index) => ({ id, index }))
+    .sort((a, b) => (orderOf.get(a.id) ?? 0) - (orderOf.get(b.id) ?? 0) || a.index - b.index)
+    .map(entry => entry.id);
 }

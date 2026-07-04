@@ -116,6 +116,12 @@ export function ExamScreen(props: { view: Extract<ViewModel, { kind: 'EXAM' }> }
           </ChoiceButton>
         ))}
       </div>
+      <button
+        className="continue-btn secondary-btn"
+        onClick={() => act({ type: 'SKIP_EXAM' })}
+      >
+        跳过答题(按默认成绩计分)
+      </button>
     </Card>
   );
 }

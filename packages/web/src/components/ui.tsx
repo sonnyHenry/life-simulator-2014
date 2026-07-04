@@ -40,14 +40,16 @@ function formatDelta(key: string, value: number): string {
 }
 
 export function DeltaChips(props: { deltas: StatDeltas }) {
+  const changed = STAT_LABELS.filter(([k]) => (props.deltas[k] ?? 0) !== 0);
+  if (changed.length === 0) return null;
   return (
     <div className="delta-chips">
-      {STAT_LABELS.map(([k, label]) => {
+      {changed.map(([k, label]) => {
         const value = props.deltas[k] ?? 0;
         return (
-        <span key={k} className={`chip ${value >= 0 ? 'chip-up' : 'chip-down'}`}>
-          {label} {formatDelta(k, value)}
-        </span>
+          <span key={k} className={`chip ${value > 0 ? 'chip-up' : 'chip-down'}`}>
+            {label} {formatDelta(k, value)}
+          </span>
         );
       })}
     </div>

@@ -31,6 +31,8 @@ export interface GameEvent {
   weight?: number;
   once?: boolean;
   mandatory?: boolean;
+  /** 同一回合内的展示顺序,越小越靠前,默认 0(如毕业散伙饭应排在当年最后) */
+  order?: number;
   choices: EventChoice[];
 }
 

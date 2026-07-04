@@ -59,6 +59,7 @@ export type PlayerAction =
   | { type: 'CONTINUE' }
   | { type: 'CHOOSE_SETUP'; provinceId: string; track: Track }
   | { type: 'ANSWER'; optionIndex: number }
+  | { type: 'SKIP_EXAM' }
   | { type: 'APPLY'; optionId: string }
   | { type: 'CHOOSE_CROSSROAD'; optionId: string }
   | { type: 'CHOOSE'; choiceId: string };

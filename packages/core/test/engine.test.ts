@@ -266,6 +266,26 @@ describe('engine full game', () => {
   });
 });
 
+describe('exam skip', () => {
+  it('skips remaining questions and resolves a default-rate score', () => {
+    const pack = miniPack();
+    const engine = createEngine(pack);
+    let state = engine.start(7);
+    state = engine.dispatch(state, { type: 'START' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    expect(engine.view(state).kind).toBe('EXAM');
+    state = engine.dispatch(state, { type: 'SKIP_EXAM' });
+    const view = engine.view(state);
+    expect(view.kind).toBe('EXAM_RESULT');
+    if (view.kind === 'EXAM_RESULT') {
+      expect(view.score).toBeGreaterThan(330);
+      expect(view.score).toBeLessThanOrEqual(750);
+    }
+    expect(state.stats.knowledge).toBeGreaterThan(20);
+  });
+});
+
 describe('income & scoring', () => {
   it('applies matching income rules once per settled round', () => {
     const base = autoPlay(miniPack(), 11);

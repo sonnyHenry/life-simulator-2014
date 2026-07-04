@@ -17,6 +17,7 @@ export interface Engine {
 
 const EXAM_BASE_SCORE = 330;
 const EXAM_SCORE_RANGE = 270;
+const EXAM_SKIP_RATE = 0.55;
 
 const CROSSROAD_OPTIONS = [
   {
@@ -544,6 +545,19 @@ export function createEngine(pack: ContentPack): Engine {
         return;
       }
       case 'EXAM': {
+        if (action.type === 'SKIP_EXAM') {
+          // 跳过剩余题目,按默认得分率(55%)折算,相当于发挥平平的一次考试
+          const remaining = state.examPaper.slice(state.examCursor);
+          const remainingPoints = remaining.reduce(
+            (sum, qid) => sum + (questionsById.get(qid)?.difficulty ?? 1),
+            0,
+          );
+          state.examCorrect += Math.round(remaining.length * EXAM_SKIP_RATE);
+          state.examEarnedPoints += remainingPoints * EXAM_SKIP_RATE;
+          state.examCursor = state.examPaper.length;
+          resolveExamScore(state, rng);
+          return;
+        }
         if (action.type !== 'ANSWER') invalid(state, action);
         const qid = state.examPaper[state.examCursor];
         const q: ExamQuestion | undefined = qid ? questionsById.get(qid) : undefined;
