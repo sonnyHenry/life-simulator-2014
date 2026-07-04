@@ -94,7 +94,7 @@ function TitleScreen() {
   return (
     <Card className="center">
       <Text className="kicker">一款关于选择的人生模拟器</Text>
-      <Text className="game-title">2014:我的十二年</Text>
+      <Text className="game-title">2014：我的十二年</Text>
       <Text className="muted block">
         从高考考场到而立之年,你将替一个普通人做出所有重要的决定。
       </Text>

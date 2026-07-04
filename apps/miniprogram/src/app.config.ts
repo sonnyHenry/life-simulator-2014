@@ -1,5 +1,6 @@
 export default {
   pages: ['pages/index/index'],
+  lazyCodeLoading: 'requiredComponents',
   window: {
     navigationBarTitleText: '2014：我的十二年',
     navigationBarBackgroundColor: '#f7f2e7',

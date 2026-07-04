@@ -1,7 +1,7 @@
 {
   "miniprogramRoot": "dist/",
   "projectname": "life-simulator-2014",
-  "description": "2014:我的十二年 - 人生模拟器",
+  "description": "2014：我的十二年 - 人生模拟器",
   "appid": "wxe39a17fd79467841",
   "setting": {
     "urlCheck": true,

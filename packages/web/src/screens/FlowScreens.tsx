@@ -11,7 +11,7 @@ export function TitleScreen(props: { view: Extract<ViewModel, { kind: 'TITLE' }>
   return (
     <Card className="center">
       <p className="kicker">一款关于选择的人生模拟器</p>
-      <h1 className="game-title">2014:我的十二年</h1>
+      <h1 className="game-title">2014：我的十二年</h1>
       <p className="muted">
         从高考考场到而立之年,你将替一个普通人做出所有重要的决定。
       </p>
