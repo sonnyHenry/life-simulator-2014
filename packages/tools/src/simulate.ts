@@ -56,6 +56,7 @@ function botAction(view: ViewModel, bot: Rng): PlayerAction {
 interface RunResult {
   endingId: string;
   endingTitle: string;
+  endingScore: number;
   finalState: GameState;
   steps: number;
 }
@@ -85,7 +86,14 @@ function runOne(seed: number, botSeed: number, verbose: boolean): RunResult {
       log(
         `\n最终数值: 学识${state.stats.knowledge} 金钱¥${state.stats.money} 心态${state.stats.mindset} 人脉${state.stats.network}`,
       );
-      return { endingId: view.endingId, endingTitle: view.title, finalState: state, steps };
+      log(`人生总分: ${view.score} (${view.grade} 级)`);
+      return {
+        endingId: view.endingId,
+        endingTitle: view.title,
+        endingScore: view.score,
+        finalState: state,
+        steps,
+      };
     }
     const action = botAction(view, bot);
     switch (view.kind) {
@@ -141,7 +149,10 @@ function main(): void {
   }
 
   const baseSeed = args.seed ?? 42;
-  const endingCounts = new Map<string, { title: string; count: number }>();
+  const endingCounts = new Map<
+    string,
+    { title: string; count: number; moneySum: number; scoreSum: number }
+  >();
   const eventsSeen = new Set<string>();
   let totalRounds = 0;
   const statSums = { knowledge: 0, money: 0, mindset: 0, network: 0 };
@@ -156,8 +167,15 @@ function main(): void {
   const t0 = Date.now();
   for (let i = 0; i < args.runs; i++) {
     const result = runOne(baseSeed + i, (baseSeed + i) ^ 0x5eed, false);
-    const entry = endingCounts.get(result.endingId) ?? { title: result.endingTitle, count: 0 };
+    const entry = endingCounts.get(result.endingId) ?? {
+      title: result.endingTitle,
+      count: 0,
+      moneySum: 0,
+      scoreSum: 0,
+    };
     entry.count++;
+    entry.moneySum += result.finalState.stats.money;
+    entry.scoreSum += result.endingScore;
     endingCounts.set(result.endingId, entry);
     totalRounds += result.finalState.roundCounter;
     for (const h of result.finalState.history) {
@@ -176,9 +194,13 @@ function main(): void {
   console.log(`\n完成,耗时 ${elapsed}ms (${(elapsed / args.runs).toFixed(2)}ms/局)\n`);
   console.log('结局分布:');
   const sorted = [...endingCounts.entries()].sort((a, b) => b[1].count - a[1].count);
-  for (const [id, { title, count }] of sorted) {
+  for (const [id, { title, count, moneySum, scoreSum }] of sorted) {
     const pct = ((count / args.runs) * 100).toFixed(1).padStart(5);
-    console.log(`  ${pct}%  【${title}】 (${id}, ${count} 局)`);
+    const avgMoney = Math.round(moneySum / count);
+    const avgScore = Math.round(scoreSum / count);
+    console.log(
+      `  ${pct}%  【${title}】 (${id}, ${count} 局, 均分${avgScore}, 均财¥${avgMoney.toLocaleString()})`,
+    );
   }
   const missingEndings = contentPack.endings.filter(e => !endingCounts.has(e.id));
   if (missingEndings.length > 0) {

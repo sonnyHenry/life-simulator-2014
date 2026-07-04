@@ -42,6 +42,8 @@ export type ViewModel =
       title: string;
       text: string;
       stats: Stats;
+      score: number;
+      grade: 'S' | 'A' | 'B' | 'C' | 'D';
       historyLength: number;
       shareCard: {
         title: string;

@@ -109,6 +109,18 @@ export interface ApplicationOption {
   failEffects?: Effect[];
 }
 
+export interface IncomeRule {
+  id: string;
+  label: string;
+  when: Condition;
+  amount: number;
+}
+
+export interface ScoringConfig {
+  weights: { knowledge: number; money: number; mindset: number; network: number };
+  moneyFullScore: number;
+}
+
 export interface NpcDef {
   id: string;
   name: string;
@@ -131,9 +143,11 @@ export interface ContentPack {
     title: string;
     fallbackEndingId: string;
     examQuestionCount: number;
+    scoring?: ScoringConfig;
   };
   timeline: PhaseConfig[];
   events: GameEvent[];
+  incomes: IncomeRule[];
   endings: EndingDef[];
   examBank: ExamQuestion[];
   provinces: ProvinceOption[];

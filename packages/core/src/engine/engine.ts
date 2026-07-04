@@ -203,12 +203,15 @@ export function createEngine(pack: ContentPack): Engine {
       case 'ENDING': {
         const ending = pack.endings.find(e => e.id === state.endingId);
         if (!ending) throw new Error(`ENDING screen with unknown ending: ${state.endingId}`);
+        const { score, grade } = computeScore(state);
         return {
           kind: 'ENDING',
           endingId: ending.id,
           title: ending.title,
           text: ending.text,
           stats: state.stats,
+          score,
+          grade,
           historyLength: state.history.length,
           shareCard: {
             title: ending.title,
@@ -220,6 +223,22 @@ export function createEngine(pack: ContentPack): Engine {
         };
       }
     }
+  }
+
+  function computeScore(state: GameState): { score: number; grade: 'S' | 'A' | 'B' | 'C' | 'D' } {
+    const scoring = pack.meta.scoring ?? {
+      weights: { knowledge: 0.25, money: 0.3, mindset: 0.25, network: 0.2 },
+      moneyFullScore: 600000,
+    };
+    const moneyScore = Math.min(100, (state.stats.money / scoring.moneyFullScore) * 100);
+    const raw =
+      state.stats.knowledge * scoring.weights.knowledge +
+      moneyScore * scoring.weights.money +
+      state.stats.mindset * scoring.weights.mindset +
+      state.stats.network * scoring.weights.network;
+    const score = Math.max(0, Math.min(100, Math.round(raw)));
+    const grade = score >= 85 ? 'S' : score >= 70 ? 'A' : score >= 55 ? 'B' : score >= 40 ? 'C' : 'D';
+    return { score, grade };
   }
 
   function enterPhase(state: GameState, rng: Rng, index: number): void {
@@ -296,9 +315,18 @@ export function createEngine(pack: ContentPack): Engine {
     state.screen = 'ENDING';
   }
 
+  function applyAnnualIncome(state: GameState, rng: Rng): void {
+    const ctx = { state, pack, rng };
+    for (const rule of pack.incomes) {
+      if (!evalCondition(rule.when, ctx)) continue;
+      state.stats.money = Math.max(0, Math.round(state.stats.money + rule.amount));
+    }
+  }
+
   function settleRound(state: GameState, rng: Rng): void {
     const phase = phaseAt(state.phaseIndex);
     if (phase.kind !== 'rounds') throw new Error('settleRound outside rounds phase');
+    applyAnnualIncome(state, rng);
     state.roundIndex += 1;
     state.roundCounter += 1;
     if (state.roundIndex < phase.rounds) {

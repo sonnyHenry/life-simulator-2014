@@ -61,6 +61,12 @@ for (const application of contentPack.applications) {
 }
 
 checkUnique('event', contentPack.events.map(e => e.id));
+checkUnique('income', contentPack.incomes.map(i => i.id));
+for (const income of contentPack.incomes) {
+  visitCondition(income.when, cond => {
+    if ('fn' in cond && !fnIds.has(cond.fn)) error(`income ${income.id} references missing condition fn: ${cond.fn}`);
+  });
+}
 checkUnique('ending', contentPack.endings.map(e => e.id));
 checkUnique('npc', contentPack.npcs.map(n => n.id));
 checkUnique('exam question', contentPack.examBank.map(q => q.id));
@@ -159,7 +165,7 @@ const errors = issues.filter(i => i.level === 'error');
 const warnings = issues.filter(i => i.level === 'warn');
 
 console.log(`校验内容包 ${contentPack.meta.id}@${contentPack.meta.version}`);
-console.log(`事件 ${contentPack.events.length}, 结局 ${contentPack.endings.length}, NPC ${contentPack.npcs.length}, 题目 ${contentPack.examBank.length}`);
+console.log(`事件 ${contentPack.events.length}, 结局 ${contentPack.endings.length}, NPC ${contentPack.npcs.length}, 题目 ${contentPack.examBank.length}, 收入规则 ${contentPack.incomes.length}`);
 for (const issue of issues) {
   console.log(`${issue.level === 'error' ? 'ERROR' : 'WARN'} ${issue.message}`);
 }

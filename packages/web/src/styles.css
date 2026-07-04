@@ -379,6 +379,27 @@ h2 {
   font-size: 13px;
 }
 
+.share-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.share-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid currentColor;
+  font-size: 20px;
+  font-weight: 700;
+}
+
 @media (max-width: 480px) {
   .app {
     padding: 10px 10px 32px;

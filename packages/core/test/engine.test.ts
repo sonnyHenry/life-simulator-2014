@@ -95,6 +95,7 @@ function miniPack(): ContentPack {
       { id: 'app1', label: '保底大学', university: '某大学', major: '某专业', minScore: 0, admitChance: 1 },
     ],
     npcs: [],
+    incomes: [],
     fns: {},
   };
 }
@@ -262,5 +263,27 @@ describe('engine full game', () => {
       results.add(JSON.stringify(autoPlay(miniPack(), seed).examPaper));
     }
     expect(results.size).toBeGreaterThan(1);
+  });
+});
+
+describe('income & scoring', () => {
+  it('applies matching income rules once per settled round', () => {
+    const base = autoPlay(miniPack(), 11);
+    const pack = miniPack();
+    pack.incomes = [{ id: 'inc_test', label: '测试收入', when: { always: true }, amount: 1000 }];
+    const withIncome = autoPlay(pack, 11);
+    expect(withIncome.roundCounter).toBe(base.roundCounter);
+    expect(withIncome.stats.money - base.stats.money).toBe(withIncome.roundCounter * 1000);
+  });
+
+  it('exposes a weighted score and grade on the ending view', () => {
+    const pack = miniPack();
+    const engine = createEngine(pack);
+    const state = autoPlay(pack, 11);
+    const view = engine.view(state);
+    if (view.kind !== 'ENDING') throw new Error('expected ENDING view');
+    expect(view.score).toBeGreaterThanOrEqual(0);
+    expect(view.score).toBeLessThanOrEqual(100);
+    expect(['S', 'A', 'B', 'C', 'D']).toContain(view.grade);
   });
 });

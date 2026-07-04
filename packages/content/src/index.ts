@@ -9,17 +9,23 @@ import { workEvents } from './events/work';
 import { randomEvents } from './events/random';
 import { endings } from './endings/endings';
 import { npcs } from './npcs/npcs';
+import { incomes } from './economy/incomes';
 
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.9.0',
+    version: '0.10.0',
     title: '2014:我的十二年(M3 社会线原型)',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 10,
+    scoring: {
+      weights: { knowledge: 0.25, money: 0.3, mindset: 0.25, network: 0.2 },
+      moneyFullScore: 600000,
+    },
   },
   timeline: phases,
   events: [...collegeEvents, ...workEvents, ...randomEvents],
+  incomes,
   endings,
   examBank,
   provinces,

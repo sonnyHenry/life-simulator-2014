@@ -19,7 +19,7 @@ export const endings: EndingDef[] = [
     condition: {
       all: [
         { flag: 'crypto_win' },
-        { stat: 'money', op: '>=', value: 300000 },
+        { stat: 'money', op: '>=', value: 800000 },
       ],
     },
     shareCard: { tone: 'triumph', tagline: '暴富靠运气,但敢按确认键的是你自己。' },
@@ -34,7 +34,7 @@ export const endings: EndingDef[] = [
       all: [
         { background: 'bg_rural' },
         { stat: 'knowledge', op: '>=', value: 65 },
-        { stat: 'money', op: '>=', value: 80000 },
+        { stat: 'money', op: '>=', value: 250000 },
       ],
     },
     shareCard: { tone: 'triumph', tagline: '做题家怎么了?做题家做出了自己的人生。' },
@@ -120,7 +120,7 @@ export const endings: EndingDef[] = [
     condition: {
       all: [
         { flag: 'no_house' },
-        { stat: 'money', op: '>=', value: 30000 },
+        { stat: 'money', op: '>=', value: 150000 },
         { stat: 'mindset', op: '>=', value: 40 },
       ],
     },
@@ -148,7 +148,7 @@ export const endings: EndingDef[] = [
     priority: 140,
     condition: {
       all: [
-        { stat: 'money', op: '>=', value: 180000 },
+        { stat: 'money', op: '>=', value: 500000 },
         { stat: 'mindset', op: '>=', value: 45 },
       ],
     },
