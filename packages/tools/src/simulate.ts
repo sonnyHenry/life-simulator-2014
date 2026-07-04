@@ -1,32 +1,97 @@
 import {
   createEngine,
+  evalCondition,
   Rng,
   type GameState,
   type PlayerAction,
+  type StatKey,
   type ViewModel,
 } from '@life-sim/core';
 import { contentPack } from '@life-sim/content';
+
+type Strategy = 'random' | 'money' | 'mindset';
 
 interface CliArgs {
   runs: number;
   seed: number | null;
   verbose: boolean;
   check: boolean;
+  strategy: Strategy;
+  compare: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { runs: 200, seed: null, verbose: false, check: false };
+  const args: CliArgs = {
+    runs: 200,
+    seed: null,
+    verbose: false,
+    check: false,
+    strategy: 'random',
+    compare: false,
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if ((a === '-n' || a === '--runs') && argv[i + 1]) args.runs = Number(argv[++i]);
     else if (a === '--seed' && argv[i + 1]) args.seed = Number(argv[++i]);
     else if (a === '--verbose' || a === '-v') args.verbose = true;
     else if (a === '--check') args.check = true;
+    else if (a === '--compare') args.compare = true;
+    else if (a === '--bot' && argv[i + 1]) {
+      const s = argv[++i];
+      if (s === 'random' || s === 'money' || s === 'mindset') args.strategy = s;
+      else throw new Error(`unknown bot strategy: ${s}(可选 random/money/mindset)`);
+    }
   }
   return args;
 }
 
-function botAction(view: ViewModel, bot: Rng): PlayerAction {
+const engine = createEngine(contentPack);
+const eventsById = new Map(contentPack.events.map(e => [e.id, e]));
+const backgroundLabels = new Map(contentPack.backgrounds.map(b => [b.id, b.label]));
+const CAREER_LABELS: Record<string, string> = {
+  cs: '计算机',
+  education: '教育',
+  gov: '体制内',
+  local: '县城/本地',
+};
+const STRATEGY_LABELS: Record<Strategy, string> = {
+  random: '随机',
+  money: '卷钱',
+  mindset: '保心态',
+};
+
+/** 贪心 bot 的选项打分:按 outcome 权重求某项数值变化的期望(条件用一次性 RNG 求值,不污染对局随机流) */
+function expectedStatDelta(
+  eventId: string,
+  choiceId: string,
+  state: GameState,
+  stat: StatKey,
+): number {
+  const event = eventsById.get(eventId);
+  const choice = event?.choices.find(c => c.id === choiceId);
+  if (!choice) return 0;
+  const probe = new Rng(0x9e3779b9);
+  const ctx = { state, pack: contentPack, rng: probe };
+  const eligible = choice.outcomes.filter(o => evalCondition(o.condition, ctx));
+  const pool = eligible.length > 0 ? eligible : choice.outcomes;
+  const totalWeight = pool.reduce((sum, o) => sum + o.weight, 0) || 1;
+  let expectation = 0;
+  for (const outcome of pool) {
+    let delta = 0;
+    for (const effect of outcome.effects) {
+      if ('stats' in effect) delta += effect.stats[stat] ?? 0;
+    }
+    expectation += (outcome.weight / totalWeight) * delta;
+  }
+  return expectation;
+}
+
+function botAction(
+  view: ViewModel,
+  bot: Rng,
+  strategy: Strategy,
+  state: GameState,
+): PlayerAction {
   switch (view.kind) {
     case 'TITLE':
       return { type: 'START' };
@@ -46,10 +111,28 @@ function botAction(view: ViewModel, bot: Rng): PlayerAction {
       return { type: 'ANSWER', optionIndex: bot.int(0, view.question.options.length - 1) };
     case 'APPLICATION':
       return { type: 'APPLY', optionId: bot.pick(view.options).id };
-    case 'CROSSROAD':
-      return { type: 'CHOOSE_CROSSROAD', optionId: bot.pick(view.options).id };
-    case 'EVENT':
-      return { type: 'CHOOSE', choiceId: bot.pick(view.choices).id };
+    case 'CROSSROAD': {
+      const preferred =
+        strategy === 'money' ? 'job' : strategy === 'mindset' ? 'civil_service' : null;
+      const hit = preferred && view.options.find(o => o.id === preferred);
+      return { type: 'CHOOSE_CROSSROAD', optionId: hit ? hit.id : bot.pick(view.options).id };
+    }
+    case 'EVENT': {
+      if (strategy === 'random') return { type: 'CHOOSE', choiceId: bot.pick(view.choices).id };
+      const stat: StatKey = strategy === 'money' ? 'money' : 'mindset';
+      let best: string[] = [];
+      let bestScore = -Infinity;
+      for (const choice of view.choices) {
+        const score = expectedStatDelta(view.eventId, choice.id, state, stat);
+        if (score > bestScore + 1e-9) {
+          bestScore = score;
+          best = [choice.id];
+        } else if (Math.abs(score - bestScore) <= 1e-9) {
+          best.push(choice.id);
+        }
+      }
+      return { type: 'CHOOSE', choiceId: bot.pick(best) };
+    }
     case 'ENDING':
       throw new Error('botAction called on ENDING view');
   }
@@ -60,10 +143,9 @@ interface RunResult {
   endingTitle: string;
   endingScore: number;
   finalState: GameState;
+  mindsetByYear: Array<[number, number]>;
   steps: number;
 }
-
-const engine = createEngine(contentPack);
 
 function fmtDeltas(deltas: Record<string, number | undefined>): string {
   const parts = Object.entries(deltas)
@@ -72,9 +154,10 @@ function fmtDeltas(deltas: Record<string, number | undefined>): string {
   return parts.length > 0 ? `  [${parts.join(', ')}]` : '';
 }
 
-function runOne(seed: number, botSeed: number, verbose: boolean): RunResult {
+function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: boolean): RunResult {
   let state = engine.start(seed);
   const bot = new Rng(botSeed);
+  const mindsetByYear: Array<[number, number]> = [];
   let steps = 0;
   const log = (line: string) => {
     if (verbose) console.log(line);
@@ -94,10 +177,11 @@ function runOne(seed: number, botSeed: number, verbose: boolean): RunResult {
         endingTitle: view.title,
         endingScore: view.score,
         finalState: state,
+        mindsetByYear,
         steps,
       };
     }
-    const action = botAction(view, bot);
+    const action = botAction(view, bot, strategy, state);
     switch (view.kind) {
       case 'BACKGROUND_DRAW':
         log(`\n🎴 家境:${view.card.label} (初始资金 ¥${view.card.initialMoney})`);
@@ -118,6 +202,7 @@ function runOne(seed: number, botSeed: number, verbose: boolean): RunResult {
         }
         break;
       case 'BRIEF':
+        mindsetByYear.push([view.year, state.stats.mindset]);
         log(`\n===== ${view.year} 年 · ${view.phaseLabel} =====`);
         log(view.text);
         break;
@@ -140,115 +225,232 @@ function runOne(seed: number, botSeed: number, verbose: boolean): RunResult {
   throw new Error(`Run did not finish within 1000 steps (seed=${seed})`);
 }
 
-function main(): void {
-  const args = parseArgs(process.argv.slice(2));
+function percentile(sorted: number[], p: number): number {
+  return sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))] ?? 0;
+}
 
-  if (args.verbose) {
-    const seed = args.seed ?? Math.floor(Math.random() * 2147483646) + 1;
-    console.log(`《${contentPack.meta.title}》 seed=${seed}\n`);
-    runOne(seed, seed ^ 0x5eed, true);
-    return;
-  }
+interface BatchStats {
+  strategy: Strategy;
+  runs: number;
+  endingCounts: Map<string, { title: string; count: number; moneySum: number; scoreSum: number }>;
+  eventsSeen: Set<string>;
+  totalRounds: number;
+  statSums: Record<StatKey, number>;
+  scoreSum: number;
+  moneySamples: number[];
+  mindsetSamples: number[];
+  earlyEndingCount: number;
+  byBackground: Map<string, { count: number; moneySum: number; mindsetSum: number; scoreSum: number }>;
+  byCareer: Map<string, { count: number; moneySum: number; mindsetSum: number; scoreSum: number }>;
+  mindsetYearly: Map<number, number[]>;
+}
 
-  const baseSeed = args.seed ?? 42;
-  const endingCounts = new Map<
-    string,
-    { title: string; count: number; moneySum: number; scoreSum: number }
-  >();
-  const eventsSeen = new Set<string>();
-  let totalRounds = 0;
-  const statSums = { knowledge: 0, money: 0, mindset: 0, network: 0 };
-  const moneySamples: number[] = [];
-  const mindsetSamples: number[] = [];
+function runBatch(runs: number, baseSeed: number, strategy: Strategy): BatchStats {
+  const stats: BatchStats = {
+    strategy,
+    runs,
+    endingCounts: new Map(),
+    eventsSeen: new Set(),
+    totalRounds: 0,
+    statSums: { knowledge: 0, money: 0, mindset: 0, network: 0 },
+    scoreSum: 0,
+    moneySamples: [],
+    mindsetSamples: [],
+    earlyEndingCount: 0,
+    byBackground: new Map(),
+    byCareer: new Map(),
+    mindsetYearly: new Map(),
+  };
   const earlyEndingIds = new Set(
     contentPack.endings.filter(e => e.category === 'early').map(e => e.id),
   );
-  let earlyEndingCount = 0;
 
-  console.log(`模拟 ${args.runs} 局 (baseSeed=${baseSeed}) ...`);
-  const t0 = Date.now();
-  for (let i = 0; i < args.runs; i++) {
-    const result = runOne(baseSeed + i, (baseSeed + i) ^ 0x5eed, false);
-    const entry = endingCounts.get(result.endingId) ?? {
+  for (let i = 0; i < runs; i++) {
+    const result = runOne(baseSeed + i, (baseSeed + i) ^ 0x5eed, strategy, false);
+    const fs = result.finalState;
+    const entry = stats.endingCounts.get(result.endingId) ?? {
       title: result.endingTitle,
       count: 0,
       moneySum: 0,
       scoreSum: 0,
     };
     entry.count++;
-    entry.moneySum += result.finalState.stats.money;
+    entry.moneySum += fs.stats.money;
     entry.scoreSum += result.endingScore;
-    endingCounts.set(result.endingId, entry);
-    totalRounds += result.finalState.roundCounter;
-    for (const h of result.finalState.history) {
-      if (h.kind === 'event') eventsSeen.add(h.eventId);
+    stats.endingCounts.set(result.endingId, entry);
+    stats.totalRounds += fs.roundCounter;
+    for (const h of fs.history) {
+      if (h.kind === 'event') stats.eventsSeen.add(h.eventId);
     }
-    statSums.knowledge += result.finalState.stats.knowledge;
-    statSums.money += result.finalState.stats.money;
-    statSums.mindset += result.finalState.stats.mindset;
-    statSums.network += result.finalState.stats.network;
-    moneySamples.push(result.finalState.stats.money);
-    mindsetSamples.push(result.finalState.stats.mindset);
-    if (earlyEndingIds.has(result.endingId)) earlyEndingCount++;
-  }
-  const elapsed = Date.now() - t0;
+    for (const key of ['knowledge', 'money', 'mindset', 'network'] as StatKey[]) {
+      stats.statSums[key] += fs.stats[key];
+    }
+    stats.scoreSum += result.endingScore;
+    stats.moneySamples.push(fs.stats.money);
+    stats.mindsetSamples.push(fs.stats.mindset);
+    if (earlyEndingIds.has(result.endingId)) stats.earlyEndingCount++;
 
-  console.log(`\n完成,耗时 ${elapsed}ms (${(elapsed / args.runs).toFixed(2)}ms/局)\n`);
+    const bgKey =
+      backgroundLabels.get(fs.profile.background ?? '') ?? fs.profile.background ?? '未知';
+    const careerKey = fs.profile.career
+      ? (CAREER_LABELS[fs.profile.career] ?? fs.profile.career)
+      : '未定线';
+    for (const [map, key] of [
+      [stats.byBackground, bgKey],
+      [stats.byCareer, careerKey],
+    ] as const) {
+      const g = map.get(key) ?? { count: 0, moneySum: 0, mindsetSum: 0, scoreSum: 0 };
+      g.count++;
+      g.moneySum += fs.stats.money;
+      g.mindsetSum += fs.stats.mindset;
+      g.scoreSum += result.endingScore;
+      map.set(key, g);
+    }
+    for (const [year, mindset] of result.mindsetByYear) {
+      const arr = stats.mindsetYearly.get(year) ?? [];
+      arr.push(mindset);
+      stats.mindsetYearly.set(year, arr);
+    }
+  }
+  stats.moneySamples.sort((a, b) => a - b);
+  stats.mindsetSamples.sort((a, b) => a - b);
+  return stats;
+}
+
+function printBatch(s: BatchStats): void {
   console.log('结局分布:');
-  const sorted = [...endingCounts.entries()].sort((a, b) => b[1].count - a[1].count);
+  const sorted = [...s.endingCounts.entries()].sort((a, b) => b[1].count - a[1].count);
   for (const [id, { title, count, moneySum, scoreSum }] of sorted) {
-    const pct = ((count / args.runs) * 100).toFixed(1).padStart(5);
-    const avgMoney = Math.round(moneySum / count);
-    const avgScore = Math.round(scoreSum / count);
+    const pct = ((count / s.runs) * 100).toFixed(1).padStart(5);
     console.log(
-      `  ${pct}%  【${title}】 (${id}, ${count} 局, 均分${avgScore}, 均财¥${avgMoney.toLocaleString()})`,
+      `  ${pct}%  【${title}】 (${id}, ${count} 局, 均分${Math.round(scoreSum / count)}, 均财¥${Math.round(moneySum / count).toLocaleString()})`,
     );
   }
-  const missingEndings = contentPack.endings.filter(e => !endingCounts.has(e.id));
+  const missingEndings = contentPack.endings.filter(e => !s.endingCounts.has(e.id));
   if (missingEndings.length > 0) {
     console.log(`\n⚠️  从未到达的结局: ${missingEndings.map(e => e.id).join(', ')}`);
   }
-  console.log(`\n事件覆盖: ${eventsSeen.size}/${contentPack.events.length}`);
-  const missedEvents = contentPack.events.filter(e => !eventsSeen.has(e.id));
+  console.log(`\n事件覆盖: ${s.eventsSeen.size}/${contentPack.events.length}`);
+  const missedEvents = contentPack.events.filter(e => !s.eventsSeen.has(e.id));
   if (missedEvents.length > 0) {
     console.log(`  未触发过的事件: ${missedEvents.map(e => e.id).join(', ')}`);
   }
-  console.log(`平均回合数: ${(totalRounds / args.runs).toFixed(1)}`);
+  console.log(`平均回合数: ${(s.totalRounds / s.runs).toFixed(1)}`);
   console.log(
-    `平均最终数值: 学识${(statSums.knowledge / args.runs).toFixed(0)} 金钱¥${(statSums.money / args.runs).toFixed(0)} 心态${(statSums.mindset / args.runs).toFixed(0)} 人脉${(statSums.network / args.runs).toFixed(0)}`,
+    `平均最终数值: 学识${(s.statSums.knowledge / s.runs).toFixed(0)} 金钱¥${(s.statSums.money / s.runs).toFixed(0)} 心态${(s.statSums.mindset / s.runs).toFixed(0)} 人脉${(s.statSums.network / s.runs).toFixed(0)} · 均分${(s.scoreSum / s.runs).toFixed(0)}`,
   );
+  console.log(
+    `金钱分位: p10=¥${percentile(s.moneySamples, 10)} p50=¥${percentile(s.moneySamples, 50)} p90=¥${percentile(s.moneySamples, 90)}`,
+  );
+  console.log(
+    `心态分位: p10=${percentile(s.mindsetSamples, 10)} p50=${percentile(s.mindsetSamples, 50)} p90=${percentile(s.mindsetSamples, 90)}`,
+  );
+  console.log(`提前结局占比: ${((s.earlyEndingCount / s.runs) * 100).toFixed(1)}%`);
 
-  const percentile = (sorted: number[], p: number): number =>
-    sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))] ?? 0;
-  moneySamples.sort((a, b) => a - b);
-  mindsetSamples.sort((a, b) => a - b);
-  console.log(
-    `金钱分位: p10=¥${percentile(moneySamples, 10)} p50=¥${percentile(moneySamples, 50)} p90=¥${percentile(moneySamples, 90)}`,
-  );
-  console.log(
-    `心态分位: p10=${percentile(mindsetSamples, 10)} p50=${percentile(mindsetSamples, 50)} p90=${percentile(mindsetSamples, 90)}`,
-  );
-  console.log(`提前结局占比: ${((earlyEndingCount / args.runs) * 100).toFixed(1)}%`);
+  const printGroups = (
+    label: string,
+    map: BatchStats['byBackground'],
+  ): void => {
+    console.log(`\n${label}:`);
+    const rows = [...map.entries()].sort((a, b) => b[1].count - a[1].count);
+    for (const [key, g] of rows) {
+      console.log(
+        `  ${key.padEnd(6, ' ')} ${String(g.count).padStart(4)} 局  均财¥${Math.round(g.moneySum / g.count).toLocaleString().padStart(9)}  心态均值${Math.round(g.mindsetSum / g.count)}  均分${Math.round(g.scoreSum / g.count)}`,
+      );
+    }
+  };
+  printGroups('按家境分组', s.byBackground);
+  printGroups('按职业线分组', s.byCareer);
 
-  if (args.check) {
-    const failures: string[] = [];
-    const missedCount = contentPack.events.length - eventsSeen.size;
-    if (missedCount > 0) failures.push(`事件覆盖不完整: ${eventsSeen.size}/${contentPack.events.length}`);
-    for (const ending of contentPack.endings) {
-      const entry = endingCounts.get(ending.id);
-      if (!entry) {
-        failures.push(`结局从未到达: ${ending.id}`);
-      } else if (entry.count / args.runs > 0.4) {
-        failures.push(`结局占比过高(>40%): ${ending.id} ${((entry.count / args.runs) * 100).toFixed(1)}%`);
+  const years = [...s.mindsetYearly.keys()].sort((a, b) => a - b);
+  if (years.length > 0) {
+    const curve = years
+      .map(y => {
+        const arr = [...(s.mindsetYearly.get(y) ?? [])].sort((a, b) => a - b);
+        return `${y}:${percentile(arr, 50)}`;
+      })
+      .join(' ');
+    console.log(`\n心态年度中位数(年初): ${curve}`);
+  }
+}
+
+function runCheck(s: BatchStats): void {
+  const failures: string[] = [];
+  if (s.eventsSeen.size < contentPack.events.length) {
+    failures.push(`事件覆盖不完整: ${s.eventsSeen.size}/${contentPack.events.length}`);
+  }
+  for (const ending of contentPack.endings) {
+    const entry = s.endingCounts.get(ending.id);
+    if (!entry) {
+      failures.push(`结局从未到达: ${ending.id}`);
+    } else if (entry.count / s.runs > 0.4) {
+      failures.push(
+        `结局占比过高(>40%): ${ending.id} ${((entry.count / s.runs) * 100).toFixed(1)}%`,
+      );
+    }
+  }
+  const fallback = s.endingCounts.get(contentPack.meta.fallbackEndingId);
+  if (fallback && fallback.count / s.runs > 0.35) {
+    failures.push(`兜底结局占比过高(>35%): ${((fallback.count / s.runs) * 100).toFixed(1)}%`);
+  }
+  if (s.earlyEndingCount / s.runs > 0.1) {
+    failures.push(`提前结局占比过高(>10%): ${((s.earlyEndingCount / s.runs) * 100).toFixed(1)}%`);
+  }
+  console.log('');
+  if (failures.length > 0) {
+    for (const f of failures) console.log(`❌ ${f}`);
+    process.exit(1);
+  }
+  console.log('✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)');
+}
+
+function main(): void {
+  const args = parseArgs(process.argv.slice(2));
+
+  if (args.verbose) {
+    const seed = args.seed ?? Math.floor(Math.random() * 2147483646) + 1;
+    console.log(`《${contentPack.meta.title}》 seed=${seed} bot=${STRATEGY_LABELS[args.strategy]}\n`);
+    runOne(seed, seed ^ 0x5eed, args.strategy, true);
+    return;
+  }
+
+  const baseSeed = args.seed ?? 42;
+
+  if (args.compare) {
+    console.log(`策略对比,每种策略 ${args.runs} 局 (baseSeed=${baseSeed}) ...\n`);
+    const batches = (['random', 'money', 'mindset'] as Strategy[]).map(strategy =>
+      runBatch(args.runs, baseSeed, strategy),
+    );
+    console.log('策略     均分  均财        心态均值  崩溃率   Top 结局');
+    for (const b of batches) {
+      const top = [...b.endingCounts.entries()].sort((x, y) => y[1].count - x[1].count)[0];
+      const topText = top
+        ? `${top[1].title} ${((top[1].count / b.runs) * 100).toFixed(0)}%`
+        : '-';
+      console.log(
+        `${STRATEGY_LABELS[b.strategy].padEnd(4, ' ')}  ${String(Math.round(b.scoreSum / b.runs)).padStart(4)}  ¥${Math.round(b.statSums.money / b.runs).toLocaleString().padStart(9)}  ${String(Math.round(b.statSums.mindset / b.runs)).padStart(6)}  ${((b.earlyEndingCount / b.runs) * 100).toFixed(1).padStart(5)}%   ${topText}`,
+      );
+    }
+    console.log('\n(各策略结局分布)');
+    for (const b of batches) {
+      console.log(`\n--- ${STRATEGY_LABELS[b.strategy]} bot ---`);
+      const sorted = [...b.endingCounts.entries()].sort((x, y) => y[1].count - x[1].count);
+      for (const [id, { title, count }] of sorted.slice(0, 6)) {
+        console.log(`  ${(((count / b.runs) * 100).toFixed(1)).padStart(5)}%  【${title}】 (${id})`);
       }
     }
-    console.log('');
-    if (failures.length > 0) {
-      for (const f of failures) console.log(`❌ ${f}`);
-      process.exit(1);
-    }
-    console.log('✅ 分布目标校验通过(全事件覆盖、全结局可达、无结局 >40%)');
+    return;
   }
+
+  console.log(
+    `模拟 ${args.runs} 局 (baseSeed=${baseSeed}, bot=${STRATEGY_LABELS[args.strategy]}) ...`,
+  );
+  const t0 = Date.now();
+  const batch = runBatch(args.runs, baseSeed, args.strategy);
+  const elapsed = Date.now() - t0;
+  console.log(`\n完成,耗时 ${elapsed}ms (${(elapsed / args.runs).toFixed(2)}ms/局)\n`);
+  printBatch(batch);
+  if (args.check) runCheck(batch);
 }
 
 main();
