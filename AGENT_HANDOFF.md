@@ -191,6 +191,23 @@
 - 调平结果:心态 p50 从 82 → 58,p10=27,提前结局占比 0.8% → 5.7%,
   "卷钱还是保心态"成为真实取舍;12 结局仍全部可达
 
+### M5 第七轮(存档双保险 + 校验补全)
+
+由 Claude Code(Fable 5)完成:
+
+- **存档 actionLog 重放 + 迁移链**(技术文档第五章方案落地):
+  - `packages/core/src/save/save.ts`:`SaveFile v2 { seed, actionLog, snapshot }`、
+    `migrateSaveFile`(迁移链,v1 快照档自动升级)、`replaySave`(要求日志从 START 起步,
+    重放失败返回 null)、`restoreSave`(内容版本一致用快照,不一致用 seed+日志重放)
+  - web store 记录每一步 action;标题页开新局时自动重置日志
+  - 旧 v1 存档:同内容版本仍可用,跨版本因无日志按旧行为丢弃
+- **validate 恒假条件静态检查**:检测 chance≤0、越界 stat、空年份区间、
+  all 分支内的矛盾(互斥 flag、同 stat 上下界冲突、双 background/career/major/npcStage)。
+  结局恒假报 error(死结局),事件 trigger/visibleIf/outcome 报 warn。已用注入死结局验证能抓到
+- **simulate --check**:分布目标校验(全事件覆盖、全结局可达、无结局 >40%),
+  失败退出码 1,可作为内容合并前的门禁
+- 引擎单测 16 个(存档重放/迁移/损坏档 +3)
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
@@ -253,8 +270,6 @@ pnpm --filter @life-sim/web build
 
 - 内容量还没有达到设计文档里的约 125 个事件,当前是 67 个。
 - 结局数量当前是 12 个,已进入 12-15 个 MVP 目标区间,可再补金融/医学线专属结局。
-- 存档目前是 snapshot 存档,还没有 actionLog 重放和迁移链。
-- validate 已有基础校验,但还没有做结局可达性静态检查(恒假条件)和结局分布目标校验。
 - 分享图 Canvas 渲染已通过类型检查和构建,但还没有在真实浏览器里点过"保存分享图",上线前建议人工玩一局到结局验证一次。
 - 金钱/心态等数值已经可玩,但还需要继续根据 simulate 分布调平衡。
 

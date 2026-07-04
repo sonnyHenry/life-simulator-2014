@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   createEngine,
+  createSaveFile,
+  CURRENT_SAVE_VERSION,
   evalCondition,
+  migrateSaveFile,
+  restoreSave,
   Rng,
   type ContentPack,
   type GameState,
@@ -263,6 +267,55 @@ describe('engine full game', () => {
       results.add(JSON.stringify(autoPlay(miniPack(), seed).examPaper));
     }
     expect(results.size).toBeGreaterThan(1);
+  });
+});
+
+describe('save replay & migration', () => {
+  it('restores via snapshot when content version matches, replay when it differs', () => {
+    const pack = miniPack();
+    const engine = createEngine(pack);
+    let state = engine.start(9);
+    const log: PlayerAction[] = [];
+    const doAct = (action: PlayerAction) => {
+      log.push(action);
+      state = engine.dispatch(state, action);
+    };
+    doAct({ type: 'START' });
+    doAct({ type: 'CONTINUE' });
+    doAct({ type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    doAct({ type: 'SKIP_EXAM' });
+
+    const save = createSaveFile('1.0.0', state, log);
+    expect(restoreSave(engine, save, '1.0.0')).toBe(save.snapshot);
+
+    const replayed = restoreSave(engine, save, '2.0.0');
+    expect(replayed).not.toBeNull();
+    expect(JSON.stringify(replayed)).toBe(JSON.stringify(state));
+  });
+
+  it('migrates v1 snapshot-only saves and refuses replaying them', () => {
+    const pack = miniPack();
+    const engine = createEngine(pack);
+    const snapshot = autoPlay(pack, 5);
+    const v1 = {
+      saveVersion: 1,
+      contentVersion: '0.9.0',
+      savedAt: '2026-01-01T00:00:00.000Z',
+      snapshot,
+    };
+    const migrated = migrateSaveFile(v1);
+    expect(migrated).not.toBeNull();
+    expect(migrated!.saveVersion).toBe(CURRENT_SAVE_VERSION);
+    expect(migrated!.seed).toBe(snapshot.seed);
+    // 同版本 → 快照可用;换版本 → 空日志不可重放,判为不可恢复
+    expect(restoreSave(engine, migrated!, '0.9.0')).toBe(migrated!.snapshot);
+    expect(restoreSave(engine, migrated!, '1.0.0')).toBeNull();
+  });
+
+  it('rejects unknown or corrupted saves', () => {
+    expect(migrateSaveFile(null)).toBeNull();
+    expect(migrateSaveFile({ saveVersion: 99 })).toBeNull();
+    expect(migrateSaveFile({ saveVersion: 2, snapshot: null, actionLog: [] })).toBeNull();
   });
 });
 

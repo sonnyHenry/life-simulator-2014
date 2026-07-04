@@ -11,15 +11,17 @@ interface CliArgs {
   runs: number;
   seed: number | null;
   verbose: boolean;
+  check: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { runs: 200, seed: null, verbose: false };
+  const args: CliArgs = { runs: 200, seed: null, verbose: false, check: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if ((a === '-n' || a === '--runs') && argv[i + 1]) args.runs = Number(argv[++i]);
     else if (a === '--seed' && argv[i + 1]) args.seed = Number(argv[++i]);
     else if (a === '--verbose' || a === '-v') args.verbose = true;
+    else if (a === '--check') args.check = true;
   }
   return args;
 }
@@ -227,6 +229,26 @@ function main(): void {
     `心态分位: p10=${percentile(mindsetSamples, 10)} p50=${percentile(mindsetSamples, 50)} p90=${percentile(mindsetSamples, 90)}`,
   );
   console.log(`提前结局占比: ${((earlyEndingCount / args.runs) * 100).toFixed(1)}%`);
+
+  if (args.check) {
+    const failures: string[] = [];
+    const missedCount = contentPack.events.length - eventsSeen.size;
+    if (missedCount > 0) failures.push(`事件覆盖不完整: ${eventsSeen.size}/${contentPack.events.length}`);
+    for (const ending of contentPack.endings) {
+      const entry = endingCounts.get(ending.id);
+      if (!entry) {
+        failures.push(`结局从未到达: ${ending.id}`);
+      } else if (entry.count / args.runs > 0.4) {
+        failures.push(`结局占比过高(>40%): ${ending.id} ${((entry.count / args.runs) * 100).toFixed(1)}%`);
+      }
+    }
+    console.log('');
+    if (failures.length > 0) {
+      for (const f of failures) console.log(`❌ ${f}`);
+      process.exit(1);
+    }
+    console.log('✅ 分布目标校验通过(全事件覆盖、全结局可达、无结局 >40%)');
+  }
 }
 
 main();

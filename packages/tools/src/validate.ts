@@ -161,6 +161,122 @@ for (const ending of contentPack.endings) {
   });
 }
 
+// ---------- 恒假条件静态检查(防 vc-simulator 式死结局) ----------
+
+const gameYearMin = Math.min(
+  ...contentPack.timeline.map(p => p.date.year),
+);
+const finalPhase = contentPack.timeline.find(p => p.kind === 'rounds' && p.isFinal);
+const gameYearMax =
+  finalPhase && finalPhase.kind === 'rounds' ? finalPhase.date.year + finalPhase.rounds - 1 : 2026;
+
+const BOUNDED_STATS = new Set(['knowledge', 'mindset', 'network']);
+
+function statBoundsImpossible(stat: string, op: string, value: number): boolean {
+  if (!BOUNDED_STATS.has(stat)) return false;
+  if (op === '>' && value >= 100) return true;
+  if (op === '>=' && value > 100) return true;
+  if (op === '<' && value <= 0) return true;
+  if (op === '<=' && value < 0) return true;
+  if (op === '==' && (value < 0 || value > 100)) return true;
+  return false;
+}
+
+function allBranchContradicts(children: Condition[]): boolean {
+  const lower = new Map<string, number>();
+  const upper = new Map<string, number>();
+  const flagRequired = new Map<string, boolean | number | string>();
+  const flagForbidden = new Set<string>();
+  const single = new Map<string, string>(); // background/career/major/npcStage 单值字段
+  let yearFrom = gameYearMin;
+  let yearTo = gameYearMax;
+
+  for (const child of children) {
+    if ('stat' in child) {
+      const key = child.stat;
+      if (!BOUNDED_STATS.has(key) && key !== 'money') continue;
+      if (child.op === '>' ) lower.set(key, Math.max(lower.get(key) ?? -Infinity, child.value + 1));
+      if (child.op === '>=') lower.set(key, Math.max(lower.get(key) ?? -Infinity, child.value));
+      if (child.op === '<' ) upper.set(key, Math.min(upper.get(key) ?? Infinity, child.value - 1));
+      if (child.op === '<=') upper.set(key, Math.min(upper.get(key) ?? Infinity, child.value));
+      if (child.op === '==') {
+        lower.set(key, Math.max(lower.get(key) ?? -Infinity, child.value));
+        upper.set(key, Math.min(upper.get(key) ?? Infinity, child.value));
+      }
+    } else if ('flag' in child) {
+      const want = child.equals ?? true;
+      if (flagForbidden.has(child.flag) && want === true) return true;
+      const existing = flagRequired.get(child.flag);
+      if (existing !== undefined && existing !== want) return true;
+      flagRequired.set(child.flag, want);
+    } else if ('not' in child && typeof child.not === 'object' && 'flag' in child.not && child.not.equals === undefined) {
+      if (flagRequired.get(child.not.flag) === true) return true;
+      flagForbidden.add(child.not.flag);
+    } else if ('year' in child) {
+      yearFrom = Math.max(yearFrom, child.year.from ?? gameYearMin);
+      yearTo = Math.min(yearTo, child.year.to ?? gameYearMax);
+    } else if ('background' in child) {
+      if ((single.get('background') ?? child.background) !== child.background) return true;
+      single.set('background', child.background);
+    } else if ('career' in child) {
+      if ((single.get('career') ?? child.career) !== child.career) return true;
+      single.set('career', child.career);
+    } else if ('major' in child) {
+      if ((single.get('major') ?? child.major) !== child.major) return true;
+      single.set('major', child.major);
+    } else if ('npcStage' in child) {
+      const key = `npcStage:${child.npcStage}`;
+      if ((single.get(key) ?? child.stage) !== child.stage) return true;
+      single.set(key, child.stage);
+    }
+  }
+  if (yearFrom > yearTo) return true;
+  for (const [key, lo] of lower) {
+    const hi = upper.get(key);
+    if (hi !== undefined && lo > hi) return true;
+  }
+  return false;
+}
+
+function conditionImpossible(cond: Condition | undefined): boolean {
+  if (!cond) return false;
+  if ('chance' in cond) return cond.chance <= 0;
+  if ('stat' in cond) return statBoundsImpossible(cond.stat, cond.op, cond.value);
+  if ('year' in cond) {
+    const from = cond.year.from ?? gameYearMin;
+    const to = cond.year.to ?? gameYearMax;
+    return from > to || from > gameYearMax || to < gameYearMin;
+  }
+  if ('not' in cond) return typeof cond.not === 'object' && 'always' in cond.not;
+  if ('all' in cond) {
+    if (cond.all.some(conditionImpossible)) return true;
+    return allBranchContradicts(cond.all);
+  }
+  if ('any' in cond) return cond.any.length > 0 && cond.any.every(conditionImpossible);
+  return false;
+}
+
+for (const ending of contentPack.endings) {
+  if (conditionImpossible(ending.condition)) {
+    error(`ending condition can never be true (dead ending): ${ending.id}`);
+  }
+}
+for (const event of contentPack.events) {
+  if (conditionImpossible(event.trigger)) {
+    warn(`event trigger can never be true: ${event.id}`);
+  }
+  for (const choice of event.choices) {
+    if (conditionImpossible(choice.visibleIf)) {
+      warn(`choice visibleIf can never be true: ${event.id}.${choice.id}`);
+    }
+    for (const outcome of choice.outcomes) {
+      if (conditionImpossible(outcome.condition)) {
+        warn(`outcome condition can never be true: ${event.id}.${choice.id}`);
+      }
+    }
+  }
+}
+
 const errors = issues.filter(i => i.level === 'error');
 const warnings = issues.filter(i => i.level === 'warn');
 

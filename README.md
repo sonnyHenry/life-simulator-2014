@@ -41,5 +41,6 @@ pnpm test             # 引擎单元测试
 pnpm validate         # 内容静态校验
 pnpm typecheck        # 全仓类型检查
 pnpm simulate -n 500  # 机器人自动打 500 局,输出结局分布
+pnpm simulate -n 1000 --check  # 分布目标校验(全覆盖/全可达/无结局>40%),失败退出码 1
 pnpm simulate -v      # 详细模式:完整打印一局(可加 --seed 42 复现)
 ```
