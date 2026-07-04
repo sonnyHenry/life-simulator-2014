@@ -366,12 +366,27 @@
   native panic。配置已通过 TypeScript 与实际 Taro webpack 构建验证。
 - 当前小程序构建产物约 548KB,低于微信小程序主包 2MB 限制。
 
+### M5 第十六轮(结果反馈保真:钳制不再吞掉加减分展示)
+
+由 Claude Code(Fable 5)完成,内容版本 → 0.15.1。起因是用户实测反馈"部分事件选完后不展示加减分"。
+
+- **根因 1(引擎)**:`applyEffects` 的 `deltas` 记的是钳制后的实际变化——属性顶到上下限时
+  (心态已满 100 再 +1、金钱为 0 再扣钱)delta 为 0,OUTCOME 页什么都不显示。
+  3000 局 bot 审计发现 14 种实际发生的"无展示"场景(比特币 -3000 在钱包空时 84/501 次不显示等)。
+  修复:`deltas` 改记**声明值**(属性本身仍钳制),结果页永远展示选项的名义加减分。
+- **根因 2(内容)**:`ev_npc_roommate_2020`(室友开播了)choice b 只有 npcFavor/npcStage 效果,
+  无任何 stats 项,100% 无展示。修复:补 `network -1`(与"走远"文案一致)。
+- **validate 防回归**:新增检查"每个 outcome 必须至少有一项非零 stats 效果",违反报 error。
+- 验证:typecheck / 17 test / validate 0 err 0 warn / simulate n=1000 --check 通过
+  (均分 49、崩溃率 9.3%、82/82 事件、15 结局全可达)/ web build 通过;
+  复跑 3000 局审计:"无展示"场景 0 种。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.13.0'
+version: '0.15.1'
 title: '2014:我的十二年'
 ```
 
@@ -403,24 +418,24 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次 `pnpm validate`:
 
 ```text
-事件 72, 结局 12, NPC 5, 题目 37, 收入规则 6
+事件 82, 结局 15, NPC 5, 题目 37, 收入规则 10
 完成: 0 errors, 0 warnings
 ```
 
 最近一次 `pnpm simulate -n 1000 --check`:
 
 ```text
-事件覆盖: 72/72
-金钱分位: p10=¥194800 p50=¥350000 p90=¥641500
-心态分位: p10=23 p50=55 p90=87
-提前结局占比: 6.3%
+事件覆盖: 82/82
+金钱分位: p10=¥91200 p50=¥237912 p90=¥494400
+心态分位: p10=24 p50=42 p90=64
+提前结局占比: 9.3%
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
-最近一次 `pnpm simulate -n 300 --compare`(四策略):
+最近一次 `pnpm simulate -n 1000 --bot score`(第十五轮):
 
 ```text
-随机 58 · 卷钱 51(崩溃率 41%) · 保心态 64 · 卷总分 76
+随机 50 · 卷钱 53 · 保心态 65 · 卷总分 74
 ```
 
 ## 当前重要实现点

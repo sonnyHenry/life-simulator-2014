@@ -1788,6 +1788,7 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你点了个赞,继续刷下一条。后来他的直播间慢慢做起来了,你们的聊天记录停在去年的"新年快乐"。有些人没有走散,只是走远。',
             effects: [
+              { stats: { network: -1 } },
               { npcFavor: 'roommate', delta: -5 },
               { npcStage: 'roommate', stage: 'faded' },
             ],

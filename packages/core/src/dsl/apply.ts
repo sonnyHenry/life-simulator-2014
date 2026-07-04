@@ -18,9 +18,9 @@ export function applyEffects(effects: Effect[], state: GameState, pack: ContentP
   for (const effect of effects) {
     if ('stats' in effect) {
       for (const [k, delta] of Object.entries(effect.stats) as [StatKey, number][]) {
-        const before = state.stats[k];
-        state.stats[k] = clampStat(k, before + delta);
-        deltas[k] = (deltas[k] ?? 0) + (state.stats[k] - before);
+        state.stats[k] = clampStat(k, state.stats[k] + delta);
+        // deltas 记声明值而非钳制后的实际变化:属性顶到上下限时,结果页仍要展示加减分
+        deltas[k] = (deltas[k] ?? 0) + delta;
       }
     } else if ('setFlag' in effect) {
       state.flags[effect.setFlag] = effect.value ?? true;

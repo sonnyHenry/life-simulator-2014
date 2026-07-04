@@ -131,6 +131,13 @@ for (const event of contentPack.events) {
     if (choice.outcomes.length === 0) error(`choice has no outcomes: ${event.id}.${choice.id}`);
     for (const outcome of choice.outcomes) {
       if (outcome.weight <= 0) error(`outcome weight must be positive: ${event.id}.${choice.id}`);
+      // 结果页只展示 stats 变化:没有任何非零 stats 的 outcome 会让玩家看不到选择反馈
+      const hasVisibleStat = outcome.effects.some(
+        e => 'stats' in e && Object.values(e.stats).some(v => v !== 0),
+      );
+      if (!hasVisibleStat) {
+        error(`outcome has no visible stat change (选完不展示加减分): ${event.id}.${choice.id}`);
+      }
       visitCondition(outcome.condition, cond => {
         if ('fn' in cond && !fnIds.has(cond.fn)) error(`outcome ${event.id}.${choice.id} references missing condition fn: ${cond.fn}`);
       });
