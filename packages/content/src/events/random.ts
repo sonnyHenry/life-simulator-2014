@@ -26,7 +26,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '挂号、化验、输液,折腾一天花了八百块。医生说"多喝水,注意休息"——这话你的家人说过一百遍,但你只信穿白大褂的。',
-            effects: [{ stats: { money: -800, mindset: -2 } }],
+            effects: [{ stats: { money: -800, mindset: -2, health: 4 } }],
           },
         ],
       },
@@ -37,12 +37,12 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 2,
             text: '扛了一周,总算好了。你在朋友圈发"病来如山倒",配图是保温杯里的枸杞。年轻真好,身体是真扛造。',
-            effects: [{ stats: { mindset: -1 } }],
+            effects: [{ stats: { mindset: -1, health: -4 } }],
           },
           {
             weight: 1,
             text: '拖成了支气管炎,最后还是去了医院,花的钱是当初的三倍。医生看着你的化验单说:"你们年轻人啊。"',
-            effects: [{ stats: { money: -3000, mindset: -8 } }],
+            effects: [{ stats: { money: -3000, mindset: -8, health: -8 } }],
           },
         ],
       },
@@ -126,7 +126,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你搬到了地铁终点站外两站公交的地方。房租降了,通勤变长了。每天早上挤上车时,你都觉得自己像被城市吞进去的一粒米。',
-            effects: [{ stats: { money: 6000, mindset: -5 } }],
+            effects: [{ stats: { money: 6000, mindset: -5, health: -3 } }],
           },
         ],
       },
@@ -190,7 +190,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 2,
             text: '你坐在陌生城市的小店里吃面,窗外下着雨。没有任何问题被解决,但你短暂地想起自己不只是一个岗位或一种身份。',
-            effects: [{ stats: { money: -2500, mindset: 8 } }],
+            effects: [{ stats: { money: -2500, mindset: 8, health: 2 } }],
           },
           {
             weight: 1,
@@ -227,7 +227,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你忙了一个月,赚了几百块,也学会了给标题加情绪词。改变人生没有发生,改变作息倒是发生了。',
-            effects: [{ stats: { money: 1200, knowledge: 2, mindset: -3 } }],
+            effects: [{ stats: { money: 1200, knowledge: 2, mindset: -3, health: -4 } }],
           },
         ],
       },
@@ -238,7 +238,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你退出了群。那晚你十一点就睡了,醒来时竟然有一种奢侈的清醒。',
-            effects: [{ stats: { mindset: 4 } }],
+            effects: [{ stats: { mindset: 4, health: 3 } }],
           },
         ],
       },
@@ -345,12 +345,12 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 2,
             text: '你去了七次:前四次拍了照,后三次只用了淋浴。年底销售问你续不续卡,你说考虑一下——考虑的过程持续到了健身房倒闭。',
-            effects: [{ stats: { money: -2000, mindset: -2 } }],
+            effects: [{ stats: { money: -2000, mindset: -2, health: 1 } }],
           },
           {
             weight: 1,
             text: '出乎所有人意料,你坚持下来了。一年后你在工位抽屉里放的不再是护肝片,而是蛋白粉。体检报告第一次没有上箭头,你把它拍照发了朋友圈。',
-            effects: [{ stats: { money: -2000, mindset: 6 } }],
+            effects: [{ stats: { money: -2000, mindset: 6, health: 12 } }],
           },
         ],
       },
@@ -361,7 +361,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你说小区里跑跑就行。当然,"小区里跑跑"最终也停留在了口头。但至少,你省下了两千块——这是这个决定里唯一兑现的部分。',
-            effects: [{ stats: { mindset: 1 } }],
+            effects: [{ stats: { mindset: 1, health: -2 } }],
           },
         ],
       },
@@ -419,7 +419,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '复查结果问题不大,医生说"多数是熬出来的,少熬就行"。你开始十二点前睡觉,外卖从"随便"改成了"少油"。身体是唯一跟你签了终身合同的同事,你想跟它搞好关系。',
-            effects: [{ stats: { money: -1500, mindset: 4 } }],
+            effects: [{ stats: { money: -1500, mindset: 4, health: 7 } }],
           },
         ],
       },
@@ -430,7 +430,7 @@ export const randomEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你把报告塞进了抽屉最深处,和去年的那份放在一起。它们在黑暗中安静地叠着,像两张还没到期的账单。',
-            effects: [{ stats: { mindset: -2 } }],
+            effects: [{ stats: { mindset: -2, health: -6 } }],
           },
         ],
       },

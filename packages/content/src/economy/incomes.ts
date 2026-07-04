@@ -15,6 +15,7 @@ export const incomes: IncomeRule[] = [
     },
     amount: 70000,
     mindsetDelta: -5,
+    healthDelta: -4,
   },
   {
     id: 'inc_cs_normal',
@@ -24,6 +25,7 @@ export const incomes: IncomeRule[] = [
     },
     amount: 45000,
     mindsetDelta: -3,
+    healthDelta: -3,
   },
   {
     id: 'inc_unemployed_gap',
@@ -40,6 +42,7 @@ export const incomes: IncomeRule[] = [
     when: { flag: 'career_edu' },
     amount: 30000,
     mindsetDelta: -3,
+    healthDelta: -2,
   },
   {
     id: 'inc_gov',
@@ -82,5 +85,6 @@ export const incomes: IncomeRule[] = [
     },
     amount: 30000,
     mindsetDelta: -3,
+    healthDelta: -2,
   },
 ];

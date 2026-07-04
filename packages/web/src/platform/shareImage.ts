@@ -122,6 +122,7 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
     ['金钱', `¥${data.stats.money.toLocaleString()}`],
     ['心态', String(data.stats.mindset)],
     ['人脉', String(data.stats.network)],
+    ['健康', String(data.stats.health)],
   ];
   const gridTop = 700;
   statItems.forEach(([label, value], i) => {

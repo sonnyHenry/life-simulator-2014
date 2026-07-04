@@ -170,7 +170,7 @@ const finalPhase = contentPack.timeline.find(p => p.kind === 'rounds' && p.isFin
 const gameYearMax =
   finalPhase && finalPhase.kind === 'rounds' ? finalPhase.date.year + finalPhase.rounds - 1 : 2026;
 
-const BOUNDED_STATS = new Set(['knowledge', 'mindset', 'network']);
+const BOUNDED_STATS = new Set(['knowledge', 'mindset', 'network', 'health']);
 
 function statBoundsImpossible(stat: string, op: string, value: number): boolean {
   if (!BOUNDED_STATS.has(stat)) return false;

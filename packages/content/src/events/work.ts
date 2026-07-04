@@ -84,7 +84,7 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你没有只把研究生当成缓冲区。论文、项目、实习,每一项都往简历上长出一点真实的东西。',
             effects: [
-              { stats: { knowledge: 8, network: 3, mindset: -4 } },
+              { stats: { knowledge: 8, network: 3, mindset: -4, health: -3 } },
               { setFlag: 'postgrad_strong' },
             ],
           },
@@ -122,7 +122,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '这一年你的工资条很好看,体检报告不太好看。你在工位抽屉里备了枸杞和护肝片,同事说你这叫"朋克养生"。',
-            effects: [{ stats: { money: 15000, mindset: -12 } }],
+            effects: [{ stats: { money: 15000, mindset: -12, health: -10 } }],
           },
         ],
       },
@@ -133,7 +133,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你成了组里唯一准点走的人。绩效拿了个"符合预期",年终奖薄了一截。但你重新捡起了跑步,体重和心情都轻了一点。',
-            effects: [{ stats: { mindset: 3 } }, { setFlag: 'low_perf' }],
+            effects: [{ stats: { mindset: 3, health: 6 } }, { setFlag: 'low_perf' }],
           },
         ],
       },
@@ -543,7 +543,7 @@ export const workEvents: GameEvent[] = [
             text: '这一年你白天上班,晚上刷题,周末全天模考。出成绩那晚你的手比去年抖得更厉害——然后你看到了自己的名字,在录取线上面。你给家里打电话,你妈"哎"了一声就没了动静,过了几秒你才听出来,她在哭。有些迟到一年的门票,拿到手反而更知道珍惜。',
             outcomeTag: 'success',
             effects: [
-              { stats: { mindset: 12, knowledge: 3 } },
+              { stats: { mindset: 12, knowledge: 3, health: -4 } },
               { setCareer: 'gov' },
               { setFlag: 'career_gov' },
             ],
@@ -552,7 +552,7 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '又是面试线附近。这次你没有盯着排名看很久,只是把打印的申论范文收进纸箱,和去年那摞放在一起。第二天你正常上班,把简历里"求职意向"改成了眼前这份工作。不是认输,是决定把力气花在能长出东西的地方。',
             outcomeTag: 'failure',
-            effects: [{ stats: { mindset: -5, knowledge: 2 } }],
+            effects: [{ stats: { mindset: -5, knowledge: 2, health: -4 } }],
           },
         ],
       },
@@ -563,7 +563,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你关掉了缴费页面。那晚你睡得很沉,第二天把去年的教材挂上了二手平台,备注"九成新,仅刷过一遍,有缘人拿走"。三天后书被一个应届生买走,你在祝福语里写:上岸顺利。你没上的那趟船,真心希望别人赶上。',
-            effects: [{ stats: { mindset: 4 } }],
+            effects: [{ stats: { mindset: 4, health: 2 } }],
           },
         ],
       },
@@ -626,7 +626,7 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '会议室里,HR 的话术标准得像录音:"感谢你的贡献……业务调整……N+1。"你听着,忽然发现自己在数她桌上的纸巾盒——原来是给谁准备的,现在知道了。你没有用上纸巾。签字,交电脑,退工卡,整个流程四十分钟,比入职快多了。抱着纸箱走出大堂时,春天的太阳很好,好得有点讽刺。N+1 到账那天,你的心情很复杂:钱是真的,一下子空出来的日子也是真的。那晚你把简历翻出来改到凌晨,改着改着想起上一次这么认真填自己的信息,还是高考报志愿。好,那就再考一次。',
             effects: [
-              { stats: { money: 90000, mindset: -12 } },
+              { stats: { money: 90000, mindset: -12, health: 4 } },
               { setFlag: 'laid_off' },
               { schedule: { eventId: 'ev_cs_reemployment', afterRounds: 1 } },
             ],
@@ -641,7 +641,7 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '那场会不是裁你,是给你选择:转岗到一个更累的业务,薪包"结构调整",干不干?你想起每个月的账单、想起家里的电话、想起脉脉上"三十岁投一百份简历无人问津"的帖子,说:干。于是你留下来了。留下来的代价是接手了三个人的活,奖金缩了一圈,团建取消,连零食柜都变得空空荡荡。离开的同事在群里发"山高水长,后会有期",配了合照。你盯着合照看了一会儿,把它保存了下来。幸存者没有掌声,只有更多的需求排期,和一个再也不敢关声音的钉钉。',
             effects: [
-              { stats: { money: 15000, mindset: -10 } },
+              { stats: { money: 15000, mindset: -10, health: -6 } },
               { setFlag: 'survived_layoff' },
               { schedule: { eventId: 'ev_cs_second_wave', afterRounds: 1 } },
             ],
@@ -669,7 +669,7 @@ export const workEvents: GameEvent[] = [
             condition: { flag: 'survived_layoff' },
             text: '去年裁员留下来的人里,你是学得最凶的那个。别人下班你在调提示词,别人周末你在搭工作流,组里第一个把 AI 接进业务流程的方案是你写的,评审会上连一贯挑刺的架构师都点了头。你比谁都清楚自己为什么这么拼:上一轮活下来靠的是降预期,那是运气加姿态;这一轮要活,得靠真本事。年底绩效面谈,领导说了句"你今年的成长曲线很陡"。你笑了笑没解释——陡,是因为悬崖就在脚后跟。AI 没有让你变得更安全,但它确实让你变得更有用。在 2023 年,这已经是能拿到的最好的东西了。',
             effects: [
-              { stats: { knowledge: 11, money: 20000, mindset: -1 } },
+              { stats: { knowledge: 11, money: 20000, mindset: -1, health: -4 } },
               { setFlag: 'ai_adapted' },
             ],
           },
@@ -678,7 +678,7 @@ export const workEvents: GameEvent[] = [
             condition: { not: { flag: 'survived_layoff' } },
             text: '你决定不跟它较劲,跟它合作。先是让它写脚手架和单元测试,然后是查文档、理旧代码,再后来你的简历也让它改了一版——它把"负责若干模块开发"改成了三行带数字的成果,你看着有点脸红,但确实更好。效率实打实地上去了,焦虑却没有消失,只是换了个位置:以前怕活干不完,现在怕自己干的活太容易被描述清楚。你在某个加班的深夜想明白了一件事,并把它写进了年度总结:工具越强,越提醒你别只做工具能做的事。这句话领导画了波浪线,批注"深刻"。',
             effects: [
-              { stats: { knowledge: 10, money: 20000, mindset: -2 } },
+              { stats: { knowledge: 10, money: 20000, mindset: -2, health: -4 } },
               { setFlag: 'ai_adapted' },
             ],
           },
@@ -716,7 +716,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你赶在名单敲定前转去了商业化团队。新业务节奏更狠,但至少工牌还是热的。你开始明白,大厂里最稳的岗位,是离钱最近的岗位。',
-            effects: [{ stats: { money: 12000, knowledge: 4, mindset: -2 } }],
+            effects: [{ stats: { money: 12000, knowledge: 4, mindset: -2, health: -4 } }],
           },
         ],
       },
@@ -795,7 +795,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你把每节课都复盘一遍,连板书顺序都改了三次。学生不一定记得你的辛苦,但成绩单会记得。',
-            effects: [{ stats: { knowledge: 6, mindset: 4, money: 5000 } }],
+            effects: [{ stats: { knowledge: 6, mindset: 4, money: 5000, health: -3 } }],
           },
         ],
       },
@@ -806,7 +806,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你少走了些弯路,也少了点自己的东西。办公室里大家说你"稳",你一时分不清这是夸奖还是提醒。',
-            effects: [{ stats: { money: 4000, network: 4 } }],
+            effects: [{ stats: { money: 4000, network: 4, health: 2 } }],
           },
         ],
       },
@@ -873,7 +873,7 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你做了决定:回到体制内的轨道上去。白天照常上课,晚上摊开教综和学科真题,台灯一开就是三个小时。你重新背起了教育学名词,像回到大学考试周,只是这次没有室友陪你熬夜,只有出租屋的冰箱嗡嗡作响。有天深夜你合上题册,忽然觉得命运有点幽默:很多年前,你靠考试从小地方走出来;现在行业塌了,你还是只能靠考试,给自己重新找一块站得住的地面。也好。会考试,至少是这么多年风浪里,从来没有背叛过你的那门手艺。',
             effects: [
-              { stats: { knowledge: 6, mindset: -4 } },
+              { stats: { knowledge: 6, mindset: -4, health: -3 } },
               { setFlag: 'edu_to_public_school' },
             ],
           },
@@ -1130,7 +1130,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '项目比你想象中难,但做成后确实有人记住了你。成长常常不是变强了才上,是上了才被迫变强。',
-            effects: [{ stats: { knowledge: 5, network: 4, mindset: -4 } }],
+            effects: [{ stats: { knowledge: 5, network: 4, mindset: -4, health: -3 } }],
           },
         ],
       },
@@ -1141,7 +1141,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你保持稳定,也保持低调。风险少了,机会也少了。安全区的门把手,摸起来总是很舒服。',
-            effects: [{ stats: { money: 8000, mindset: 2 } }],
+            effects: [{ stats: { money: 8000, mindset: 2, health: 2 } }],
           },
         ],
       },
@@ -1194,7 +1194,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 2,
             text: '你给自己划了上下班时间。虽然消息还是会越界,但至少你没有彻底变成一台联网设备。',
-            effects: [{ stats: { mindset: 4, knowledge: 2 } }],
+            effects: [{ stats: { mindset: 4, knowledge: 2, health: 4 } }],
           },
           {
             weight: 1,
@@ -1210,7 +1210,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你回复得很快,也累得很快。远程办公最可怕的不是在家办公,是在家也下不了班。',
-            effects: [{ stats: { money: 6000, mindset: -6 } }],
+            effects: [{ stats: { money: 6000, mindset: -6, health: -5 } }],
           },
         ],
       },

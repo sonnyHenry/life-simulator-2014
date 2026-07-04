@@ -31,6 +31,7 @@ const STAT_LABELS = [
   ['money', '金钱'],
   ['mindset', '心态'],
   ['network', '人脉'],
+  ['health', '健康'],
 ] as const;
 
 function formatDelta(key: string, value: number): string {

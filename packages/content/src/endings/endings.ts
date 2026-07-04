@@ -11,6 +11,15 @@ export const endings: EndingDef[] = [
     shareCard: { tone: 'warm', tagline: '中途停下来喘口气的人,不算输。' },
   },
   {
+    id: 'end_health_crash',
+    title: '身体先亮了红灯',
+    text: '救护车的顶灯在写字楼玻璃上一闪一闪。医生看着你的检查单说:"再晚半年,就不是住院能解决的了。"住院的两周里,工作群没有停,但你第一次没有点开。出院那天你走得很慢,阳光落在手背的留置针胶布上。你想起这些年推掉的每一次体检、扛过去的每一场感冒、凌晨两点的每一份外卖——身体都记着账,它只是比你有耐心。',
+    category: 'early',
+    priority: 2,
+    condition: { stat: 'health', op: '<=', value: 12 },
+    shareCard: { tone: 'warm', tagline: '身体都记着账,它只是比你有耐心。' },
+  },
+  {
     id: 'end_early_retire',
     title: '提前退休',
     text: '2017年那三千块钱的"彩票",最后变成了你账户里最大的一笔数字。你没有真的退休——你只是获得了说"不"的权利:不喜欢的活可以不接,不想卷的班可以不上。财务自由的门槛其实没那么高,自由的定义才高。',

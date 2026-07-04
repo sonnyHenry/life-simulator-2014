@@ -100,7 +100,7 @@ export function createEngine(pack: ContentPack): Engine {
       examCursor: 0,
       examCorrect: 0,
       examEarnedPoints: 0,
-      stats: { knowledge: 40, money: 0, mindset: 70, network: 10 },
+      stats: { knowledge: 40, money: 0, mindset: 70, network: 10, health: 85 },
       profile: {
         background: null,
         province: null,
@@ -229,15 +229,19 @@ export function createEngine(pack: ContentPack): Engine {
 
   function computeScore(state: GameState): { score: number; grade: 'S' | 'A' | 'B' | 'C' | 'D' } {
     const scoring = pack.meta.scoring ?? {
-      weights: { knowledge: 0.25, money: 0.3, mindset: 0.25, network: 0.2 },
+      weights: { knowledge: 0.2, money: 0.25, mindset: 0.2, network: 0.15, health: 0.2 },
       moneyFullScore: 600000,
     };
-    const moneyScore = Math.min(100, (state.stats.money / scoring.moneyFullScore) * 100);
-    const raw =
-      state.stats.knowledge * scoring.weights.knowledge +
-      moneyScore * scoring.weights.money +
-      state.stats.mindset * scoring.weights.mindset +
-      state.stats.network * scoring.weights.network;
+    const raw = (Object.entries(scoring.weights) as [StatKey, number][]).reduce(
+      (sum, [key, weight]) => {
+        const statScore =
+          key === 'money'
+            ? Math.min(100, (state.stats.money / scoring.moneyFullScore) * 100)
+            : state.stats[key];
+        return sum + statScore * weight;
+      },
+      0,
+    );
     const score = Math.max(0, Math.min(100, Math.round(raw)));
     const grade = score >= 85 ? 'S' : score >= 70 ? 'A' : score >= 55 ? 'B' : score >= 40 ? 'C' : 'D';
     return { score, grade };
@@ -324,6 +328,9 @@ export function createEngine(pack: ContentPack): Engine {
       state.stats.money = Math.max(0, Math.round(state.stats.money + rule.amount));
       if (rule.mindsetDelta) {
         state.stats.mindset = Math.max(0, Math.min(100, state.stats.mindset + rule.mindsetDelta));
+      }
+      if (rule.healthDelta) {
+        state.stats.health = Math.max(0, Math.min(100, state.stats.health + rule.healthDelta));
       }
     }
   }

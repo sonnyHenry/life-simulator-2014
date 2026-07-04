@@ -41,6 +41,7 @@ const STAT_LABELS = [
   ['money', '金钱'],
   ['mindset', '心态'],
   ['network', '人脉'],
+  ['health', '健康'],
 ] as const;
 
 function fmtDelta(key: string, value: number): string {
@@ -70,7 +71,7 @@ function StatsBar() {
   const game = useGame(s => s.game);
   const view = useGame(s => s.view);
   if (view.kind === 'TITLE') return null;
-  const { knowledge, money, mindset, network } = game.stats;
+  const { knowledge, money, mindset, network, health } = game.stats;
   return (
     <View className="stats-bar">
       <Text className="stats-year">{game.date.year} 年</Text>
@@ -78,6 +79,7 @@ function StatsBar() {
       <Text className="stat">¥{fmtMoney(money)}</Text>
       <Text className="stat">心态 {mindset}</Text>
       <Text className="stat">人脉 {network}</Text>
+      <Text className="stat">健康 {health}</Text>
     </View>
   );
 }
@@ -327,6 +329,10 @@ function SettlementScreen(props: { view: Extract<ViewModel, { kind: 'SETTLEMENT'
           <Text className="settle-num">{stats.network}</Text>
           <Text className="muted">人脉</Text>
         </View>
+        <View className="settle-cell">
+          <Text className="settle-num">{stats.health}</Text>
+          <Text className="muted">健康</Text>
+        </View>
       </View>
       <ContinueButton onClick={() => act({ type: 'CONTINUE' })} label="翻过这一年" />
     </Card>
@@ -358,6 +364,7 @@ function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' }> }) {
           <Text>金钱 ¥{fmtMoney(stats.money)}</Text>
           <Text>心态 {stats.mindset}</Text>
           <Text>人脉 {stats.network}</Text>
+          <Text>健康 {stats.health}</Text>
         </View>
       </View>
       <Text className="muted block seed-line">

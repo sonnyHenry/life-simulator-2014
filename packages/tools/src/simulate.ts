@@ -61,13 +61,15 @@ const STRATEGY_LABELS: Record<Strategy, string> = {
   score: '卷总分',
 };
 
-/** 与 engine.computeScore 同一套权重:模拟"看得出哪个选项得分"的玩家 */
+/** 与 engine.computeScore 同一套权重(直接读内容包配置):模拟"看得出哪个选项得分"的玩家 */
+const packScoring = contentPack.meta.scoring ?? {
+  weights: { knowledge: 0.2, money: 0.25, mindset: 0.2, network: 0.15, health: 0.2 },
+  moneyFullScore: 600000,
+};
 const SCORE_WEIGHTS: Record<StatKey, number> = {
-  knowledge: 0.25,
-  mindset: 0.25,
-  network: 0.2,
-  // money 权重 0.3,满分线 ¥600000 → 每 1 元 ≈ 0.00005 分
-  money: (0.3 * 100) / (contentPack.meta.scoring?.moneyFullScore ?? 600000),
+  ...packScoring.weights,
+  // money 权重按满分线折算成"每元多少分"
+  money: (packScoring.weights.money * 100) / packScoring.moneyFullScore,
 };
 
 /** 贪心 bot 的选项打分:按 outcome 权重求某项数值变化的期望(条件用一次性 RNG 求值,不污染对局随机流) */
@@ -187,7 +189,7 @@ function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: bool
       log(`\n🏁 结局:【${view.title}】`);
       log(view.text);
       log(
-        `\n最终数值: 学识${state.stats.knowledge} 金钱¥${state.stats.money} 心态${state.stats.mindset} 人脉${state.stats.network}`,
+        `\n最终数值: 学识${state.stats.knowledge} 金钱¥${state.stats.money} 心态${state.stats.mindset} 人脉${state.stats.network} 健康${state.stats.health}`,
       );
       log(`人生总分: ${view.score} (${view.grade} 级)`);
       return {
@@ -270,7 +272,7 @@ function runBatch(runs: number, baseSeed: number, strategy: Strategy): BatchStat
     endingCounts: new Map(),
     eventsSeen: new Set(),
     totalRounds: 0,
-    statSums: { knowledge: 0, money: 0, mindset: 0, network: 0 },
+    statSums: { knowledge: 0, money: 0, mindset: 0, network: 0, health: 0 },
     scoreSum: 0,
     moneySamples: [],
     mindsetSamples: [],
@@ -300,7 +302,7 @@ function runBatch(runs: number, baseSeed: number, strategy: Strategy): BatchStat
     for (const h of fs.history) {
       if (h.kind === 'event') stats.eventsSeen.add(h.eventId);
     }
-    for (const key of ['knowledge', 'money', 'mindset', 'network'] as StatKey[]) {
+    for (const key of ['knowledge', 'money', 'mindset', 'network', 'health'] as StatKey[]) {
       stats.statSums[key] += fs.stats[key];
     }
     stats.scoreSum += result.endingScore;
@@ -355,7 +357,7 @@ function printBatch(s: BatchStats): void {
   }
   console.log(`平均回合数: ${(s.totalRounds / s.runs).toFixed(1)}`);
   console.log(
-    `平均最终数值: 学识${(s.statSums.knowledge / s.runs).toFixed(0)} 金钱¥${(s.statSums.money / s.runs).toFixed(0)} 心态${(s.statSums.mindset / s.runs).toFixed(0)} 人脉${(s.statSums.network / s.runs).toFixed(0)} · 均分${(s.scoreSum / s.runs).toFixed(0)}`,
+    `平均最终数值: 学识${(s.statSums.knowledge / s.runs).toFixed(0)} 金钱¥${(s.statSums.money / s.runs).toFixed(0)} 心态${(s.statSums.mindset / s.runs).toFixed(0)} 人脉${(s.statSums.network / s.runs).toFixed(0)} 健康${(s.statSums.health / s.runs).toFixed(0)} · 均分${(s.scoreSum / s.runs).toFixed(0)}`,
   );
   console.log(
     `金钱分位: p10=¥${percentile(s.moneySamples, 10)} p50=¥${percentile(s.moneySamples, 50)} p90=¥${percentile(s.moneySamples, 90)}`,

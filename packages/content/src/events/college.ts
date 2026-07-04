@@ -98,7 +98,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你们打到凌晨两点,赢了七把。第二天的高数课你睡得很沉,但兄弟情谊无价——至少这一刻你是这么觉得的。',
-            effects: [{ stats: { mindset: 8, knowledge: -4 } }, { setFlag: 'dorm_bond' }],
+            effects: [{ stats: { mindset: 8, knowledge: -4, health: -2 } }, { setFlag: 'dorm_bond' }],
           },
         ],
       },
@@ -131,7 +131,7 @@ export const collegeEvents: GameEvent[] = [
             weight: 3,
             text: '答辩很顺利。名单公示那天,你反复刷新了十几次页面——你的名字在上面。奖学金五千块,你先给家里打了两千。',
             outcomeTag: 'success',
-            effects: [{ stats: { money: 5000, mindset: 5 } }],
+            effects: [{ stats: { money: 5000, mindset: 5, health: -2 } }],
           },
           {
             weight: 2,
@@ -169,7 +169,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '一学期下来,你赚了三千块,也重新做了一遍高中数学。家长很满意,只是每次晚上九点半坐末班公交回学校的时候,你会有点想家。',
-            effects: [{ stats: { money: 3000, mindset: -2 } }],
+            effects: [{ stats: { money: 3000, mindset: -2, health: -2 } }],
           },
         ],
       },
@@ -180,7 +180,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你婉拒了学长。那些晚上你用来跑步、看闲书、在天台吹风。钱没赚到,但日子是自己的。',
-            effects: [{ stats: { mindset: 1 } }],
+            effects: [{ stats: { mindset: 1, health: 3 } }],
           },
         ],
       },
@@ -238,7 +238,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你借了教材,刷了网课,把最难的几章啃到能讲给别人听。学习有时不是热爱,是把恐惧拆小。',
-            effects: [{ stats: { knowledge: 8, mindset: -3 } }],
+            effects: [{ stats: { knowledge: 8, mindset: -3, health: -2 } }],
           },
         ],
       },
@@ -270,7 +270,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你第一次坐进写字楼工位,第一次发现 Excel 和邮件也能让人筋疲力尽。实习证明很薄,但它让简历不再空白。',
-            effects: [{ stats: { money: 2500, network: 5, mindset: -2 } }],
+            effects: [{ stats: { money: 2500, network: 5, mindset: -2, health: -2 } }],
           },
         ],
       },
@@ -303,7 +303,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 2,
             text: '你提前搭好框架,后面虽然也改到崩溃,但至少没有在查重前夜怀疑人生。',
-            effects: [{ stats: { knowledge: 5, mindset: 2 } }],
+            effects: [{ stats: { knowledge: 5, mindset: 2, health: -2 } }],
           },
           {
             weight: 1,
@@ -319,7 +319,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 2,
             text: '你收藏了二十篇论文,真正打开的是最后三天。凌晨四点的文档光标,比辅导员还会催人。',
-            effects: [{ stats: { mindset: -4 } }],
+            effects: [{ stats: { mindset: -4, health: -4 } }],
           },
           {
             weight: 1,
@@ -385,7 +385,7 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '你跟着早起了两周,痛苦是真的,效率也是真的。后来你没变成他,但至少知道自己不是完全没潜力。',
             effects: [
-              { stats: { knowledge: 7, mindset: -4 } },
+              { stats: { knowledge: 7, mindset: -4, health: -2 } },
               { npcFavor: 'grinder', delta: 8 },
               { npcStage: 'grinder', stage: 'big_tech' },
               { setFlag: 'learned_from_grinder' },

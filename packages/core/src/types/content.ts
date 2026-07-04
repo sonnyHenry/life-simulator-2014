@@ -121,10 +121,12 @@ export interface IncomeRule {
   amount: number;
   /** 年度心态损耗/恢复(可选,职业压力的系统性建模) */
   mindsetDelta?: number;
+  /** 年度健康损耗/恢复(可选,职业强度的系统性建模) */
+  healthDelta?: number;
 }
 
 export interface ScoringConfig {
-  weights: { knowledge: number; money: number; mindset: number; network: number };
+  weights: { knowledge: number; money: number; mindset: number; network: number; health: number };
   moneyFullScore: number;
 }
 

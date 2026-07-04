@@ -69,6 +69,10 @@ export function SettlementScreen(props: { view: Extract<ViewModel, { kind: 'SETT
           <span className="settle-num">{stats.network}</span>
           <span className="muted">人脉</span>
         </div>
+        <div>
+          <span className="settle-num">{stats.health}</span>
+          <span className="muted">健康</span>
+        </div>
       </div>
       <ContinueButton onClick={() => act({ type: 'CONTINUE' })} label="翻过这一年" />
     </Card>
@@ -84,7 +88,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
     `我在《2014:我的十二年》里达成结局: ${props.view.title}`,
     props.view.shareCard.tagline,
     `人生总分 ${props.view.score} (${props.view.grade} 级)`,
-    `学识${stats.knowledge} 金钱¥${stats.money.toLocaleString()} 心态${stats.mindset} 人脉${stats.network}`,
+    `学识${stats.knowledge} 金钱¥${stats.money.toLocaleString()} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
     `人生编号 #${seed}`,
   ].join('\n');
   const copyShare = async () => {
@@ -136,6 +140,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
           <span>金钱 ¥{stats.money.toLocaleString()}</span>
           <span>心态 {stats.mindset}</span>
           <span>人脉 {stats.network}</span>
+          <span>健康 {stats.health}</span>
         </div>
       </div>
       <div className="settle-grid">
@@ -154,6 +159,10 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         <div>
           <span className="settle-num">{stats.network}</span>
           <span className="muted">人脉</span>
+        </div>
+        <div>
+          <span className="settle-num">{stats.health}</span>
+          <span className="muted">健康</span>
         </div>
       </div>
       <p className="muted seed-line">人生编号 #{seed}</p>
