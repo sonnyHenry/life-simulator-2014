@@ -69,8 +69,19 @@ export function createEngine(pack: ContentPack): Engine {
     return (state.profile.examScore ?? 0) + (province?.scoreShift ?? 0);
   }
 
-  function availableApplications(state: GameState) {
-    return pack.applications.filter(opt => admissionScore(state) >= opt.minScore);
+  // 录取概率按(加成后分数 - 批次线)分段:冲高批次可能滑档
+  const CHANCE_TIERS = [
+    { minDiff: 20, chance: 1, label: '稳' },
+    { minDiff: 0, chance: 0.9, label: '较稳' },
+    { minDiff: -20, chance: 0.45, label: '冲' },
+    { minDiff: -45, chance: 0.18, label: '悬' },
+    { minDiff: -Infinity, chance: 0.05, label: '基本无望' },
+  ] as const;
+
+  function admissionTier(diff: number) {
+    const tier = CHANCE_TIERS.find(t => diff >= t.minDiff);
+    if (!tier) throw new Error('unreachable: admission tier not found');
+    return tier;
   }
 
   function start(seed?: number): GameState {
@@ -152,13 +163,17 @@ export function createEngine(pack: ContentPack): Engine {
         return {
           kind: 'APPLICATION',
           score: state.profile.examScore ?? 0,
-          options: availableApplications(state).map(opt => ({
-            id: opt.id,
-            label: opt.label,
-            university: opt.university,
-            major: opt.major,
-            risky: opt.admitChance < 1,
-          })),
+          options: pack.applications.map(opt => {
+            const tier = admissionTier(admissionScore(state) - opt.minScore);
+            return {
+              id: opt.id,
+              label: opt.label,
+              university: opt.university,
+              chanceLabel: tier.label,
+              risky: tier.chance < 1,
+              majors: opt.majors.map(m => ({ id: m.id, name: m.name })),
+            };
+          }),
         };
       case 'CROSSROAD':
         return {
@@ -243,7 +258,7 @@ export function createEngine(pack: ContentPack): Engine {
       0,
     );
     const score = Math.max(0, Math.min(100, Math.round(raw)));
-    const grade = score >= 85 ? 'S' : score >= 70 ? 'A' : score >= 55 ? 'B' : score >= 40 ? 'C' : 'D';
+    const grade = score >= 88 ? 'S' : score >= 76 ? 'A' : score >= 58 ? 'B' : score >= 42 ? 'C' : 'D';
     return { score, grade };
   }
 
@@ -371,28 +386,39 @@ export function createEngine(pack: ContentPack): Engine {
     state.screen = 'EXAM_RESULT';
   }
 
-  function handleApplication(state: GameState, rng: Rng, optionId: string): void {
-    const option = availableApplications(state).find(o => o.id === optionId);
-    if (!option) throw new Error(`Application option not available: ${optionId}`);
-    const admitted = rng.chance(option.admitChance);
+  function handleApplication(state: GameState, rng: Rng, optionId: string, majorId?: string): void {
+    const option = pack.applications.find(o => o.id === optionId);
+    if (!option) throw new Error(`Unknown application option: ${optionId}`);
+    const major = option.majors.find(m => m.id === majorId) ?? option.majors[0];
+    if (!major) throw new Error(`Application option has no majors: ${optionId}`);
+    const diff = admissionScore(state) - option.minScore;
+    const admitted = rng.chance(admissionTier(diff).chance);
     const deltas: StatDeltas = {};
     let text: string;
     if (admitted) {
       state.profile.university = option.university;
-      state.profile.major = option.major;
+      state.profile.major = major.name;
+      state.flags['major_track'] = major.trackFlag;
       if (option.effects) addDeltas(deltas, applyEffects(option.effects, state, pack).deltas);
-      text = `录取结果出来了: ${option.university} · ${option.major}。志愿表上的一行字,从今天起变成了你接下来四年的城市、同学和专业。`;
+      text =
+        diff < 0
+          ? `录取结果出来了:${option.university} · ${major.name}。你压着线冲了进去——查到结果那一刻,你把页面刷新了三遍才敢相信,班主任在电话里连说了三个"好"。后来你才知道,那年这个专业的最后一名,就是你。`
+          : `录取结果出来了:${option.university} · ${major.name}。志愿表上的一行字,从今天起变成了你接下来四年的城市、同学和专业。`;
     } else {
+      // 滑档:落到分数够线的最高批次(排除刚冲失败的那个)
       const fallback = pack.applications
-        .filter(o => o.admitChance >= 1 && admissionScore(state) >= o.minScore)
+        .filter(o => o.id !== option.id && admissionScore(state) >= o.minScore)
         .sort((a, b) => b.minScore - a.minScore)[0];
       if (!fallback) throw new Error('No fallback application option; content must provide one');
+      const fbMajor = fallback.majors.find(m => m.trackFlag === major.trackFlag) ?? fallback.majors[0];
+      if (!fbMajor) throw new Error(`Fallback option has no majors: ${fallback.id}`);
       state.profile.university = fallback.university;
-      state.profile.major = fallback.major;
+      state.profile.major = fbMajor.name;
+      state.flags['major_track'] = fbMajor.trackFlag;
       state.flags['slipped'] = true;
       if (option.failEffects) addDeltas(deltas, applyEffects(option.failEffects, state, pack).deltas);
       if (fallback.effects) addDeltas(deltas, applyEffects(fallback.effects, state, pack).deltas);
-      text = `你没有被 ${option.university} 录取,最后去了 ${fallback.university} · ${fallback.major}。滑档像一盆冷水,但人生不会因为一张录取通知书就停止加载。`;
+      text = `滑档了。「${option.label}」的投档线比往年又涨了一截,你的名字不在这一批任何一张录取名单上。那几天家里安静得可怕,爸爸在阳台抽了半包烟,妈妈把"复读"两个字含在嘴里又咽了回去。直到征集志愿的最后一轮,${fallback.university}把你接住——${fbMajor.name}。去报到那天,爸爸只说了一句:"去了,就好好念。"十八岁的夏天你第一次知道:人生的考卷不止一张,但那年夏天,它看起来就像是唯一的一张。`;
     }
     state.history.push({
       kind: 'application',
@@ -607,7 +633,7 @@ export function createEngine(pack: ContentPack): Engine {
         return;
       case 'APPLICATION':
         if (action.type !== 'APPLY') invalid(state, action);
-        handleApplication(state, rng, action.optionId);
+        handleApplication(state, rng, action.optionId, action.majorId);
         return;
       case 'CROSSROAD':
         if (action.type !== 'CHOOSE_CROSSROAD') invalid(state, action);

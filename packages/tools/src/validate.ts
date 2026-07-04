@@ -71,6 +71,16 @@ checkUnique('ending', contentPack.endings.map(e => e.id));
 checkUnique('npc', contentPack.npcs.map(n => n.id));
 checkUnique('exam question', contentPack.examBank.map(q => q.id));
 checkUnique('application', contentPack.applications.map(a => a.id));
+const KNOWN_TRACK_FLAGS = new Set(['cs', 'education', 'cs_applied', 'management']);
+for (const application of contentPack.applications) {
+  if (application.majors.length === 0) error(`application has no majors: ${application.id}`);
+  checkUnique(`application ${application.id} major`, application.majors.map(m => m.id));
+  for (const major of application.majors) {
+    if (!KNOWN_TRACK_FLAGS.has(major.trackFlag)) {
+      error(`application ${application.id} major ${major.id} has unknown trackFlag: ${major.trackFlag}`);
+    }
+  }
+}
 checkUnique('background', contentPack.backgrounds.map(b => b.id));
 
 for (const track of ['文', '理'] as const) {

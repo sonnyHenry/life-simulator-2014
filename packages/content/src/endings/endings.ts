@@ -16,7 +16,7 @@ export const endings: EndingDef[] = [
     text: '救护车的顶灯在写字楼玻璃上一闪一闪。医生看着你的检查单说:"再晚半年,就不是住院能解决的了。"住院的两周里,工作群没有停,但你第一次没有点开。出院那天你走得很慢,阳光落在手背的留置针胶布上。你想起这些年推掉的每一次体检、扛过去的每一场感冒、凌晨两点的每一份外卖——身体都记着账,它只是比你有耐心。',
     category: 'early',
     priority: 2,
-    condition: { stat: 'health', op: '<=', value: 12 },
+    condition: { stat: 'health', op: '<=', value: 15 },
     shareCard: { tone: 'warm', tagline: '身体都记着账,它只是比你有耐心。' },
   },
   {
@@ -162,6 +162,30 @@ export const endings: EndingDef[] = [
       ],
     },
     shareCard: { tone: 'triumph', tagline: '存款不够买梦,但够证明你走过路。' },
+  },
+  {
+    id: 'end_viral_creator',
+    title: '被算法选中的人',
+    text: '2026年,你的账号还在更新。粉丝数早就过了当年做梦都不敢想的数字,但你最珍惜的还是最早那一万个——他们见过你对着镜头结巴的样子。年会上有人问你成功秘诀,你说:"运气,加上运气来的时候我刚好没躺着。"',
+    category: 'final',
+    priority: 118,
+    condition: { flag: 'viral_creator' },
+    shareCard: { tone: 'triumph', tagline: '风口来的时候,我刚好没躺着。' },
+  },
+  {
+    id: 'end_scarred_survivor',
+    title: '栽过跟头的人',
+    text: '2026年,你的账户余额又一次爬回了让你有安全感的数字。这些年你被骗过、亏过、在深夜算过那些再也回不来的钱。但你还是把日子过了下来,而且过得越来越稳——因为每一道疤都变成了判断力。现在亲戚朋友做任何"大决定"之前,都会先来问问你。你成了家族的防火墙。',
+    category: 'final',
+    priority: 160,
+    condition: {
+      all: [
+        { any: [{ flag: 'pig_butchered' }, { flag: 'p2p_burned' }, { flag: 'stock_lesson' }] },
+        { stat: 'money', op: '>=', value: 150000 },
+        { stat: 'mindset', op: '>=', value: 40 },
+      ],
+    },
+    shareCard: { tone: 'warm', tagline: '每一道疤,后来都变成了判断力。' },
   },
   {
     id: 'end_ordinary',

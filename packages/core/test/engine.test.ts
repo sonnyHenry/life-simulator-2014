@@ -96,7 +96,7 @@ function miniPack(): ContentPack {
     provinces: [{ id: 'p1', label: '某省', scoreShift: 0 }],
     backgrounds: [{ id: 'bg1', label: '普通家庭', text: '普通', initialMoney: 5000 }],
     applications: [
-      { id: 'app1', label: '保底大学', university: '某大学', major: '某专业', minScore: 0, admitChance: 1 },
+      { id: 'app1', label: '保底大学', university: '某大学', minScore: 0, majors: [{ id: 'm1', name: '某专业', trackFlag: 'management' }] },
     ],
     npcs: [],
     incomes: [],

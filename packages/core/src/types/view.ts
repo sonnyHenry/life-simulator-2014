@@ -17,7 +17,15 @@ export type ViewModel =
   | {
       kind: 'APPLICATION';
       score: number;
-      options: { id: string; label: string; university: string; major: string; risky: boolean }[];
+      options: {
+        id: string;
+        label: string;
+        university: string;
+        /** 稳 / 较稳 / 冲 / 悬 / 基本无望 */
+        chanceLabel: string;
+        risky: boolean;
+        majors: { id: string; name: string }[];
+      }[];
     }
   | {
       kind: 'CROSSROAD';
@@ -61,6 +69,6 @@ export type PlayerAction =
   | { type: 'CHOOSE_SETUP'; provinceId: string; track: Track }
   | { type: 'ANSWER'; optionIndex: number }
   | { type: 'SKIP_EXAM' }
-  | { type: 'APPLY'; optionId: string }
+  | { type: 'APPLY'; optionId: string; majorId?: string }
   | { type: 'CHOOSE_CROSSROAD'; optionId: string }
   | { type: 'CHOOSE'; choiceId: string };

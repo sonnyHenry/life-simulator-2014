@@ -109,6 +109,18 @@ export const randomEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '不能输:分期新手机,再安排一组旅拍',
+        outcomes: [
+          {
+            weight: 1,
+            text: '新手机、九宫格、定位和滤镜都到位了,收获五十八个赞,其中一半来自微商。分期账单则会在之后的十二个月里,每月准时提醒你这场"不能输"到底输给了谁。朋友圈是别人的橱窗,账单是自己的厨房。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -12000, mindset: -3 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -242,6 +254,23 @@ export const randomEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '报名 6999 的"副业实战营",毕业保接单',
+        outcomes: [
+          {
+            weight: 2,
+            text: '课程的前三节全网免费就能搜到,后面全是"心法"和拉新任务。"保接单"的真相是:把课卖给下一个你,就是你的第一单。结营那天导师发了张电子证书,你看着那个花体英文名想:六千九买张 JPG,这单生意里唯一赚钱的副业是他的。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -6999, mindset: -7 } }],
+          },
+          {
+            weight: 1,
+            text: '课八成是水的,但你把剩下两成真学进去了:剪辑、排版、报价话术。之后一年靠零星接单把学费挣了回来,勉强打平。你的结论很中肯:这钱买不来副业,但买得来"知道这行不适合我"——也算信息费。',
+            effects: [{ stats: { money: 1000, knowledge: 3, mindset: -2, health: -3 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -283,6 +312,18 @@ export const randomEvents: GameEvent[] = [
             weight: 1,
             text: '你发了祝福,对方回了谢谢。关系没有变坏,只是又往通讯录深处沉了一点。',
             effects: [{ stats: { money: -800, mindset: -1 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '随 5888,让全场记住你的排面',
+        outcomes: [
+          {
+            weight: 1,
+            text: '司仪念红包名单时确实全场看了你一眼——就一眼。接下来三个月你的午饭预算降到二十块,而新人的感谢是群发的。你终于想通了红包的定价逻辑:它买的不是别人的记忆,是你自己的心理戏。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -5888, mindset: -5, network: 2 } }],
           },
         ],
       },
@@ -362,6 +403,24 @@ export const randomEvents: GameEvent[] = [
             weight: 1,
             text: '你说小区里跑跑就行。当然,"小区里跑跑"最终也停留在了口头。但至少,你省下了两千块——这是这个决定里唯一兑现的部分。',
             effects: [{ stats: { mindset: 1, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '年卡再加一万八私教包,一步到位',
+        outcomes: [
+          {
+            weight: 2,
+            text: '私教课上了六节,教练离职了;转来的新教练上了两节,门店"升级改造"了。会员群里全是要说法的人,说法最后浓缩成公告栏一张 A4 纸。两万块买来的教训贴在你的记账本首页:预付费的尽头,是老板的下一家店。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -20000, mindset: -8, health: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你运气不错,碰上一个真负责的教练。一年后你的体测数据全面翻新,冬天没感冒过一次,连走路的姿态都变了。两万块花得肉疼,但身体给出的回报是复利——这大概是你今年唯一没有暴雷的"高收益理财"。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: -20000, mindset: 8, health: 16 } }],
           },
         ],
       },

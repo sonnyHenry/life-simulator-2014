@@ -102,15 +102,23 @@ export interface BackgroundCard {
   flags?: Record<string, boolean | number | string>;
 }
 
+export interface ApplicationMajor {
+  id: string;
+  /** 专业名,需与 CROSSROAD 分流和事件 visibleIf 里的 major 字符串一致 */
+  name: string;
+  /** 写入 flags.major_track 的值:cs / education / cs_applied / management */
+  trackFlag: string;
+}
+
+/** 志愿"批次":录取概率由引擎按(分数 - minScore)动态计算,不再静态配置 */
 export interface ApplicationOption {
   id: string;
   label: string;
   university: string;
-  major: string;
   minScore: number;
-  admitChance: number;
   effects?: Effect[];
   failEffects?: Effect[];
+  majors: ApplicationMajor[];
 }
 
 export interface IncomeRule {

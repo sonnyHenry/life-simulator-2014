@@ -137,6 +137,23 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '明面顶着大小周,私下再接一份外包',
+        outcomes: [
+          {
+            weight: 2,
+            text: '两头卷了四个月,外包的钱确实香,直到你在公司电脑上改外包代码被同事看见。事情捅到领导那儿,按制度这是红线,你写了检查,绩效直接打了 C。外包赚的钱和年终奖的差额基本抵消,而"这人接私活"的标签,在部门里洗了很久才洗掉。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: 8000, mindset: -8, health: -10 } }, { setFlag: 'low_perf' }],
+          },
+          {
+            weight: 1,
+            text: '你像特工一样管理着两条时间线,平安赚了一年双份钱。代价是这一年你没有一个完整的周末,体检报告的箭头多到医生画了个圈。钱包厚了,人垮了半截——这笔账怎么算,你到现在没敢细算。',
+            effects: [{ stats: { money: 45000, mindset: -8, health: -16 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -173,6 +190,24 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你看着室友的表情从五月的意气风发变成六月的沉默寡言。那个夏天你没赚一分钱,但白捡了一门风险教育课——学费是别人交的。',
             effects: [{ stats: { knowledge: 2, mindset: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '找同学拼单上融资盘,放大干',
+        outcomes: [
+          {
+            weight: 3,
+            text: '五月你们的"联合账户"浮盈翻倍,宿舍夜谈会全在聊买房买车。六月股灾,杠杆把下跌放大成雪崩,强平短信来的时候你正在上毛概课。生活费、家教攒的钱、下学期的教材钱,一夜清零。你第一次明白:牛市里最危险的不是贪心,是借来的贪心。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -8000, mindset: -10 } }, { setFlag: 'stock_lesson' }],
+          },
+          {
+            weight: 1,
+            text: '你们运气好到离谱,五月底因为要凑学费提前清了仓,杠杆反而放大了那波收益。你请全宿舍吃了顿大餐,心里却有点发虚:这钱来得太快了,快得不像是你挣的。后来你才知道,这种"第一口甜"害人比亏损更深。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 9000, mindset: 3 } }, { setFlag: 'stock_lesson' }],
           },
         ],
       },
@@ -285,6 +320,18 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '这就是未来!押上两万重仓',
+        outcomes: [
+          {
+            weight: 1,
+            text: '重仓和轻仓是两种完全不同的持有体验:三千块可以忘掉,两万块会长在你的视网膜上。2018 年初那波腰斩,你每天醒来第一件事是看盘,第七天你割了肉。多年后看着价格新高,你终于承认:你亏掉的不是运气,是仓位管理——重到拿不住的仓,涨到天上也和你没关系。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -12000, mindset: -10, health: -3 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -325,6 +372,24 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '不卖,反而抵押信用贷加仓',
+        outcomes: [
+          {
+            weight: 3,
+            text: '你在山顶上又加了一层楼。后来的暴跌里,借来的仓位最先爆掉,连带着老仓一起清算。四年翻几十倍的神话,最后落袋一万五和一屁股利息。群里那句话你现在背得出来:"上山的人很多,下山的路只有一条,叫贪。"',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: 15000, mindset: -9, health: -5 } }],
+          },
+          {
+            weight: 1,
+            text: '疯狂的顶部比所有人预期的都高,你加的仓翻了倍,并在某个手抖的深夜全部清掉。落袋的数字大到你不敢告诉任何人。你去庙里捐了一笔香火钱——不是迷信,是心虚。这种运气,一辈子透支一次就该收手了。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 600000, mindset: 8, health: -4 } }, { setFlag: 'crypto_win' }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -357,6 +422,18 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你没投。半年后平台暴雷,同事在工位上打了一下午电话。你请他吃了顿饭,他说:"早知道听你的。"这世上最贵的三个字,是"早知道"。',
             effects: [{ stats: { mindset: 1 } }, { setFlag: 'dodged_p2p' }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '投五万上"新手加息标",锁一年',
+        outcomes: [
+          {
+            weight: 1,
+            text: '加息标的年化写着 18%,锁定期一年——你锁进去的第七个月,平台雷了。别人还能在"暂停提现"前抢跑,你的钱连跑的资格都没有。维权两年,回款一成半。你后来把这笔账算得很清楚:多出来的 3 个点年化,代价是本金的 85%。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -42000, mindset: -10, health: -4 } }, { setFlag: 'p2p_burned' }],
           },
         ],
       },
@@ -700,6 +777,24 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '裸辞加入朋友的 AI 创业公司,拿期权赌一把',
+        outcomes: [
+          {
+            weight: 3,
+            text: '故事的开头很热血:天使轮、路演、通宵改 demo。故事的结尾很常见:A 轮没融到,公司在第十四个月解散。期权变成一段 GitHub 链接,存款烧掉一半,你重新回到招聘软件上,把"创业经历"字斟句酌地包装成"0 到 1 项目经验"。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -70000, mindset: -8, health: -6, knowledge: 6 } }],
+          },
+          {
+            weight: 1,
+            text: '你们做的方向踩中了一波真需求,第二年被一家大厂整体收购。期权按比例折了现,虽然不是财务自由的数目,但足够让你在同学群里保持沉默的微笑。更值钱的是履历:你从"用 AI 的人"变成了"做过 AI 产品的人"。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 150000, knowledge: 9, network: 6, mindset: 6, health: -6 } }, { setFlag: 'ai_adapted' }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -983,6 +1078,24 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '开两融账户上杠杆,收益乘三',
+        outcomes: [
+          {
+            weight: 2,
+            text: '牛市下半场,杠杆确实把收益乘了三;抱团瓦解的时候,它也把亏损乘了三。追加保证金的短信来了两次,第三次你没钱可追,系统替你做了决定。从满仓浮盈到亏穿本金,只用了四个月。你卸载了行情软件,把"杠杆"两个字拉进了人生黑名单。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -90000, mindset: -10, health: -4 } }],
+          },
+          {
+            weight: 1,
+            text: '你在最热的那两个月里赚足了,并且——这是最难的部分——真的在年初抱团松动前撤了出来。收益让同事眼红,你却私下发誓下不为例:全程你睡不好觉,胃一直是紧的。这不是投资,这是拿命换钱的极限运动。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 110000, mindset: 2, health: -6 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1071,6 +1184,23 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '付费进大 V 的"跟单群",跟着信号干',
+        outcomes: [
+          {
+            weight: 2,
+            text: '入群费一万八,"信号"前两周确实准——后来你才知道那叫养客。第三周开始,每次你跟单买入,K 线就精准转头。大 V 说是"洗盘",直到某天群被解散,你才看懂这个局:你不是他的学员,你是他的对手盘。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -68000, mindset: -8 } }],
+          },
+          {
+            weight: 1,
+            text: '你跟了三个月,小赚了一笔,然后在某次"内部信号"翻车、群里开始互相指责时果断退了群。赚的钱刚好覆盖入群费再多一点。复盘时你想明白了:那三个月赚钱靠的是行情,不是信号——牛市里,连扔飞镖都是股神。',
+            effects: [{ stats: { money: 12000, mindset: -2 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1110,6 +1240,23 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '那周部门在救火,你的汇报只开了十五分钟,领导全程在回消息,最后说"挺好,继续保持"。你没出错,而在那个兵荒马乱的季度,没出错就是最好的表现。',
             effects: [{ stats: { money: 3000, mindset: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '汇报是虚的,饭局是实的——精力花在陪领导应酬上',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你酒量见长,段子越来越熟,领导确实记住了你——三个月后他调去了别的事业部。新领导只看周报和代码,你的"酒桌资产"一夜清零,转正评审上被问到项目细节时,你卡了整整十秒。那十秒里你想明白了:关系是浮动利率,本事才是固定资产。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { mindset: -8, health: -8, network: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你抱对了大腿:转正丝滑,评优有份,好项目优先想到你。只是每周三场的酒局在你的胃和肝上记着账,而且你隐约知道,把职业生涯拴在一个人身上,和把全仓押在一只股票上,是同一种风险。',
+            effects: [{ stats: { money: 8000, network: 6, mindset: 2, health: -10 } }],
           },
         ],
       },
@@ -1174,6 +1321,23 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你买了新手机或一件好外套。拆包装时很快乐,付款记录也很清醒。成年人的奖励,常常要自己批准。',
             effects: [{ stats: { money: 8000, mindset: 6 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '听同事的,全仓买入明星基金经理',
+        outcomes: [
+          {
+            weight: 2,
+            text: '"坤坤 yyds"的弹幕还在飘,你把年终奖全数打了进去。抱团股崩塌那几个月,你的持仓页面绿得发光,回本的执念让你又扛了一年才割肉。年终奖的意义本来是犒劳过去一年的自己,结果它变成了未来两年的心病。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -14000, mindset: -8 } }],
+          },
+          {
+            weight: 1,
+            text: '你进场早,那波行情的尾巴让年终奖胖了一圈,而且你因为要付房租提前赎回,稀里糊涂躲过了后面的崩塌。同事夸你有纪律,你没好意思说实话:救你的不是纪律,是穷。',
+            effects: [{ stats: { money: 10000, mindset: 3 } }],
           },
         ],
       },
@@ -1258,6 +1422,39 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你算了几遍,发现首付还是差一截。中介说"再不买就晚了",但你的银行卡说"现在就很晚"。',
             effects: [{ stats: { mindset: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '掏空六个钱包上高杠杆,一步到位买大三居',
+        outcomes: [
+          {
+            weight: 2,
+            condition: { stat: 'money', op: '>=', value: 400000 },
+            text: '你在市场最热的时候,用最高的杠杆,买了最大的房子。月供占了收入的六成,2022 年行情转冷、收入缩水时,这套房从"资产"变成了勒在脖子上的绳。你开始害怕一切变动:裁员、降薪、利率——大房子很亮堂,你却睡得越来越轻。',
+            effects: [
+              { stats: { money: -400000, mindset: -8, health: -4 } },
+              { setFlag: 'has_house' },
+              { schedule: { eventId: 'ev_mortgage_first_year', afterRounds: 1 } },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '>=', value: 400000 },
+            text: '你压着杠杆红线买下大三居,月供沉重,但收入撑住了。爸妈来住过一个春节,妈妈在阳台上晒被子的时候说"这房子买得值"。值不值要到很多年后才知道,但那一刻的踏实是真的。',
+            effects: [
+              { stats: { money: -400000, mindset: 6 } },
+              { setFlag: 'has_house' },
+              { schedule: { eventId: 'ev_mortgage_first_year', afterRounds: 1 } },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '<', value: 400000 },
+            text: '中介说首付不够可以"想办法":消费贷凑、流水包装。方案做到一半银行风控升级,审批被拒,你搭进去两万定金和一个月的奔波。事后你后怕大于心疼:那套"办法"要是成了,才是真正的深渊。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { money: -20000, mindset: -8 } }],
           },
         ],
       },

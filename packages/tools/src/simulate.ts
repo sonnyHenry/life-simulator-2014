@@ -122,7 +122,8 @@ function botAction(
     case 'EXAM':
       return { type: 'ANSWER', optionIndex: bot.int(0, view.question.options.length - 1) };
     case 'APPLICATION':
-      return { type: 'APPLY', optionId: bot.pick(view.options).id };
+      const appOpt = bot.pick(view.options);
+      return { type: 'APPLY', optionId: appOpt.id, majorId: bot.pick(appOpt.majors).id };
     case 'CROSSROAD': {
       const preferred =
         strategy === 'money' ? 'job' : strategy === 'mindset' ? 'civil_service' : null;

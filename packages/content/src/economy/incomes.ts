@@ -67,6 +67,21 @@ export const incomes: IncomeRule[] = [
     mindsetDelta: -1,
   },
   {
+    // 低谷自愈:人在谷底会自己长出茧——防止连环打击后的死亡螺旋
+    id: 'inc_resilience_mindset',
+    label: '低谷自愈(心态)',
+    when: { stat: 'mindset', op: '<', value: 40 },
+    amount: 0,
+    mindsetDelta: 6,
+  },
+  {
+    id: 'inc_resilience_health',
+    label: '低谷自愈(健康)',
+    when: { stat: 'health', op: '<', value: 30 },
+    amount: 0,
+    healthDelta: 3,
+  },
+  {
     id: 'inc_generic_job',
     label: '普通工作收入',
     when: {

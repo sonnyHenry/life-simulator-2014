@@ -7,6 +7,7 @@ import { examBank } from './exam/questions';
 import { collegeEvents } from './events/college';
 import { workEvents } from './events/work';
 import { randomEvents } from './events/random';
+import { dramaEvents } from './events/drama';
 import { endings } from './endings/endings';
 import { npcs } from './npcs/npcs';
 import { incomes } from './economy/incomes';
@@ -14,7 +15,7 @@ import { incomes } from './economy/incomes';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.14.0',
+    version: '0.15.0',
     title: '2014:我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 10,
@@ -24,7 +25,7 @@ export const contentPack: ContentPack = {
     },
   },
   timeline: phases,
-  events: [...collegeEvents, ...workEvents, ...randomEvents],
+  events: [...collegeEvents, ...workEvents, ...randomEvents, ...dramaEvents],
   incomes,
   endings,
   examBank,
