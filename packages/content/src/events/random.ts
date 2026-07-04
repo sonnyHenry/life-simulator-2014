@@ -117,7 +117,7 @@ export const randomEvents: GameEvent[] = [
     category: 'money',
     title: '房租又涨了',
     text: '房东发来消息:下个租期每月涨三百。你打开租房软件看了一圈,发现不是房东变坏了,是整座城市都在涨价。',
-    trigger: { all: [{ year: { from: 2018 } }, working] },
+    trigger: { all: [{ year: { from: 2018 } }, working, { not: { flag: 'has_house' } }] },
     choices: [
       {
         id: 'a',
@@ -284,7 +284,7 @@ export const randomEvents: GameEvent[] = [
     category: 'career',
     title: '年度总结',
     text: '年底,你打开文档写年度总结。写着写着发现,这一年好像一直在处理问题,却很难说自己真正完成了什么。',
-    trigger: { year: { from: 2023 } },
+    trigger: { all: [{ year: { from: 2023 } }, working] },
     choices: [
       {
         id: 'a',
@@ -385,7 +385,7 @@ export const randomEvents: GameEvent[] = [
     category: 'health',
     title: '体检报告',
     text: '公司体检的报告出来了。你盯着 APP 上"查看报告"四个字看了半天,像大学时不敢查挂科成绩。点开:结节、脂肪肝倾向、几个向上的箭头。',
-    trigger: { year: { from: 2023 } },
+    trigger: { all: [{ year: { from: 2023 } }, working] },
     choices: [
       {
         id: 'a',

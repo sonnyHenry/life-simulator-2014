@@ -277,6 +277,48 @@ for (const event of contentPack.events) {
   }
 }
 
+// ---------- 互斥语境词表检查(防"买了房还收到房租涨价"式穿帮) ----------
+// 只扫事件标题和正文(不扫 outcome 文案,避免"当年交给房东"这类回忆句误报)。
+
+function conditionRequiresFlag(cond: Condition | undefined, flag: string): boolean {
+  if (!cond) return false;
+  if ('flag' in cond) return cond.flag === flag && (cond.equals === undefined || cond.equals === true);
+  if ('all' in cond) return cond.all.some(c => conditionRequiresFlag(c, flag));
+  return false;
+}
+
+function conditionForbidsFlag(cond: Condition | undefined, flag: string): boolean {
+  if (!cond) return false;
+  if ('not' in cond) {
+    const inner = cond.not;
+    return typeof inner === 'object' && 'flag' in inner && inner.flag === flag && inner.equals === undefined;
+  }
+  if ('all' in cond) return cond.all.some(c => conditionForbidsFlag(c, flag));
+  return false;
+}
+
+const MUTEX_TEXT_RULES: { pattern: RegExp; label: string; ok: (trigger?: Condition) => boolean }[] = [
+  {
+    pattern: /房租|房东|续租|租房软件/,
+    label: '租房语境需要 not has_house(或 no_house)门控',
+    ok: trigger => conditionForbidsFlag(trigger, 'has_house') || conditionRequiresFlag(trigger, 'no_house'),
+  },
+  {
+    pattern: /相亲/,
+    label: '相亲语境需要 not in_love 门控',
+    ok: trigger => conditionForbidsFlag(trigger, 'in_love'),
+  },
+];
+
+for (const event of contentPack.events) {
+  const surface = `${event.title} ${event.text}`;
+  for (const rule of MUTEX_TEXT_RULES) {
+    if (rule.pattern.test(surface) && !rule.ok(event.trigger)) {
+      error(`互斥门控缺失(${rule.label}): ${event.id}`);
+    }
+  }
+}
+
 const errors = issues.filter(i => i.level === 'error');
 const warnings = issues.filter(i => i.level === 'warn');
 

@@ -267,6 +267,22 @@
 - 基金 2020 → 2021 抱团松动改为 schedule 硬链:买了基金必然次年遇到崩塌,
   不再依赖随机抽取(trigger 保留作双保险,调度器自动去重)
 
+### M5 第十二轮(互斥情节门控 + validate 词表检查)
+
+由 Claude Code(Fable 5)完成:
+
+- 修复"买了房还收到『房租又涨了』"一类互斥穿帮,共 4 处 trigger 门控:
+  - `ev_random_room_rent` 加 `not has_house`
+  - `ev_work_blind_date`(相亲局)加 `not in_love`(恋爱中/已婚不再被安排相亲)
+  - `ev_random_annual_review` / `ev_random_health_report` 补挂 `working`(random.ts 顶部注释
+    早已约定上班族语境事件必须挂 working,这两个漏了)
+- 2 处文案去租房假设:发小重聚"聊房租"→"聊房价";裁员事件"想起房租"→"想起每个月的账单"
+- **validate 新增互斥语境词表检查**(机制性杜绝,不再靠人肉审):事件标题/正文命中
+  `房租|房东|续租|租房软件` 必须门控 `not has_house`(或 `no_house`),命中 `相亲` 必须门控
+  `not in_love`,违反直接 ERROR 使 `pnpm validate` 失败。只扫事件正文不扫 outcome 文案,
+  避免"当年交给房东"这类回忆句误报。新增互斥语境词(如结婚/生育)时在
+  `packages/tools/src/validate.ts` 的 `MUTEX_TEXT_RULES` 里加一行即可。
+
 ### M6 小程序移植续接
 
 由 Codex 完成:
@@ -314,26 +330,26 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次完整验证通过:
 
 - `pnpm typecheck`
-- `pnpm test`
+- `pnpm test`(17 通过)
 - `pnpm validate`
-- `pnpm simulate -n 100`
+- `pnpm simulate -n 1000 --check`
 - `pnpm --filter @life-sim/web build`
 
 最近一次 `pnpm validate`:
 
 ```text
-事件 67, 结局 12, NPC 5, 题目 37, 收入规则 6
+事件 72, 结局 12, NPC 5, 题目 37, 收入规则 6
 完成: 0 errors, 0 warnings
 ```
 
-最近一次 `pnpm simulate -n 1000`:
+最近一次 `pnpm simulate -n 1000 --check`:
 
 ```text
-事件覆盖: 67/67
-结局 12 个全部到达,最高占比 25.1%(平凡之路)
-金钱分位: p10=¥198500 p50=¥340600 p90=¥626800
-心态分位: p10=27 p50=58 p90=88
-提前结局占比: 5.7%
+事件覆盖: 72/72
+金钱分位: p10=¥197300 p50=¥351200 p90=¥654200
+心态分位: p10=28 p50=60 p90=92
+提前结局占比: 5.2%
+✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
 ## 当前重要实现点
