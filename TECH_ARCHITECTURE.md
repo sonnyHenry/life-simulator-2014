@@ -212,6 +212,8 @@ type Condition =
 
 type Effect =
   | { stats: Partial<StatDeltas> }                       // 数值增减(引擎负责 clamp 0-100)
+  | { moneyCost: { rate: number; min?: number; max?: number; roundTo?: number; reason?: string } }
+  | { setStat: 'money'|'knowledge'|'mindset'|'network'|'health'; value: number }
   | { setFlag: string; value?: boolean|number|string }
   | { npcFavor: NpcId; delta: number } | { npcStage: NpcId; stage: string }
   | { schedule: { eventId: string; afterRounds: number } }   // 事件链:N回合后触发后续
@@ -221,6 +223,73 @@ type Effect =
 ```
 
 `fn` 注册表让 DSL 覆盖不了的逻辑仍有出口,但强制**具名、集中、可测试**,不会散落在数据里。
+
+### 4.1.1 金钱扣减 DSL 设计(防固定金额超扣)
+
+问题背景:
+
+- 事件里直接写 `stats: { money: -300000 }` 会在余额不足时被引擎钳到 0,但内容配置表达的是一个玩家实际上付不起的数字。
+- 固定扣款对不同家境、职业、投资结果的玩家压力差异过大:穷玩家直接归零,富玩家无感。
+- 当前 `money` 同时承担现金、净资产、结局判定资产三种含义,因此大额支出必须显式区分"消费损失"和"资产置换"。
+
+设计新增一个声明式金钱效果,专门处理负向扣减:
+
+```ts
+type MoneyCostEffect = {
+  moneyCost: {
+    /** 按当前 money 的比例扣减,0.25 表示扣 25% */
+    rate: number;
+    /** 可选:理论扣减下限。实际扣减仍不能超过当前余额 */
+    min?: number;
+    /** 可选:理论扣减上限 */
+    max?: number;
+    /** 可选:四舍五入到 100 / 1000 等,避免出现碎金额 */
+    roundTo?: number;
+    /** 可选:用于工具报表和内容审计 */
+    reason?: 'daily' | 'medical' | 'family' | 'investment' | 'scam' | 'house' | 'other';
+  };
+};
+```
+
+引擎计算:
+
+```ts
+const raw = state.stats.money * rate;
+const bounded = clamp(raw, min ?? 0, max ?? Infinity);
+const rounded = roundTo ? Math.round(bounded / roundTo) * roundTo : Math.round(bounded);
+const actual = Math.min(state.stats.money, rounded);
+state.stats.money -= actual;
+deltas.money -= actual;
+```
+
+关键约束:
+
+- `actual` 永远不大于当前余额,不会出现"扣减金额大于余额"。
+- OUTCOME 页面显示 `actual`,不是配置里的理论值。
+- `moneyCost` 只表达负向扣减;工资、奖金、投资收益等正向来源继续使用固定 `stats.money`。
+- 如果余额为 0,`moneyCost` 的金钱变化为 0,但同一 outcome 仍可通过心态、健康、人脉等效果表达代价。
+
+资产置换规则:
+
+```ts
+type SetStatEffect = { setStat: 'money'; value: 0 };
+```
+
+- 买房、全仓投资等"现金换资产"事件不使用大额固定扣减。当前买房使用 `moneyCost` 扣当前余额 50%,再通过 schedule 事件把资产净值折算回 `money`,例如早买房补回高估值,晚买房补回较低估值。
+- `setStat` 仍保留给需要精确设置数值的特殊事件,但不是当前买房扣款的主路径。
+- 在未来拆分 `cash / assets / debt` 之前,这是一种保持单一 `money` 指标可用的过渡方案。
+
+内容迁移状态:
+
+1. 引擎已实现 `moneyCost` 效果,并保留已有 `setStat`。
+2. `validate` 已增加门禁:事件 outcome 中出现 `stats.money < -10000` 会报 error,要求改用 `moneyCost`。万元以内的小额固定支出暂时允许。
+3. 已将现有大额固定负扣款迁移到 `moneyCost`;后续新增/调整事件继续按以下口径配置:
+   - 日常消费:3%–8%,max 3000–8000
+   - 中等消费/预付费:10%–25%,max 20000–50000
+   - 投资亏损/诈骗:30%–70%,按风险程度设 max
+   - all-in/买房:80%–100%,或 `setStat money=0 + schedule 资产回补`
+4. 跑 `pnpm simulate -n 1000 --check` 和四策略 compare,观察金钱分位、提前结局、兜底结局是否偏移。
+5. 如果未来需要彻底禁止所有固定负扣款,再把万元以内小额支出的豁免收紧为显式字段或白名单。
 
 ### 4.2 事件 Schema
 

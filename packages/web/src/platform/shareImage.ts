@@ -46,14 +46,30 @@ function wrapText(
 ): string[] {
   const lines: string[] = [];
   let current = '';
-  for (const ch of text) {
-    if (ctx.measureText(current + ch).width > maxWidth) {
-      lines.push(current);
-      current = ch;
-      if (lines.length === maxLines - 1) break;
-    } else {
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text.charAt(i);
+    if (current === '' || ctx.measureText(current + ch).width <= maxWidth) {
       current += ch;
+      continue;
     }
+
+    lines.push(current);
+    current = ch;
+    if (lines.length !== maxLines - 1) continue;
+
+    for (let j = i + 1; j < text.length; j += 1) {
+      const next = current + text.charAt(j);
+      if (ctx.measureText(`${next}…`).width > maxWidth) break;
+      current = next;
+      i = j;
+    }
+    if (i < text.length - 1) {
+      while (current && ctx.measureText(`${current}…`).width > maxWidth) {
+        current = current.slice(0, -1);
+      }
+      current = `${current}…`;
+    }
+    break;
   }
   if (current) lines.push(current);
   return lines.slice(0, maxLines);
@@ -68,6 +84,23 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   const colors = TONE_COLORS[data.tone];
   const font = (size: number, weight = 400) =>
     `${weight} ${size}px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`;
+  const drawFittedText = (
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    size: number,
+    weight = 400,
+    minSize = 22,
+  ) => {
+    let fittedSize = size;
+    ctx.font = font(fittedSize, weight);
+    while (fittedSize > minSize && ctx.measureText(text).width > maxWidth) {
+      fittedSize -= 2;
+      ctx.font = font(fittedSize, weight);
+    }
+    ctx.fillText(text, x, y);
+  };
 
   // 背景
   ctx.fillStyle = colors.bg;
@@ -110,27 +143,22 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   // 总分 + 评级
   const scoreY = 520;
   ctx.fillStyle = colors.accent;
-  ctx.font = font(120, 700);
-  ctx.fillText(data.grade, W / 2 - 130, scoreY);
+  drawFittedText(`成绩：${data.grade}`, W / 2 - 90, scoreY + 22, 320, 76, 700, 42);
   ctx.fillStyle = '#2c2a24';
   ctx.font = font(40, 600);
-  ctx.fillText(`人生总分 ${data.score}`, W / 2 + 90, scoreY + 60);
+  ctx.fillText(`人生总分 ${data.score}`, W / 2 + 180, scoreY + 60);
 
-  // 四维数值 2x2
-  const statItems: [string, string][] = [
-    ['学识', String(data.stats.knowledge)],
-    ['金钱', `¥${data.stats.money.toLocaleString()}`],
-    ['心态', String(data.stats.mindset)],
-    ['人脉', String(data.stats.network)],
-    ['健康', String(data.stats.health)],
+  // 五项指标用固定两行排布,避免长金额或第五项撞到底部标题。
+  const statItems = [
+    { label: '学识', value: String(data.stats.knowledge), x: W * 0.2, y: 690, maxWidth: 170 },
+    { label: '金钱', value: `¥${data.stats.money.toLocaleString()}`, x: W * 0.5, y: 690, maxWidth: 230 },
+    { label: '心态', value: String(data.stats.mindset), x: W * 0.8, y: 690, maxWidth: 170 },
+    { label: '人脉', value: String(data.stats.network), x: W * 0.35, y: 805, maxWidth: 190 },
+    { label: '健康', value: String(data.stats.health), x: W * 0.65, y: 805, maxWidth: 190 },
   ];
-  const gridTop = 700;
-  statItems.forEach(([label, value], i) => {
-    const cx = i % 2 === 0 ? W / 4 + 40 : (3 * W) / 4 - 40;
-    const cy = gridTop + Math.floor(i / 2) * 110;
+  statItems.forEach(({ label, value, x: cx, y: cy, maxWidth }) => {
     ctx.fillStyle = '#2c2a24';
-    ctx.font = font(44, 600);
-    ctx.fillText(value, cx, cy);
+    drawFittedText(value, cx, cy, maxWidth, 40, 600, 24);
     ctx.fillStyle = '#8a8577';
     ctx.font = font(26);
     ctx.fillText(label, cx, cy + 56);

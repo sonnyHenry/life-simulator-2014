@@ -381,13 +381,78 @@
   (均分 49、崩溃率 9.3%、82/82 事件、15 结局全可达)/ web build 通过;
   复跑 3000 局审计:"无展示"场景 0 种。
 
+### M5 第十七轮(关系后果、父母事件去重、成绩展示)
+
+由 Codex 完成,内容版本 → 0.15.2。起因是用户实测反馈:杀猪盘对非单身玩家缺少关系后果、父母住院情节重复、结尾字母评级不够明确,以及近期难度调高后模拟门禁失衡。
+
+- **杀猪盘非单身后续**:`ev_drama_pig_butchering` 在 `in_love` 状态下被骗会追加同年事件
+  `ev_drama_pig_partner_fallout`《聊天记录被看见》(事件 82 → 83)。后续选项包括坦白报警、隐瞒补窟窿、家庭财务复盘;隐瞒会伤害 `first_love` 好感并把关系推进到 `separated`。
+- **父母健康事件去重**:`ev_random_parent_checkup` 改成轻量的“家里的体检报告/普通复查”事件,不再写成住院语境;真正的住院手术保留在 `ev_drama_parent_hospital`《爸爸的检查单》。两个事件都用 `parent_ill` 门控避免大病后再刷普通体检。
+- **结尾成绩展示**:Web 结尾分享卡、小程序结尾分享卡、Web 复制文案、Canvas 分享图都把字母评级改为“成绩：X”,避免用户把 S/A/B 当成其他标签。分享图同步调整了评级区域位置和字号,防止新增文字挤出。
+- **早退难度回调**:保留“按下暂停键 / 被生活按下退出键 / 现金流断了 / 身体先亮红灯”四类提前结局,但把触发条件收窄到真正触底场景;同时放宽还贷、北漂、围城、AI、栽过跟头等最终叙事结局,减少低分玩家大面积落进兜底。
+- 最新验证:`validate` 0 error/0 warning;`simulate -n 1000 --check` 通过,83/83 事件覆盖、17 个结局全可达、提前结局 9.7%、兜底 26.4%。
+
+### M5 第十八轮(家境池收敛 + 买房现金清零)
+
+由 Codex 完成,内容版本 → 0.15.3。起因是用户反馈“暴发户/拆迁户”开局 20 万对剧情影响弱,且买房只扣固定首付不符合现实。
+
+- **移除开局拆迁户身份**:`bg_demolition` 从 `backgrounds` 抽卡池删除;2016「六个钱包」触发条件同步改为只面向 `bg_urban_middle`,避免留下不可抽中身份引用。
+- **新增 core DSL 效果 `setStat`**:支持把某项数值设为精确值并按实际变化写入 `deltas`。本轮用于买房后把 `money` 设为 0,结果页显示真实扣掉的余额,不会出现 `-999999` 这种假扣款。core 单测 +1。
+- **买房后清空现金**:2016「六个钱包」买房、2021-2023「买房问题」两个买房选项都改为 `{ setStat: 'money', value: 0 }`,不再固定扣 1 万/25 万/30 万后留一大笔现金。
+- **早买房后补回房产净值**:新增 schedule 事件 `ev_house_price_rise_2018`《房价翻倍的新闻》(事件 83 → 84)。2016 买房后两年触发,用 `money +260000` 把房产浮盈折算回金钱值,符合“买房先清空余额,后续上涨再加回来”的口径。
+- **分布微调**:移除拆迁户和清空买房现金后,健康早退阈值从 `health <= 4` 收到 `<= 1`,使 `simulate --check` 的提前结局占比回到门禁以内。
+- 最新验证:`validate` 0 error/0 warning;`simulate -n 1000 --check` 通过,84/84 事件覆盖、17 个结局全可达、提前结局 9.5%、兜底 27.6%。
+
+### M5 第十九轮(晚买房资产补回)
+
+由 Codex 完成,内容版本 → 0.15.4。起因是用户指出 2021-2023 买房清空存款后也需要后续新闻把房产资产折算回来,只是补回幅度应小于 2016 早买房。
+
+- **晚买房补回净值**:新增 schedule 事件 `ev_house_value_reprice_late`《资产表重新算了一遍》(事件 84 → 85)。2021-2023「买房问题」中成功买房的三个 outcome 都会在下一轮触发,用 `money +120000` 把保守房产净值折回金钱值。
+- **早晚买房收益差异**:2016 早买房仍使用 `ev_house_price_rise_2018` 补 `money +260000`;2021-2023 晚买房补 `+120000`,表达“买得晚也不是归零,但收益明显少于早上车”。
+- 最新验证:`validate` 0 error/0 warning;`simulate -n 1000 --check` 通过,85/85 事件覆盖、17 个结局全可达、提前结局 9.4%、兜底 27.5%。
+
+### 设计补充(金钱扣减百分比方案)
+
+由 Codex 完成,只改文档,未改运行时代码。起因是用户指出当前事件里很多 `money` 扣减仍是写死金额,应重新设计为按余额比例扣减,避免理论扣款大于余额。
+
+- `GAME_DESIGN.md` 新增“金钱扣减口径:按余额比例而不是硬扣固定数”,定义日常小额支出、中等消费、大额风险损失、all-in 决策、资产置换五类扣减比例和上下限。
+- `TECH_ARCHITECTURE.md` 新增 `moneyCost` DSL 设计:按 `current money × rate` 计算理论扣款,套 `min/max/roundTo`,最终 `actual = min(currentMoney, rounded)`,OUTCOME 展示实际扣款。
+- 文档当时明确:正向收入/奖金/投资收益仍可固定写 `stats.money`;负向支出迁移到 `moneyCost`;买房使用资产置换口径。注意后续 M5 第二十轮已把买房从 `setStat money=0` 改为 `moneyCost rate=0.5 + schedule 资产回补`。
+- 迁移计划:先实现 `moneyCost`,再让 `validate` 对大额固定 `stats.money < 0` 报错或警告,最后批量迁移事件并用 `simulate --check` 守分布。
+
+### M5 第二十轮(买房扣款改 50% + 拆迁暴发户回归)
+
+由 Codex 完成,内容版本 → 0.15.5。起因是用户要求两个买房事件不再清空余额,改为扣当前余额 50%;后续资产回补也按比例减半;同时把之前删掉的拆迁暴发户以 10 万初始金额加回。
+
+- **实现 `moneyCost` 运行时效果**:core DSL 新增 `{ moneyCost: { rate, min?, max?, roundTo?, reason? } }`,按当前余额比例计算实际扣款并写入 `deltas.money`;validate 校验 rate/min/max/roundTo;simulate 的策略 bot 也会把 `moneyCost` 算进期望;core 单测 +1。
+- **家境池加回拆迁暴发户**:`bg_demolition` 回到 `backgrounds`,label 为“拆迁暴发户”,初始金额 100000。2016「六个钱包」触发条件恢复为城市中产或拆迁暴发户。
+- **买房扣款改为余额 50%**:2016「六个钱包」和 2021-2023「买房问题」成功买房 outcome 都从 `setStat money=0` 改为 `moneyCost rate=0.5 roundTo=1000 reason=house`。
+- **资产回补减半**:2016 早买房补回从 `money +260000` 改为 `+130000`;2021-2023 晚买房补回从 `+120000` 改为 `+60000`;相关文案去掉“清空/归零”表述。
+- **文档同步**:`GAME_DESIGN.md` 加回“拆迁暴发户”家境并更新买房 50% 扣款口径;`TECH_ARCHITECTURE.md` 的 Effect 示例同步加入 `moneyCost` 和 `setStat`,并标记 `moneyCost` 已实现。
+- 最新验证:`validate` 0 error/0 warning;`simulate -n 1000 --check` 通过,85/85 事件覆盖、17 个结局全可达、提前结局 9.0%、兜底 25.7%。
+
+### M5 第二十一轮(大额固定扣款迁移 + moneyCost 门禁)
+
+由 Codex 完成,内容版本 → 0.15.6。延续上一轮“金钱扣减百分比”方案,把文档里的迁移计划落到内容和校验门禁。
+
+- **迁移大额固定负扣款**:把 `drama.ts` / `work.ts` 中所有超过 10000 的 `stats.money < 0` 改为 `moneyCost`。
+  - 诈骗、投资爆仓、医疗、长租公寓、裸辞空窗、婚礼、提前还贷等现在按余额比例扣款,并设置 `max/roundTo/reason`。
+  - P2P 两万、比特币重仓等“明确本金”场景用 `min=max` 表达“最多扣这笔本金,余额不足只扣现有余额”,避免继续展示超余额扣款。
+  - 万元以内的小额叙事支出暂时保留固定 `stats.money`,避免普通请客/搬家/春节饭桌被过度 DSL 化。
+- **validate 防回归**:`packages/tools/src/validate.ts` 新增 `MAX_FIXED_MONEY_DEBIT = 10000`;事件 outcome 中若出现 `stats.money < -10000` 直接 error,要求改用 `moneyCost`。
+- **现金流结局再调平**:由于 `moneyCost` 不再把余额硬扣穿,`end_cashflow_break` 从 `money<=0 && mindset<=0` 改为低现金缓冲触发:
+  `money<=30000 && mindset<=5 && health>10 && network>20`,避免与健康/崩溃类早退互相抢结局。最新随机 1000 局中现金流结局占比 1.0%。
+- **文档同步**:`GAME_DESIGN.md` / `TECH_ARCHITECTURE.md` 修正买房/资产置换口径,标记大额固定负扣款迁移与校验门禁已完成。
+- 最新验证:`typecheck` / `test`(19 通过) / `validate` / `simulate -n 1000 --check` / `web build` / `miniprogram build:weapp` 全部通过;
+  `simulate -n 500 --compare` 显示无明显必胜解(随机 42、卷钱 41、保心态 62、卷总分 68)。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.15.1'
-title: '2014:我的十二年'
+version: '0.15.6'
+title: '2014：我的十二年'
 ```
 
 ## 常用验证命令
@@ -410,32 +475,34 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次完整验证通过:
 
 - `pnpm typecheck`
-- `pnpm test`(17 通过)
+- `pnpm test`(19 通过)
 - `pnpm validate`
 - `pnpm simulate -n 1000 --check`
 - `pnpm --filter @life-sim/web build`
+- `pnpm --filter @life-sim/miniprogram build:weapp`
 
 最近一次 `pnpm validate`:
 
 ```text
-事件 82, 结局 15, NPC 5, 题目 37, 收入规则 10
+事件 85, 结局 17, NPC 5, 题目 37, 收入规则 10
 完成: 0 errors, 0 warnings
 ```
 
 最近一次 `pnpm simulate -n 1000 --check`:
 
 ```text
-事件覆盖: 82/82
-金钱分位: p10=¥91200 p50=¥237912 p90=¥494400
-心态分位: p10=24 p50=42 p90=64
-提前结局占比: 9.3%
+事件覆盖: 85/85
+金钱分位: p10=¥114700 p50=¥211700 p90=¥439000
+心态分位: p10=3 p50=30 p90=64
+提前结局占比: 8.2%
+兜底结局占比: 23.0%
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
-最近一次 `pnpm simulate -n 1000 --bot score`(第十五轮):
+最近一次 `pnpm simulate -n 500 --compare`:
 
 ```text
-随机 50 · 卷钱 53 · 保心态 65 · 卷总分 74
+随机 42 · 卷钱 41 · 保心态 62 · 卷总分 68
 ```
 
 ## 当前重要实现点
@@ -449,8 +516,8 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 已知问题 / 后续建议
 
-- 内容量还没有达到设计文档里的约 125 个事件,当前是 67 个。
-- 结局数量当前是 12 个,已进入 12-15 个 MVP 目标区间,可再补金融/医学线专属结局。
+- 内容量还没有达到设计文档里的约 125 个事件,当前是 85 个。
+- 结局数量当前是 17 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要再次挤高兜底或某个单一结局。
 - 分享图 Canvas 渲染已通过类型检查和构建,但还没有在真实浏览器里点过"保存分享图",上线前建议人工玩一局到结局验证一次。
 - 金钱/心态等数值已经可玩,但还需要继续根据 simulate 分布调平衡。
 

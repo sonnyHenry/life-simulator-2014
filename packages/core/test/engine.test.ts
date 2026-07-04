@@ -369,6 +369,46 @@ describe('exam skip', () => {
 });
 
 describe('income & scoring', () => {
+  it('supports setting a stat to an exact value and reports the real delta', () => {
+    const pack = miniPack();
+    const evA = pack.events.find(e => e.id === 'ev_a')!;
+    evA.choices[0]!.outcomes[0]!.effects = [{ setStat: 'money', value: 0 }];
+    const engine = createEngine(pack);
+    let state = engine.start(7);
+    state = engine.dispatch(state, { type: 'START' });
+    state.stats.money = 12345;
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'SKIP_EXAM' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE', choiceId: 'x' });
+    expect(state.stats.money).toBe(0);
+    expect(state.pendingOutcome?.deltas.money).toBe(-12345);
+  });
+
+  it('supports proportional money costs capped by the current balance', () => {
+    const pack = miniPack();
+    const evA = pack.events.find(e => e.id === 'ev_a')!;
+    evA.choices[0]!.outcomes[0]!.effects = [{ moneyCost: { rate: 0.5, roundTo: 1000 } }];
+    const engine = createEngine(pack);
+    let state = engine.start(7);
+    state = engine.dispatch(state, { type: 'START' });
+    state.stats.money = 12345;
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'SKIP_EXAM' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE', choiceId: 'x' });
+    expect(state.stats.money).toBe(6345);
+    expect(state.pendingOutcome?.deltas.money).toBe(-6000);
+  });
+
   it('applies matching income rules once per settled round', () => {
     const base = autoPlay(miniPack(), 11);
     const pack = miniPack();

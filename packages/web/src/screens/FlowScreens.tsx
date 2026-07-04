@@ -148,7 +148,7 @@ export function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APP
     <Card>
       <h2>志愿填报</h2>
       <p className="muted">
-        你的分数:{props.view.score}。先选批次,再选专业。报高于分数的批次可以冲,但冲不上就会滑档。
+        你的分数：{props.view.score}。先选批次，再选专业。报高于分数的批次可以冲，但冲不上就会滑档。
       </p>
       {!batch ? (
         <div className="choices">
@@ -156,7 +156,7 @@ export function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APP
             <ChoiceButton
               key={opt.id}
               onClick={() => setBatchId(opt.id)}
-              sub={`${opt.university} · 录取把握:${opt.chanceLabel}${opt.risky ? ' · 有滑档风险' : ''}`}
+              sub={`${opt.university} · 录取把握：${opt.chanceLabel}${opt.risky ? ' · 有滑档风险' : ''}`}
             >
               {opt.label}
               {opt.risky ? ' ⚡' : ''}
@@ -166,7 +166,7 @@ export function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APP
       ) : (
         <>
           <p className="section-label">
-            {batch.label} · 录取把握:{batch.chanceLabel}。选一个专业:
+            {batch.label} · 录取把握：{batch.chanceLabel}。选一个专业：
           </p>
           <div className="choices">
             {batch.majors.map(m => (

@@ -317,12 +317,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
+  min-width: 70px;
   height: 34px;
+  padding: 0 8px;
   border-radius: 8px;
   border: 1.5px solid #8a6a2f;
   color: #8a6a2f;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
 }
 

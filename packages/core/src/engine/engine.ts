@@ -23,19 +23,19 @@ const CROSSROAD_OPTIONS = [
   {
     id: 'postgrad',
     label: '考研',
-    text: '再把青春押给一次考试。晚几年入场,也许能换一张更硬的门票。',
+    text: '再把青春押给一次考试。晚几年入场，也许能换一张更硬的门票。',
     recommendedFor: ['计算机科学与技术', '软件工程', '师范类'],
   },
   {
     id: 'job',
     label: '求职',
-    text: '先上车再说。简历、群面、笔试、offer,毕业季的风会把人推着往前走。',
+    text: '先上车再说。简历、群面、笔试、offer，毕业季的风会把人推着往前走。',
     recommendedFor: ['计算机科学与技术', '软件工程', '计算机应用'],
   },
   {
     id: 'civil_service',
     label: '考公',
-    text: '回到一张安静的书桌前,把不确定的人生复习成确定的题型。',
+    text: '回到一张安静的书桌前，把不确定的人生复习成确定的题型。',
     recommendedFor: ['师范类', '工商管理'],
   },
 ] as const;
@@ -232,7 +232,7 @@ export function createEngine(pack: ContentPack): Engine {
           historyLength: state.history.length,
           shareCard: {
             title: ending.title,
-            tagline: ending.shareCard?.tagline ?? '普通人的十二年,也有自己的重量。',
+            tagline: ending.shareCard?.tagline ?? '普通人的十二年，也有自己的重量。',
             tone: ending.shareCard?.tone ?? 'warm',
             seed: state.seed,
             years: '2014-2026',
@@ -258,7 +258,7 @@ export function createEngine(pack: ContentPack): Engine {
       0,
     );
     const score = Math.max(0, Math.min(100, Math.round(raw)));
-    const grade = score >= 88 ? 'S' : score >= 76 ? 'A' : score >= 58 ? 'B' : score >= 42 ? 'C' : 'D';
+    const grade = score >= 92 ? 'S' : score >= 82 ? 'A' : score >= 64 ? 'B' : score >= 45 ? 'C' : 'D';
     return { score, grade };
   }
 
@@ -402,8 +402,8 @@ export function createEngine(pack: ContentPack): Engine {
       if (option.effects) addDeltas(deltas, applyEffects(option.effects, state, pack).deltas);
       text =
         diff < 0
-          ? `录取结果出来了:${option.university} · ${major.name}。你压着线冲了进去——查到结果那一刻,你把页面刷新了三遍才敢相信,班主任在电话里连说了三个"好"。后来你才知道,那年这个专业的最后一名,就是你。`
-          : `录取结果出来了:${option.university} · ${major.name}。志愿表上的一行字,从今天起变成了你接下来四年的城市、同学和专业。`;
+          ? `录取结果出来了：${option.university} · ${major.name}。你压着线冲了进去——查到结果那一刻，你把页面刷新了三遍才敢相信，班主任在电话里连说了三个“好”。后来你才知道，那年这个专业的最后一名，就是你。`
+          : `录取结果出来了：${option.university} · ${major.name}。志愿表上的一行字，从今天起变成了你接下来四年的城市、同学和专业。`;
     } else {
       // 滑档:落到分数够线的最高批次(排除刚冲失败的那个)
       const fallback = pack.applications
@@ -418,7 +418,7 @@ export function createEngine(pack: ContentPack): Engine {
       state.flags['slipped'] = true;
       if (option.failEffects) addDeltas(deltas, applyEffects(option.failEffects, state, pack).deltas);
       if (fallback.effects) addDeltas(deltas, applyEffects(fallback.effects, state, pack).deltas);
-      text = `滑档了。「${option.label}」的投档线比往年又涨了一截,你的名字不在这一批任何一张录取名单上。那几天家里安静得可怕,爸爸在阳台抽了半包烟,妈妈把"复读"两个字含在嘴里又咽了回去。直到征集志愿的最后一轮,${fallback.university}把你接住——${fbMajor.name}。去报到那天,爸爸只说了一句:"去了,就好好念。"十八岁的夏天你第一次知道:人生的考卷不止一张,但那年夏天,它看起来就像是唯一的一张。`;
+      text = `滑档了。「${option.label}」的投档线比往年又涨了一截，你的名字不在这一批任何一张录取名单上。那几天家里安静得可怕，爸爸在阳台抽了半包烟，妈妈把“复读”两个字含在嘴里又咽了回去。直到征集志愿的最后一轮，${fallback.university}把你接住——${fbMajor.name}。去报到那天，爸爸只说了一句：“去了，就好好念。”十八岁的夏天你第一次知道：人生的考卷不止一张，但那年夏天，它看起来就像是唯一的一张。`;
     }
     state.history.push({
       kind: 'application',
@@ -450,7 +450,7 @@ export function createEngine(pack: ContentPack): Engine {
           pack,
         );
         addDeltas(deltas, result.deltas);
-        text = '你选择考研。别人开始投简历、租房、领工资时,你重新坐回书桌前。晚几年入场,也意味着多几年打磨自己。';
+        text = '你选择考研。别人开始投简历、租房、领工资时，你重新坐回书桌前。晚几年入场，也意味着多几年打磨自己。';
         break;
       }
       case 'job': {
@@ -478,7 +478,7 @@ export function createEngine(pack: ContentPack): Engine {
           );
         }
         addDeltas(deltas, applyEffects(effects, state, pack).deltas);
-        text = '你选择直接求职。简历投出去的那一刻,学生时代开始松手,社会开始接管你的日程表。';
+        text = '你选择直接求职。简历投出去的那一刻，学生时代开始松手，社会开始接管你的日程表。';
         break;
       }
       case 'civil_service': {
@@ -493,7 +493,7 @@ export function createEngine(pack: ContentPack): Engine {
           pack,
         );
         addDeltas(deltas, result.deltas);
-        text = '你选择考公。把不确定的人生重新复习成题型,也是一种勇气。只是这条路不保证上岸,只保证你会很熟悉申论格子纸。';
+        text = '你选择考公。把不确定的人生重新复习成题型，也是一种勇气。只是这条路不保证上岸，只保证你会很熟悉申论格子纸。';
         break;
       }
       default:

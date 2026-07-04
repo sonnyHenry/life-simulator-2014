@@ -85,9 +85,9 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
   const { stats } = props.view;
   const [copied, setCopied] = useState(false);
   const shareText = [
-    `我在《2014:我的十二年》里达成结局: ${props.view.title}`,
+    `我在《2014：我的十二年》里达成结局：${props.view.title}`,
     props.view.shareCard.tagline,
-    `人生总分 ${props.view.score} (${props.view.grade} 级)`,
+    `人生总分 ${props.view.score}（成绩：${props.view.grade} 级）`,
     `学识${stats.knowledge} 金钱¥${stats.money.toLocaleString()} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
     `人生编号 #${seed}`,
   ].join('\n');
@@ -132,7 +132,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         <h2>{props.view.shareCard.title}</h2>
         <p>{props.view.shareCard.tagline}</p>
         <div className="share-score">
-          <span className="share-grade">{props.view.grade}</span>
+          <span className="share-grade">成绩：{props.view.grade}</span>
           <span>人生总分 {props.view.score}</span>
         </div>
         <div className="share-stats">

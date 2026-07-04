@@ -21,6 +21,16 @@ export type Condition =
 
 export type Effect =
   | { stats: Partial<Record<StatKey, number>> }
+  | {
+      moneyCost: {
+        rate: number;
+        min?: number;
+        max?: number;
+        roundTo?: number;
+        reason?: 'daily' | 'medical' | 'family' | 'investment' | 'scam' | 'house' | 'other';
+      };
+    }
+  | { setStat: StatKey; value: number }
   | { setFlag: string; value?: boolean | number | string }
   | { npcFavor: string; delta: number }
   | { npcStage: string; stage: string }

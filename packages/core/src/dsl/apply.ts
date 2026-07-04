@@ -22,6 +22,19 @@ export function applyEffects(effects: Effect[], state: GameState, pack: ContentP
         // deltas 记声明值而非钳制后的实际变化:属性顶到上下限时,结果页仍要展示加减分
         deltas[k] = (deltas[k] ?? 0) + delta;
       }
+    } else if ('moneyCost' in effect) {
+      const { rate, min = 0, max = Infinity, roundTo } = effect.moneyCost;
+      const raw = state.stats.money * rate;
+      const bounded = Math.max(min, Math.min(max, raw));
+      const rounded = roundTo && roundTo > 0 ? Math.round(bounded / roundTo) * roundTo : Math.round(bounded);
+      const actual = Math.max(0, Math.min(state.stats.money, rounded));
+      state.stats.money = clampStat('money', state.stats.money - actual);
+      deltas.money = (deltas.money ?? 0) - actual;
+    } else if ('setStat' in effect) {
+      const before = state.stats[effect.setStat];
+      const after = clampStat(effect.setStat, effect.value);
+      state.stats[effect.setStat] = after;
+      deltas[effect.setStat] = (deltas[effect.setStat] ?? 0) + (after - before);
     } else if ('setFlag' in effect) {
       state.flags[effect.setFlag] = effect.value ?? true;
     } else if ('npcFavor' in effect) {

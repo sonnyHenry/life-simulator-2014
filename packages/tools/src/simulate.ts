@@ -92,6 +92,14 @@ function expectedStatDelta(
     let delta = 0;
     for (const effect of outcome.effects) {
       if ('stats' in effect) delta += effect.stats[stat] ?? 0;
+      if ('moneyCost' in effect && stat === 'money') {
+        const { rate, min = 0, max = Infinity, roundTo } = effect.moneyCost;
+        const raw = state.stats.money * rate;
+        const bounded = Math.max(min, Math.min(max, raw));
+        const rounded = roundTo && roundTo > 0 ? Math.round(bounded / roundTo) * roundTo : Math.round(bounded);
+        delta -= Math.max(0, Math.min(state.stats.money, rounded));
+      }
+      if ('setStat' in effect && effect.setStat === stat) delta += effect.value - state.stats[stat];
     }
     expectation += (outcome.weight / totalWeight) * delta;
   }

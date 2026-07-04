@@ -223,7 +223,7 @@ function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APPLICATIO
     <Card>
       <Text className="h2">志愿填报</Text>
       <Text className="muted block">
-        你的分数:{props.view.score}。先选批次,再选专业。报高于分数的批次可以冲,但冲不上就会滑档。
+        你的分数：{props.view.score}。先选批次，再选专业。报高于分数的批次可以冲，但冲不上就会滑档。
       </Text>
       {!batch ? (
         <View className="choices">
@@ -231,7 +231,7 @@ function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APPLICATIO
             <ChoiceButton
               key={opt.id}
               onClick={() => setBatchId(opt.id)}
-              sub={`${opt.university} · 录取把握:${opt.chanceLabel}${opt.risky ? ' · 有滑档风险' : ''}`}
+              sub={`${opt.university} · 录取把握：${opt.chanceLabel}${opt.risky ? ' · 有滑档风险' : ''}`}
             >
               {opt.label}
               {opt.risky ? ' ⚡' : ''}
@@ -379,7 +379,7 @@ function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' }> }) {
         <Text className="share-title">{props.view.shareCard.title}</Text>
         <Text className="share-tagline block">{props.view.shareCard.tagline}</Text>
         <View className="share-score">
-          <Text className="share-grade">{props.view.grade}</Text>
+          <Text className="share-grade">成绩：{props.view.grade}</Text>
           <Text>人生总分 {props.view.score}</Text>
         </View>
         <View className="share-stats">
@@ -435,8 +435,8 @@ export default function Index() {
   useShareAppMessage(() => ({
     title:
       view.kind === 'ENDING'
-        ? `我在《2014:我的十二年》达成了「${view.title}」,总分 ${view.score}`
-        : '《2014:我的十二年》——替一个普通人过完这十二年',
+        ? `我在《2014：我的十二年》达成了「${view.title}」，总分 ${view.score}`
+        : '《2014：我的十二年》——替一个普通人过完这十二年',
     path: '/pages/index/index',
   }));
   return (

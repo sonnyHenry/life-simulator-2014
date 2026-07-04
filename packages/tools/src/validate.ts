@@ -7,6 +7,7 @@ interface Issue {
 }
 
 const issues: Issue[] = [];
+const MAX_FIXED_MONEY_DEBIT = 10000;
 
 function error(message: string): void {
   issues.push({ level: 'error', message });
@@ -133,7 +134,10 @@ for (const event of contentPack.events) {
       if (outcome.weight <= 0) error(`outcome weight must be positive: ${event.id}.${choice.id}`);
       // 结果页只展示 stats 变化:没有任何非零 stats 的 outcome 会让玩家看不到选择反馈
       const hasVisibleStat = outcome.effects.some(
-        e => 'stats' in e && Object.values(e.stats).some(v => v !== 0),
+        e =>
+          ('stats' in e && Object.values(e.stats).some(v => v !== 0)) ||
+          'moneyCost' in e ||
+          'setStat' in e,
       );
       if (!hasVisibleStat) {
         error(`outcome has no visible stat change (选完不展示加减分): ${event.id}.${choice.id}`);
@@ -142,10 +146,37 @@ for (const event of contentPack.events) {
         if ('fn' in cond && !fnIds.has(cond.fn)) error(`outcome ${event.id}.${choice.id} references missing condition fn: ${cond.fn}`);
       });
       visitEffects(outcome.effects, effect => {
+        if ('stats' in effect && effect.stats.money !== undefined && effect.stats.money < -MAX_FIXED_MONEY_DEBIT) {
+          error(
+            `event ${event.id} has large fixed money debit ${effect.stats.money}; use moneyCost for costs above ${MAX_FIXED_MONEY_DEBIT}`,
+          );
+        }
         if ('schedule' in effect && !eventIds.has(effect.schedule.eventId)) {
           error(`event ${event.id} schedules missing event: ${effect.schedule.eventId}`);
         } else if ('triggerEnding' in effect && !endingIds.has(effect.triggerEnding)) {
           error(`event ${event.id} triggers missing ending: ${effect.triggerEnding}`);
+        } else if ('moneyCost' in effect) {
+          if (effect.moneyCost.rate < 0 || effect.moneyCost.rate > 1) {
+            error(`event ${event.id} has invalid moneyCost rate: ${effect.moneyCost.rate}`);
+          }
+          if (effect.moneyCost.min !== undefined && effect.moneyCost.min < 0) {
+            error(`event ${event.id} has invalid moneyCost min: ${effect.moneyCost.min}`);
+          }
+          if (effect.moneyCost.max !== undefined && effect.moneyCost.max < 0) {
+            error(`event ${event.id} has invalid moneyCost max: ${effect.moneyCost.max}`);
+          }
+          if (
+            effect.moneyCost.min !== undefined &&
+            effect.moneyCost.max !== undefined &&
+            effect.moneyCost.min > effect.moneyCost.max
+          ) {
+            error(`event ${event.id} has moneyCost min > max`);
+          }
+          if (effect.moneyCost.roundTo !== undefined && effect.moneyCost.roundTo <= 0) {
+            error(`event ${event.id} has invalid moneyCost roundTo: ${effect.moneyCost.roundTo}`);
+          }
+        } else if ('setStat' in effect && !['knowledge', 'money', 'mindset', 'network', 'health'].includes(effect.setStat)) {
+          error(`event ${event.id} sets unknown stat: ${effect.setStat}`);
         } else if ('npcFavor' in effect && !npcIds.has(effect.npcFavor)) {
           error(`event ${event.id} changes missing npc favor: ${effect.npcFavor}`);
         } else if ('npcStage' in effect && !npcIds.has(effect.npcStage)) {
