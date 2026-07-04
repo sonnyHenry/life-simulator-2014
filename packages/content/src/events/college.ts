@@ -199,9 +199,14 @@ export const collegeEvents: GameEvent[] = [
         text: '报名竞选',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你磕磕绊绊讲完竞选词,竟然选上了。后来你学会了拉赞助、排活动、调解争吵。所谓人脉,最早可能就是从搬桌子开始的。',
             effects: [{ stats: { network: 8, mindset: 3, knowledge: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '你选上了,然后迎新晚会音响出了事故,你作为负责人在群里道歉到半夜。那学期你学会的第一课不是领导力,是背锅时如何保持表情管理。',
+            effects: [{ stats: { network: 4, mindset: -5, knowledge: -2 } }],
           },
         ],
       },
@@ -296,20 +301,30 @@ export const collegeEvents: GameEvent[] = [
         text: '早点写,别拖到最后',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你提前搭好框架,后面虽然也改到崩溃,但至少没有在查重前夜怀疑人生。',
             effects: [{ stats: { knowledge: 5, mindset: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你写得最早,也被毙得最早。开题会上老师一句"选题太空",两个月的框架推倒重来。好处是你还有时间;坏处是,你亲眼看着拖到最后的同学直接绕过了这一劫——他们的选题老师根本没来得及细看。',
+            effects: [{ stats: { knowledge: 3, mindset: -4 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '先收藏资料,以后再写',
+        text: '先把文献囤着,想清楚再动笔',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你收藏了二十篇论文,真正打开的是最后三天。凌晨四点的文档光标,比辅导员还会催人。',
             effects: [{ stats: { mindset: -4 } }],
+          },
+          {
+            weight: 1,
+            text: '想得久,动笔就快。你在截止前两周一口气写完,思路反而比早早开题的同学更顺——当然,你没敢告诉任何人这套方法论,怕害了别人。',
+            effects: [{ stats: { knowledge: 3, mindset: 2 } }],
           },
         ],
       },
@@ -339,12 +354,17 @@ export const collegeEvents: GameEvent[] = [
       },
       {
         id: 'b',
-        text: '笑着糊弄过去',
+        text: '用段子撑住气氛',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '气氛一旦往伤感的方向滑,你就赶紧讲个段子拽回来。四年攒下的梗够你讲一晚上:考前拜过的锦鲤、寝室夜谈会立过的 flag、那次集体睡过头的早八。大家笑得很配合,你也讲得很卖力,一顿饭就这么热热闹闹地糊弄了过去。深夜回到宿舍,推开门,一半的床位已经空了,床板露着,凉席卷在角落。你在自己的床沿坐了很久,忽然明白:段子挡得住那一顿饭,挡不住这一间屋子。离别没有被你糊弄过去,它只是很有耐心,等人群散了才来找你单独结账。',
             effects: [{ stats: { mindset: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '你一晚上没让冷场超过十秒。散场时班长搂着你的脖子说:"幸好有你,不然今晚得哭成什么样。"多年后群里回忆起散伙饭,大家记得的不是眼泪,是那晚笑到拍桌子的样子——这也是一种收尾,不比眼泪差。',
+            effects: [{ stats: { mindset: 3, network: 3 } }],
           },
         ],
       },

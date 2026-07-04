@@ -188,9 +188,14 @@ export const randomEvents: GameEvent[] = [
         text: '买票,周末就走',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你坐在陌生城市的小店里吃面,窗外下着雨。没有任何问题被解决,但你短暂地想起自己不只是一个岗位或一种身份。',
             effects: [{ stats: { money: -2500, mindset: 8 } }],
+          },
+          {
+            weight: 1,
+            text: '你选的正是全网都在推的"小众宝藏城市"。排队两小时的面馆、举着手机的人潮、比工位还密集的日程——周日深夜到家,你瘫在床上想:下次还是在家躺着吧。',
+            effects: [{ stats: { money: -3000, mindset: -2 } }],
           },
         ],
       },
@@ -263,6 +268,11 @@ export const randomEvents: GameEvent[] = [
             text: '婚礼上你们聊起宿舍和论文,笑得像当年一样。只是散场后各自打车回家,没人再说"晚上开黑"。',
             effects: [{ stats: { money: -2000, network: 4, mindset: 3 } }],
           },
+          {
+            weight: 1,
+            text: '你被安排在"同学散客桌",一桌九个人,你只认识新郎。从"在哪儿高就"聊到"有对象没",你笑着接了一下午招,红包还随了两千。回程的高铁上你想:有些婚礼是去见朋友的,有些只是去证明你来过。',
+            effects: [{ stats: { money: -2000, network: 1, mindset: -3 } }],
+          },
         ],
       },
       {
@@ -291,20 +301,30 @@ export const randomEvents: GameEvent[] = [
         text: '认真复盘,找下一年重点',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你列出三件真正重要的事,删掉了一堆虚假的目标。计划不能保证未来,但至少能让你别被日程推着走。',
             effects: [{ stats: { knowledge: 3, mindset: 3 } }],
+          },
+          {
+            weight: 1,
+            text: '复盘越写越心惊:去年立的目标,一多半原样躺在今年的清单里。你合上电脑,新一年还没开始,焦虑先到账了。',
+            effects: [{ stats: { knowledge: 2, mindset: -3 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '套模板,先交差',
+        text: '沿用去年的框架',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你复制了去年的结构,换了几个关键词。领导批了"继续努力",你也确实继续努力了。',
             effects: [{ stats: { mindset: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '年底领导在忙更大的事,总结根本没人细看。你省下的两个晚上,一个用来睡觉,一个跟爸妈视频——事后看,这可能是全年性价比最高的两晚。',
+            effects: [{ stats: { mindset: 3 } }],
           },
         ],
       },
@@ -371,9 +391,14 @@ export const randomEvents: GameEvent[] = [
         text: '正忙,挂了回头再说',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你按掉了,想着忙完这阵回过去。等你想起来,已经是三天后。爸妈没有怪你,这比怪你更让你难受。',
             effects: [{ stats: { mindset: -3 } }],
+          },
+          {
+            weight: 1,
+            text: '你忙完回拨过去,妈妈压低声音说"你爸刚睡着"。你们轻声聊了五分钟,她说"知道你忙,我们就是看看你"。有些牵挂不挑时间,补上就还算数。',
+            effects: [{ stats: { mindset: 1 } }],
           },
         ],
       },
@@ -424,9 +449,14 @@ export const randomEvents: GameEvent[] = [
         text: '报名,去看看大家都活成了什么样',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '聚会上没有想象中的攀比,大家聊的都是孩子、房贷和体检。散场时班长说"十年后再聚",所有人都笑着答应,所有人都知道很难。但今晚很好,今晚就够了。',
             effects: [{ stats: { money: -1000, network: 5, mindset: 4 } }],
+          },
+          {
+            weight: 1,
+            text: '饭吃到一半,有人开始讲保险,有人扫码拉群卖酒,还有人举着手机直播"十年重聚感动瞬间"。你和当年的同桌对视一眼,在彼此眼里看到了同一句话:再也不来了。',
+            effects: [{ stats: { money: -1000, network: 1, mindset: -3 } }],
           },
         ],
       },

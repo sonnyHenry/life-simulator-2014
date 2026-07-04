@@ -689,9 +689,14 @@ export const workEvents: GameEvent[] = [
         text: '先观望,别被概念割韭菜',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你见过太多风口了:O2O、区块链、元宇宙,每一个都说要改变世界,每一个都先改变了一批人的钱包。所以这次你决定等子弹飞一会儿。子弹飞得比你想的快:半年后,它进了公司的工具链,变成了周会上的"提效指标";一年后,新来的实习生用它的熟练度让你沉默。你开始补课,补得很快——基本功还在,追上不难。只是最早那波红利,和红利期里那种"我在浪潮前排"的心气,是补不回来的。你没有被割韭菜,只是这一次,谨慎本身也是有价格的。',
             effects: [{ stats: { knowledge: 3, mindset: -4 } }],
+          },
+          {
+            weight: 1,
+            text: '半年后,概念潮水退了一轮:隔壁组 all-in 的"大模型创新项目"没跑出指标,连人带项目一起被"优化"了。你按自己的节奏补课入场,工具照用、班照上,反而躲过了那轮折腾。风口上第一批起飞的和第一批摔下来的,经常是同一批人。',
+            effects: [{ stats: { knowledge: 6, mindset: 2 } }],
           },
         ],
       },
@@ -821,20 +826,30 @@ export const workEvents: GameEvent[] = [
         text: '重新设计互动方式',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你学会了用投票、弹幕和小测把学生拉回来。效果不完美,但至少屏幕那头有人开始回"老师我在"。',
             effects: [{ stats: { knowledge: 5, network: 3, mindset: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你搬出了十八般武艺,弹幕确实活跃了——活跃成了聊天室。一节课下来进度只走了一半,你盯着"老师再见"的刷屏,分不清自己是老师还是主播。',
+            effects: [{ stats: { knowledge: 2, mindset: -4 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '按原课件硬讲',
+        text: '按打磨多年的原课件讲',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '课讲完了,你也累空了。后台数据显示观看时长断崖式下跌,它比任何领导听课都诚实。',
             effects: [{ stats: { mindset: -5 } }],
+          },
+          {
+            weight: 1,
+            text: '期末你收到一条学生留言:"老师,你的课像深夜电台,我妈以为我在听睡前故事,其实我真的在记笔记。"花活会过时,把一件事讲清楚不会。',
+            effects: [{ stats: { mindset: 3, network: 1 } }],
           },
         ],
       },
@@ -1003,7 +1018,7 @@ export const workEvents: GameEvent[] = [
       },
       {
         id: 'b',
-        text: '越跌越买,信仰充值',
+        text: '逢低补仓,摊薄成本',
         outcomes: [
           {
             weight: 1,
@@ -1034,15 +1049,20 @@ export const workEvents: GameEvent[] = [
         text: '小仓位参与,留足现金',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你赚了一点,也睡得着觉。成年人最实用的投资哲学,可能是别让账户余额决定当天心情。',
             effects: [{ stats: { money: 30000, mindset: 3 } }],
+          },
+          {
+            weight: 1,
+            text: '你的小仓位买完就横盘,横了三个月,你嫌它占着现金清了仓。清完第二周,行情启动了。你安慰自己"仓位小,拿住了也赚不了多少"——这话没错,但你还是取关了那个天天晒收益的群友。',
+            effects: [{ stats: { money: 3000, mindset: -3 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '追热门,这次别错过',
+        text: '加大仓位,抓住这波主线',
         outcomes: [
           {
             weight: 1,
@@ -1066,20 +1086,30 @@ export const workEvents: GameEvent[] = [
         text: '认真准备,把事讲清楚',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你把做过的事拆成三页,问题和改进也写得实在。领导没夸很多,但说"可以转正"。那一刻你才敢松口气。',
             effects: [{ stats: { money: 5000, mindset: 4, network: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你把踩过的坑讲得太实诚。转正是过了,但从那以后,组里最烫手的活总会先想到"抗压能力强"的你。你第一次意识到,坦诚在职场是要挑剂量的。',
+            effects: [{ stats: { money: 5000, mindset: -4 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '套模板,别太暴露自己',
+        text: '稳妥一点,按模板讲',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '汇报过了,但也只是过了。你开始明白,职场里"没问题"和"有机会"之间隔着很长一段路。',
             effects: [{ stats: { mindset: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '那周部门在救火,你的汇报只开了十五分钟,领导全程在回消息,最后说"挺好,继续保持"。你没出错,而在那个兵荒马乱的季度,没出错就是最好的表现。',
+            effects: [{ stats: { money: 3000, mindset: 2 } }],
           },
         ],
       },
@@ -1162,15 +1192,20 @@ export const workEvents: GameEvent[] = [
         text: '建立作息,守住边界',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你给自己划了上下班时间。虽然消息还是会越界,但至少你没有彻底变成一台联网设备。',
             effects: [{ stats: { mindset: 4, knowledge: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '边界是守住了,但那几个月的新项目,都悄悄流向了消息秒回的同事。年底看绩效,你守住的作息被折算成了一个不咸不淡的评级。',
+            effects: [{ stats: { mindset: 2, money: -4000 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '随叫随到,别掉链子',
+        text: '保持在线,抓住表现的机会',
         outcomes: [
           {
             weight: 1,
@@ -1265,13 +1300,13 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             condition: { all: [{ flag: 'early_house' }, { stat: 'money', op: '>=', value: 200000 }] },
             text: '2016年上的车,跌掉的只是浮盈的零头。你提前还了一笔,月供轻了一大截。当年在客厅签字时手心冒汗的你,大概想不到有一天会感谢爸妈的固执。',
-            effects: [{ stats: { money: -150000, mindset: 8 } }],
+            effects: [{ stats: { money: -150000, mindset: 8 } }, { setFlag: 'prepaid_mortgage' }],
           },
           {
             weight: 1,
             condition: { all: [{ not: { flag: 'early_house' } }, { stat: 'money', op: '>=', value: 200000 }] },
             text: '你提前还了一笔,月供轻了一些。房价的数字你决定不再天天看——住着的房子,跌的是别人嘴里的估值,亮的是自己家里的灯。',
-            effects: [{ stats: { money: -150000, mindset: 6 } }],
+            effects: [{ stats: { money: -150000, mindset: 6 } }, { setFlag: 'prepaid_mortgage' }],
           },
           {
             weight: 1,
@@ -1379,15 +1414,20 @@ export const workEvents: GameEvent[] = [
         text: '重新规划下一阶段',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你写下几个真正想保住的东西:身体、现金流、少数关系、还能学习的能力。清单不长,但比愿望靠谱。',
             effects: [{ stats: { knowledge: 3, mindset: 5 } }],
+          },
+          {
+            weight: 1,
+            text: '规划做到一半,你打开了同龄人的社交主页,然后半夜两点还在对着"三十岁该有多少存款"的帖子做算术。规划没做完,焦虑倒是提前完成了指标。',
+            effects: [{ stats: { knowledge: 2, mindset: -3 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '先别想,过一天算一天',
+        text: '顺其自然,先把眼前过好',
         outcomes: [
           {
             weight: 1,
@@ -1742,9 +1782,14 @@ export const workEvents: GameEvent[] = [
         text: '感谢他,但继续按原计划走',
         outcomes: [
           {
-            weight: 1,
+            weight: 2,
             text: '你感谢了他,也没有立刻改变。不是所有建议都会马上生效,有些话要过几年才听得懂。',
             effects: [{ stats: { mindset: 1 } }, { npcStage: 'mentor', stage: 'ally' }],
+          },
+          {
+            weight: 1,
+            text: '你按原计划走完了这一年。年底复盘,你发现自己当初的几个判断并没有错——前辈的话是地图,但路终究是自己脚下这条。信別人之前先信过自己,这一年不亏。',
+            effects: [{ stats: { knowledge: 2, mindset: 3 } }, { npcStage: 'mentor', stage: 'ally' }],
           },
         ],
       },

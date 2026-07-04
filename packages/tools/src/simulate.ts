@@ -9,7 +9,7 @@ import {
 } from '@life-sim/core';
 import { contentPack } from '@life-sim/content';
 
-type Strategy = 'random' | 'money' | 'mindset';
+type Strategy = 'random' | 'money' | 'mindset' | 'score';
 
 interface CliArgs {
   runs: number;
@@ -38,8 +38,8 @@ function parseArgs(argv: string[]): CliArgs {
     else if (a === '--compare') args.compare = true;
     else if (a === '--bot' && argv[i + 1]) {
       const s = argv[++i];
-      if (s === 'random' || s === 'money' || s === 'mindset') args.strategy = s;
-      else throw new Error(`unknown bot strategy: ${s}(可选 random/money/mindset)`);
+      if (s === 'random' || s === 'money' || s === 'mindset' || s === 'score') args.strategy = s;
+      else throw new Error(`unknown bot strategy: ${s}(可选 random/money/mindset/score)`);
     }
   }
   return args;
@@ -58,6 +58,16 @@ const STRATEGY_LABELS: Record<Strategy, string> = {
   random: '随机',
   money: '卷钱',
   mindset: '保心态',
+  score: '卷总分',
+};
+
+/** 与 engine.computeScore 同一套权重:模拟"看得出哪个选项得分"的玩家 */
+const SCORE_WEIGHTS: Record<StatKey, number> = {
+  knowledge: 0.25,
+  mindset: 0.25,
+  network: 0.2,
+  // money 权重 0.3,满分线 ¥600000 → 每 1 元 ≈ 0.00005 分
+  money: (0.3 * 100) / (contentPack.meta.scoring?.moneyFullScore ?? 600000),
 };
 
 /** 贪心 bot 的选项打分:按 outcome 权重求某项数值变化的期望(条件用一次性 RNG 求值,不污染对局随机流) */
@@ -119,11 +129,19 @@ function botAction(
     }
     case 'EVENT': {
       if (strategy === 'random') return { type: 'CHOOSE', choiceId: bot.pick(view.choices).id };
-      const stat: StatKey = strategy === 'money' ? 'money' : 'mindset';
+      const scoreOf = (choiceId: string): number => {
+        if (strategy === 'score') {
+          return (Object.keys(SCORE_WEIGHTS) as StatKey[]).reduce(
+            (sum, key) => sum + SCORE_WEIGHTS[key] * expectedStatDelta(view.eventId, choiceId, state, key),
+            0,
+          );
+        }
+        return expectedStatDelta(view.eventId, choiceId, state, strategy === 'money' ? 'money' : 'mindset');
+      };
       let best: string[] = [];
       let bestScore = -Infinity;
       for (const choice of view.choices) {
-        const score = expectedStatDelta(view.eventId, choice.id, state, stat);
+        const score = scoreOf(choice.id);
         if (score > bestScore + 1e-9) {
           bestScore = score;
           best = [choice.id];
@@ -418,7 +436,7 @@ function main(): void {
 
   if (args.compare) {
     console.log(`策略对比,每种策略 ${args.runs} 局 (baseSeed=${baseSeed}) ...\n`);
-    const batches = (['random', 'money', 'mindset'] as Strategy[]).map(strategy =>
+    const batches = (['random', 'money', 'mindset', 'score'] as Strategy[]).map(strategy =>
       runBatch(args.runs, baseSeed, strategy),
     );
     console.log('策略     均分  均财        心态均值  崩溃率   Top 结局');

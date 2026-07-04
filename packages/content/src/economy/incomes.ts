@@ -49,6 +49,21 @@ export const incomes: IncomeRule[] = [
     mindsetDelta: -1,
   },
   {
+    id: 'inc_prepaid_mortgage',
+    label: '提前还贷省下的利息',
+    when: { flag: 'prepaid_mortgage' },
+    amount: 18000,
+    mindsetDelta: 1,
+  },
+  {
+    // 观望不买房不是白嫖:2024 起房租进入补涨周期,租房者的净储蓄被持续侵蚀
+    id: 'inc_rent_inflation',
+    label: '房租上涨侵蚀',
+    when: { all: [{ flag: 'no_house' }, { year: { from: 2024 } }] },
+    amount: -8000,
+    mindsetDelta: -1,
+  },
+  {
     id: 'inc_generic_job',
     label: '普通工作收入',
     when: {
