@@ -1,4 +1,14 @@
-import type { GameEvent } from '@life-sim/core';
+import type { Condition, GameEvent } from '@life-sim/core';
+
+// "已经在上班"的身份门控,防止上班族语境事件打到 2018-2021 在读的考研玩家身上
+const working: Condition = {
+  any: [
+    { flag: 'entered_job_market_2018' },
+    { flag: 'postgrad_done' },
+    { flag: 'career_gov' },
+    { flag: 'civil_service_failed' },
+  ],
+};
 
 export const workEvents: GameEvent[] = [
   {
@@ -300,7 +310,7 @@ export const workEvents: GameEvent[] = [
     category: 'invest',
     title: '年化 15% 的理财',
     text: '同事神秘兮兮地给你看他的收益截图:某 P2P 平台,年化 15%,"国资背景,上市系,跑了好几年了"。他已经投了半年,每月利息准时到账。',
-    trigger: { year: { from: 2018, to: 2019 } },
+    trigger: { all: [{ year: { from: 2018, to: 2019 } }, working] },
     choices: [
       {
         id: 'a',
@@ -978,7 +988,7 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '试用期汇报',
     text: '入职几个月后,你要做第一次试用期汇报。PPT 上写着"成长与反思",但你最想写的是"我真的尽力了"。',
-    trigger: { year: { from: 2018, to: 2019 } },
+    trigger: { all: [{ year: { from: 2018, to: 2019 } }, working] },
     choices: [
       {
         id: 'a',
@@ -1010,7 +1020,7 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '领导的反馈',
     text: '绩效沟通时,领导说你"执行不错,但要更有 owner 意识"。你点头记录,心里翻译成中文:活要多想,锅也要多背。',
-    trigger: { year: { from: 2019 } },
+    trigger: { all: [{ year: { from: 2019 } }, working] },
     choices: [
       {
         id: 'a',
@@ -1042,7 +1052,7 @@ export const workEvents: GameEvent[] = [
     category: 'money',
     title: '第一笔年终奖',
     text: '年终奖到账了。金额没有传说中那么夸张,但比你学生时代见过的大多数数字都大。你打开购物车,又打开银行卡余额。',
-    trigger: { year: { from: 2019, to: 2020 } },
+    trigger: { all: [{ year: { from: 2019, to: 2020 } }, working] },
     choices: [
       {
         id: 'a',
@@ -1074,7 +1084,7 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '远程办公',
     text: '2020年,客厅变成办公室。视频会议里有人忘关麦,有人孩子在旁边哭,有人把头像停在"网络不佳"。',
-    trigger: { year: { from: 2020, to: 2020 } },
+    trigger: { all: [{ year: { from: 2020, to: 2020 } }, working] },
     choices: [
       {
         id: 'a',

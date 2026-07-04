@@ -1,4 +1,15 @@
-import type { GameEvent } from '@life-sim/core';
+import type { Condition, GameEvent } from '@life-sim/core';
+
+// "已经在上班"的身份门控:求职入场 / 研究生毕业 / 考公上岸 / 考公落榜后打工。
+// 上班族语境的事件(房租、副业、领导、公司体检…)都要挂这个,防止打到在读玩家身上。
+const working: Condition = {
+  any: [
+    { flag: 'entered_job_market_2018' },
+    { flag: 'postgrad_done' },
+    { flag: 'career_gov' },
+    { flag: 'civil_service_failed' },
+  ],
+};
 
 export const randomEvents: GameEvent[] = [
   {
@@ -72,6 +83,7 @@ export const randomEvents: GameEvent[] = [
     id: 'ev_random_old_friend',
     pools: ['random'],
     category: 'friendship',
+    trigger: { year: { from: 2020 } },
     title: '老同学的朋友圈',
     text: '你刷到高中同学的朋友圈:有人晒婚纱照,有人晒工牌,有人晒孩子,有人晒国外定位。你看了很久,突然想起当年大家都穿着一样的校服。',
     choices: [
@@ -105,7 +117,7 @@ export const randomEvents: GameEvent[] = [
     category: 'money',
     title: '房租又涨了',
     text: '房东发来消息:下个租期每月涨三百。你打开租房软件看了一圈,发现不是房东变坏了,是整座城市都在涨价。',
-    trigger: { year: { from: 2018 } },
+    trigger: { all: [{ year: { from: 2018 } }, working] },
     choices: [
       {
         id: 'a',
@@ -169,7 +181,7 @@ export const randomEvents: GameEvent[] = [
     category: 'mindset',
     title: '短途旅行',
     text: '连续忙了很久后,你突然想离开这座城市两天。不是去看什么大风景,只是想让手机信号和工作消息都慢一点。',
-    trigger: { year: { from: 2019 } },
+    trigger: { all: [{ year: { from: 2019 } }, working] },
     choices: [
       {
         id: 'a',
@@ -201,7 +213,7 @@ export const randomEvents: GameEvent[] = [
     category: 'money',
     title: '副业诱惑',
     text: '朋友拉你进了一个副业群:写稿、剪视频、带货、知识付费。群公告写着"下班后两小时,改变人生"。',
-    trigger: { year: { from: 2020 } },
+    trigger: { all: [{ year: { from: 2020 } }, working] },
     choices: [
       {
         id: 'a',
@@ -304,7 +316,7 @@ export const randomEvents: GameEvent[] = [
     category: 'health',
     title: '年卡',
     text: '公司楼下的健身房在搞活动,销售小哥拦住你:"哥,办年卡吧,平均一天才六块钱,一杯奶茶都不到。"你捏了捏加班攒出来的肚子。',
-    trigger: { year: { from: 2019 } },
+    trigger: { all: [{ year: { from: 2019 } }, working] },
     choices: [
       {
         id: 'a',
