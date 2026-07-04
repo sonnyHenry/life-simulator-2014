@@ -44,6 +44,21 @@ const phasePoolIds = new Set(
   contentPack.timeline.flatMap(phase => (phase.kind === 'rounds' ? phase.pools : [])),
 );
 const eventPoolIds = new Set(contentPack.events.flatMap(e => e.pools));
+const scheduledEventIds = new Set<string>();
+for (const event of contentPack.events) {
+  for (const choice of event.choices) {
+    for (const outcome of choice.outcomes) {
+      for (const effect of outcome.effects) {
+        if ('schedule' in effect) scheduledEventIds.add(effect.schedule.eventId);
+      }
+    }
+  }
+}
+for (const application of contentPack.applications) {
+  for (const effect of [...(application.effects ?? []), ...(application.failEffects ?? [])]) {
+    if ('schedule' in effect) scheduledEventIds.add(effect.schedule.eventId);
+  }
+}
 
 checkUnique('event', contentPack.events.map(e => e.id));
 checkUnique('ending', contentPack.endings.map(e => e.id));
@@ -82,10 +97,10 @@ for (const pool of phasePoolIds) {
 }
 
 for (const event of contentPack.events) {
-  if (event.pools.length === 0 && ![...contentPack.npcs].some(npc =>
+  if (event.pools.length === 0 && !scheduledEventIds.has(event.id) && ![...contentPack.npcs].some(npc =>
     Object.values(npc.stages).some(stage => stage.eventId === event.id),
   )) {
-    warn(`event has no pool and is not referenced by an NPC stage: ${event.id}`);
+    warn(`event has no pool and is not referenced by an NPC stage or schedule: ${event.id}`);
   }
   if (event.choices.length === 0) error(`event has no choices: ${event.id}`);
   visitCondition(event.trigger, cond => {

@@ -19,8 +19,16 @@ export const npcs: NpcDef[] = [
         advanceWhen: { year: { from: 2017, to: 2017 } },
         eventId: 'ev_npc_roommate_startup_reality',
       },
-      distant: {},
-      close_friend: {},
+      distant: {
+        advanceWhen: { year: { from: 2020, to: 2020 } },
+        eventId: 'ev_npc_roommate_2020',
+      },
+      close_friend: {
+        advanceWhen: { year: { from: 2020, to: 2020 } },
+        eventId: 'ev_npc_roommate_2020',
+      },
+      livestream_comeback: {},
+      faded: {},
     },
   },
   {

@@ -142,16 +142,12 @@ export const workEvents: GameEvent[] = [
         text: '跟投两万,搏一搏',
         outcomes: [
           {
-            weight: 3,
-            text: '三个月后,平台公告"暂停提现"。维权群从 200 人涨到 2000 人,你的两万块变成了群文件里的一行登记信息。同事比你惨,他加了杠杆。',
-            outcomeTag: 'failure',
-            effects: [{ stats: { money: -20000, mindset: -15 } }],
-          },
-          {
             weight: 1,
-            text: '你拿了几个月利息,总觉得不踏实,提前把本息赎回了。半年后平台暴雷,你在新闻里看到那个熟悉的 logo,后背发凉。',
-            outcomeTag: 'success',
-            effects: [{ stats: { money: 8000, mindset: 3 } }],
+            text: '你转了两万进去。第一个月利息 250,准时到账,像一句"你看吧"。同事拍拍你:"稳的,我研究过他们的股东背景。"你把这个 APP 挪到了手机第一屏。',
+            effects: [
+              { stats: { money: -20000, mindset: 2 } },
+              { schedule: { eventId: 'ev_invest_p2p_collapse', afterRounds: 1 } },
+            ],
           },
         ],
       },
@@ -163,6 +159,44 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你没投。半年后平台暴雷,同事在工位上打了一下午电话。你请他吃了顿饭,他说:"早知道听你的。"这世上最贵的三个字,是"早知道"。',
             effects: [{ stats: { mindset: 1 } }, { setFlag: 'dodged_p2p' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_invest_p2p_collapse',
+    pools: [],
+    category: 'invest',
+    title: '暂停提现',
+    text: '这天早上,平台公告"系统升级,暂停提现"。维权群一夜之间从 200 人涨到 2000 人,有人晒出总部人去楼空的照片。你点开自己的账户,数字还在,只是"取出"按钮再也点不动了。',
+    choices: [
+      {
+        id: 'a',
+        text: '进维权群,登记材料,死磕到底',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你跟着群友跑立案、做登记、盯进展。两年后清退方案下来,回款四成。到账那天群里刷了一排"谢谢",你却高兴不起来——但好歹,不是零。',
+            outcomeTag: 'partial',
+            effects: [{ stats: { money: 8000, mindset: -10 } }, { setFlag: 'p2p_burned' }],
+          },
+          {
+            weight: 2,
+            text: '你登记了材料,进了三个维权群,换来的只有一轮轮"最新进展"和一次次失望。两万块最后变成了群文件里的一行数字。同事比你惨,他加了杠杆。',
+            outcomeTag: 'failure',
+            effects: [{ stats: { mindset: -15 } }, { setFlag: 'p2p_burned' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '认栽,当交了两万块学费',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你退了群,卸了 APP,把这两万块记进"人生学费"。后来再看到"年化 15%"四个字,你的手指会自动划走。有些课,一辈子只需要上一次。',
+            effects: [{ stats: { mindset: -8 } }, { setFlag: 'p2p_burned' }],
           },
         ],
       },
@@ -350,6 +384,7 @@ export const workEvents: GameEvent[] = [
             effects: [
               { stats: { money: 60000, mindset: -12 } },
               { setFlag: 'laid_off' },
+              { schedule: { eventId: 'ev_cs_reemployment', afterRounds: 1 } },
             ],
           },
         ],
@@ -361,7 +396,11 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你留下来了,代价是更重的活和更小的奖金。幸存者没有掌声,只有更多需求排期。',
-            effects: [{ stats: { money: 15000, mindset: -10 } }, { setFlag: 'survived_layoff' }],
+            effects: [
+              { stats: { money: 15000, mindset: -10 } },
+              { setFlag: 'survived_layoff' },
+              { schedule: { eventId: 'ev_cs_second_wave', afterRounds: 1 } },
+            ],
           },
         ],
       },
@@ -382,6 +421,16 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            condition: { flag: 'survived_layoff' },
+            text: '去年裁员留下来的人里,你是学得最凶的那个。你比谁都清楚:上一轮靠的是降预期,这一轮得靠真本事。AI 没有让你更安全,但让你更有用。',
+            effects: [
+              { stats: { knowledge: 11, money: 20000, mindset: -1 } },
+              { setFlag: 'ai_adapted' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'survived_layoff' } },
             text: '你开始用 AI 写脚手架、查文档、改简历。效率确实上去了,焦虑也没有消失。工具越强,越提醒你别只做工具能做的事。',
             effects: [
               { stats: { knowledge: 10, money: 20000, mindset: -2 } },
@@ -398,6 +447,83 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你没有第一时间跟进。半年后,它已经进了公司的工具链。你补课补得很快,只是错过了最早那波红利。',
             effects: [{ stats: { knowledge: 3, mindset: -4 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_cs_second_wave',
+    pools: [],
+    category: 'career',
+    title: '第二轮优化',
+    text: '"降本增效"进入第二季。这次没有全员大会,只有一个个被拉进小会议室的日历邀请。你去年主动降过预期,但名单从来不看苦劳。',
+    choices: [
+      {
+        id: 'a',
+        text: '主动申请转岗,去离收入最近的业务',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你赶在名单敲定前转去了商业化团队。新业务节奏更狠,但至少工牌还是热的。你开始明白,大厂里最稳的岗位,是离钱最近的岗位。',
+            effects: [{ stats: { money: 12000, knowledge: 4, mindset: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '不折腾,赌名单上没有我',
+        outcomes: [
+          {
+            weight: 2,
+            text: '这一轮的刀落在了隔壁组。你继续留在原地,只是把工位上的私人物品,悄悄减到了一个背包能装下的量。',
+            effects: [{ stats: { money: 8000, mindset: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '日历邀请最终还是来了。HR 的话术,和去年你目送同事离开时听到的一模一样。N+1 到账,你在楼下坐了很久,把去年没敢想的问题想完了。',
+            outcomeTag: 'failure',
+            effects: [
+              { stats: { money: 50000, mindset: -14 } },
+              { setFlag: 'laid_off' },
+              { schedule: { eventId: 'ev_cs_reemployment', afterRounds: 1 } },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_cs_reemployment',
+    pools: [],
+    category: 'career',
+    title: '空窗期之后',
+    text: '被裁后的第几个月,你已经数不清投了多少份简历。面试官的问题越来越像审讯:"这段空窗期你在做什么?"这天,你同时收到两个消息:一个降薪三成的 offer,和一句"再等等,还有更合适的"的猎头留言。',
+    choices: [
+      {
+        id: 'a',
+        text: '降薪也先上车,活下来再说',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你签了。工资少了一截,心里的石头却落了地。入职第一天,你把新工卡拍照发给爸妈。他们不懂"降薪三成"意味着什么,只回了一句:"上班就好。"',
+            effects: [{ stats: { money: 25000, mindset: 8 } }, { setFlag: 'restarted_after_layoff' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '再撑一撑,等一个不将就的机会',
+        outcomes: [
+          {
+            weight: 1,
+            text: '三个月后,你等到了那个位置——薪资没降,方向也对。回头看,那段空窗期像一场没人监考的考试,你交卷交得比想象中体面。',
+            effects: [{ stats: { money: 40000, mindset: 10 } }, { setFlag: 'restarted_after_layoff' }],
+          },
+          {
+            weight: 1,
+            text: '存款以肉眼可见的速度变薄,合适的机会始终差半步。最后你接了一份过渡的工作。成年人的底气,原来是按月发放的。',
+            effects: [{ stats: { money: -15000, mindset: -6 } }],
           },
         ],
       },
@@ -567,6 +693,19 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            condition: { flag: 'p2p_burned' },
+            text: '被 P2P 咬过之后,你只敢每月定投一点宽基。收益不惊艳,但每次点开账户,你想到的不再是"暴富",而是"这次至少跑得掉"。学费没有白交。',
+            effects: [{ stats: { money: 6000, mindset: 3 } }, { setFlag: 'fund_dca' }],
+          },
+          {
+            weight: 1,
+            condition: { flag: 'dodged_p2p' },
+            text: '当年躲过 P2P 的那点直觉还在。你设了每月定投,涨了不追,跌了不停。同事笑你保守,你笑笑没说话。',
+            effects: [{ stats: { money: 7000, mindset: 3 } }, { setFlag: 'fund_dca' }],
+          },
+          {
+            weight: 1,
+            condition: { all: [{ not: { flag: 'p2p_burned' } }, { not: { flag: 'dodged_p2p' } }] },
             text: '你没有赚到截图里那种夸张收益,但也没有被波动吓跑。慢慢来这三个字,在牛市里很难听进去。',
             effects: [{ stats: { money: 6000, mindset: 2 } }, { setFlag: 'fund_dca' }],
           },
@@ -591,7 +730,12 @@ export const workEvents: GameEvent[] = [
     category: 'invest',
     title: '抱团松动',
     text: '2021年,曾经闭眼买的基金开始回撤。评论区从"经理永远的神"变成"还我血汗钱"。你第一次认真看懂了什么叫最大回撤。',
-    trigger: { year: { from: 2021, to: 2021 } },
+    trigger: {
+      all: [
+        { year: { from: 2021, to: 2021 } },
+        { any: [{ flag: 'fund_dca' }, { flag: 'fund_chased' }] },
+      ],
+    },
     choices: [
       {
         id: 'a',
@@ -599,7 +743,14 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            text: '你少赚过,也少亏了。投资里最难的不是买入,是承认自己其实没有那么懂。',
+            condition: { flag: 'fund_chased' },
+            text: '你在半山腰割掉了大半仓位。去年梭哈进去的钱回来时瘦了一圈,但至少还认识回家的路。投资里最难的不是买入,是承认自己其实没有那么懂。',
+            effects: [{ stats: { money: -8000, mindset: -3 } }, { setFlag: 'risk_control' }],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'fund_chased' } },
+            text: '定投的仓位本来就不重,你降了一档继续走。你少赚过,也少亏了。投资里最难的不是买入,是承认自己其实没有那么懂。',
             effects: [{ stats: { mindset: 2 } }, { setFlag: 'risk_control' }],
           },
         ],
@@ -610,6 +761,13 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            condition: { flag: 'fund_chased' },
+            text: '你重仓在山顶,又一路补仓到山腰。去年研究"提前退休"的文档还在收藏夹里,现在你只敢在深夜打开账户。市场用真金白银给你上了第二课。',
+            effects: [{ stats: { money: -30000, mindset: -14 } }],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'fund_chased' } },
             text: '你一路补仓,一路降低成本,也一路降低心态。账户曲线像体检报告,每次打开都需要勇气。',
             effects: [{ stats: { money: -18000, mindset: -10 } }],
           },
@@ -816,6 +974,79 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_house_price_correction',
+    pools: ['work'],
+    category: 'money',
+    title: '房价回调',
+    mandatory: true,
+    trigger: { all: [{ flag: 'has_house' }, { year: { from: 2024, to: 2024 } }] },
+    text: '2024年,你所在小区的挂牌价比你买入时低了一截。中介的朋友圈从"再不上车就晚了"变成了"业主诚心急售"。月供短信还是每月 8 号准时到,像什么都没发生过。',
+    choices: [
+      {
+        id: 'a',
+        text: '手里攒了点钱,提前还一部分贷款',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '>=', value: 50000 },
+            text: '你提前还了一笔,月供轻了一些。房价的数字你决定不再天天看——住着的房子,跌的是别人嘴里的估值,亮的是自己家里的灯。',
+            effects: [{ stats: { money: -50000, mindset: 6 } }],
+          },
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '<', value: 50000 },
+            text: '你打开还款计算器按了半天,发现"提前还贷"这四个字,首先需要"提前有钱"。你关掉 APP,把这件事推给了明年的自己。',
+            effects: [{ stats: { mindset: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '不看不问,照常还贷照常生活',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把看房 APP 卸载了。周末你在自己家里煮火锅,窗户上全是雾气。账面浮亏是真的,锅里的热气也是真的。',
+            effects: [{ stats: { mindset: 3 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_rent_moving_again',
+    pools: ['work'],
+    category: 'money',
+    title: '第 N 次搬家',
+    mandatory: true,
+    trigger: { all: [{ flag: 'no_house' }, { year: { from: 2025, to: 2025 } }] },
+    text: '房东发来消息:"房子要卖,下个月麻烦搬一下。"你环顾这间住了几年的屋子,发现所谓生活,原来可以被打包成十二个纸箱。',
+    choices: [
+      {
+        id: 'a',
+        text: '搬,顺便换个离公司近点的',
+        outcomes: [
+          {
+            weight: 1,
+            text: '新房子贵了几百块,但通勤缩短了四十分钟。搬完最后一箱,你点了个外卖,坐在地板上吃。没有房产证,但这一刻,这里确实是你的家。',
+            effects: [{ stats: { money: -8000, mindset: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '借这个机会,认真算算要不要离开这座城市',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你打开了老家省会的招聘软件,又打开了这座城市的地铁图。算到最后你发现,让你留下的不是机会,是不甘心。你续租了另一间房,把"离开"两个字又存回了草稿箱。',
+            effects: [{ stats: { money: -5000, mindset: -2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_work_blind_date',
     pools: ['work'],
     category: 'relationship',
@@ -913,6 +1144,55 @@ export const workEvents: GameEvent[] = [
               { stats: { mindset: -1 } },
               { npcFavor: 'grinder', delta: -2 },
               { npcStage: 'grinder', stage: 'layoff_pending' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_npc_roommate_2020',
+    pools: [],
+    category: 'npc',
+    title: '室友开播了',
+    text: '2020年,你刷到室友在直播卖家乡的橙子。镜头前他熟练地喊着"3、2、1 上链接",背景是他老家的果园。当年校园跑腿那股劲儿,原来一直没灭,只是换了个出口。',
+    choices: [
+      {
+        id: 'a',
+        text: '下一单,再帮他转发到朋友圈',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { flag: 'roommate_startup_joined' },
+            text: '你下了单,备注写了句"创始团队前来验货"。他在直播里念到这条备注时愣了一下,笑着说:"这是我第一个合伙人。"当晚他给你转了 888,你退回去,留了句:下次上新叫我。',
+            effects: [
+              { stats: { mindset: 6, network: 5 } },
+              { npcFavor: 'roommate', delta: 15 },
+              { npcStage: 'roommate', stage: 'livestream_comeback' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'roommate_startup_joined' } },
+            text: '你买了两箱橙子,顺手转发了直播间。他私信你:"谢了兄弟。"橙子很甜,你想起大学阳台上那份没入伙的商业计划书,忽然有点感慨:他一直在场上,你一直在看台。',
+            effects: [
+              { stats: { mindset: 3 } },
+              { npcFavor: 'roommate', delta: 8 },
+              { npcStage: 'roommate', stage: 'livestream_comeback' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '点个赞就划走,各自生活',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你点了个赞,继续刷下一条。后来他的直播间慢慢做起来了,你们的聊天记录停在去年的"新年快乐"。有些人没有走散,只是走远。',
+            effects: [
+              { npcFavor: 'roommate', delta: -5 },
+              { npcStage: 'roommate', stage: 'faded' },
             ],
           },
         ],

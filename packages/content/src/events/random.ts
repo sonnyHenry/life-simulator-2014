@@ -241,6 +241,13 @@ export const randomEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            condition: { flag: 'dorm_bond' },
+            text: '敬酒环节,新郎特意走到你这桌:"这是当年天天带我开黑的兄弟。"你们把大学的梗一个个翻出来,笑到隔壁桌回头。散场后你在路边站了一会儿,觉得那几年没白过。',
+            effects: [{ stats: { money: -2000, network: 6, mindset: 5 } }],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'dorm_bond' } },
             text: '婚礼上你们聊起宿舍和论文,笑得像当年一样。只是散场后各自打车回家,没人再说"晚上开黑"。',
             effects: [{ stats: { money: -2000, network: 4, mindset: 3 } }],
           },

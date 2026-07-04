@@ -62,7 +62,12 @@ export const endings: EndingDef[] = [
     condition: {
       all: [
         { flag: 'laid_off' },
-        { stat: 'mindset', op: '>=', value: 35 },
+        {
+          any: [
+            { flag: 'restarted_after_layoff' },
+            { stat: 'mindset', op: '>=', value: 35 },
+          ],
+        },
       ],
     },
     shareCard: { tone: 'warm', tagline: '没有背景音乐,也可以慢慢站起来。' },
@@ -89,6 +94,35 @@ export const endings: EndingDef[] = [
     priority: 110,
     condition: { flag: 'career_gov' },
     shareCard: { tone: 'warm', tagline: '稳定不是没故事,只是故事讲得更慢。' },
+  },
+  {
+    id: 'end_house_key',
+    title: '还贷的人',
+    text: '2026年,你的存款余额和房贷余额之间,隔着一条长长的河。有人说你接了盘,有人说你安了家。每天晚上,你用自己的钥匙打开自己的门,把外卖放在自己的桌上——这件小事,你用了十二年才做到。',
+    category: 'final',
+    priority: 115,
+    condition: {
+      all: [
+        { flag: 'has_house' },
+        { stat: 'mindset', op: '>=', value: 30 },
+      ],
+    },
+    shareCard: { tone: 'warm', tagline: '房价会跌会涨,自己家的灯只会亮。' },
+  },
+  {
+    id: 'end_city_drifter',
+    title: '北漂十年',
+    text: '你在这座城市搬过很多次家,换过几张工卡,楼下的早餐店换了三个老板。你没有房子,没有户口,但地铁换乘不用看指示牌,加班后的夜风你也认识。这座城市没有给你一个家,但你自己活成了一个据点。',
+    category: 'final',
+    priority: 120,
+    condition: {
+      all: [
+        { flag: 'no_house' },
+        { stat: 'money', op: '>=', value: 30000 },
+        { stat: 'mindset', op: '>=', value: 40 },
+      ],
+    },
+    shareCard: { tone: 'bitter', tagline: '城市没给我一个家,我把自己活成了据点。' },
   },
   {
     id: 'end_ordinary',

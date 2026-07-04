@@ -116,16 +116,36 @@
 - 修复 `换季重感冒` 重复出现问题
 - 做了一轮移动端样式压缩和结局分享卡适配
 
+### M5 第二轮(事件因果链)
+
+由 Claude Code(Fable 5)完成,主题是"让之前的选择真正影响后面的人生":
+
+- 首次启用引擎的 `schedule` 延迟事件机制,建立三条硬因果链:
+  - P2P 投两万 → 次年必触发 `ev_invest_p2p_collapse`(暂停提现:维权/认栽,写入 `p2p_burned`)
+  - 2022 被裁 → 次年必触发 `ev_cs_reemployment`(空窗期再就业,写入 `restarted_after_layoff`)
+  - 2022 留下(`survived_layoff`)→ 次年必触发 `ev_cs_second_wave`(第二轮优化,可能二次被裁并再 schedule 再就业)
+- write-only flags 全部接通:
+  - `fund_dca`/`fund_chased` → 2021 抱团松动改为仅基金参与者触发,追高者亏损加倍
+  - `p2p_burned`/`dodged_p2p` → 2020 基金上车事件的条件分支文案
+  - `survived_layoff` → 2023 AI 事件条件分支
+  - `has_house` → 新强制事件「房价回调」(2024)+ 新结局「还贷的人」
+  - `no_house` → 新强制事件「第 N 次搬家」(2025)+ 新结局「北漂十年」
+  - `roommate_startup_joined`/`roommate_close_friend` → 新 NPC 事件「室友开播了」(2020),室友状态机延长出 `livestream_comeback`/`faded` 阶段
+  - `dorm_bond` → 婚礼请柬事件条件分支
+  - `restarted_after_layoff` → 「30岁,重新开始」结局条件(与心态阈值取 any)
+- validate 增强:被 `schedule` 引用的无池事件不再误报 warning
+- 内容量:事件 58,结局 10
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.7.0'
+version: '0.8.0'
 title: '2014:我的十二年(M3 社会线原型)'
 ```
 
-注意:title 还保留 M3 字样,但功能进度已经推进到 M5 第一轮。后续可以改成更中性的 `2014:我的十二年`。
+注意:title 还保留 M3 字样,但功能进度已经推进到 M5 第二轮。后续可以改成更中性的 `2014:我的十二年`。
 
 ## 常用验证命令
 
@@ -153,14 +173,15 @@ pnpm --filter @life-sim/web build
 最近一次 `pnpm validate`:
 
 ```text
-事件 52, 结局 8, NPC 5, 题目 37
+事件 58, 结局 10, NPC 5, 题目 37
 完成: 0 errors, 0 warnings
 ```
 
-最近一次 `pnpm simulate -n 100`:
+最近一次 `pnpm simulate -n 500`:
 
 ```text
-事件覆盖: 52/52
+事件覆盖: 58/58
+结局 10 个全部有到达率(北漂十年 6.4%,还贷的人 1.0%)
 ```
 
 ## 当前重要实现点
@@ -174,8 +195,9 @@ pnpm --filter @life-sim/web build
 
 ## 已知问题 / 后续建议
 
-- 内容量还没有达到设计文档里的约 125 个事件,当前是 52 个。
-- 结局数量仍偏少,当前是 8 个,设计目标是 12-15 个 MVP 结局。
+- 内容量还没有达到设计文档里的约 125 个事件,当前是 58 个。
+- 结局数量当前是 10 个,设计目标是 12-15 个 MVP 结局。
+- NPC `advanceWhen` 多为精确单年窗口,且 NPC 事件优先级低于强制事件、受 eventSlots 限制;内容变多后存在"某年槽位挤满 → NPC 链永久卡死"的风险,后续可考虑放宽年份窗口或给 NPC 事件保底槽位。
 - Web 还没有真正导出图片分享卡,目前是 DOM 分享卡 + 复制文本。
 - 存档目前是 snapshot 存档,还没有 actionLog 重放和迁移链。
 - validate 已有基础校验,但还没有做结局分布目标校验。
