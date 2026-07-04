@@ -190,6 +190,7 @@ export function createEngine(pack: ContentPack): Engine {
           eventId: ev.id,
           title: ev.title,
           text: ev.text,
+          major: ev.tier === 'major',
           choices: visible.map(c => ({ id: c.id, text: c.text })),
         };
       }

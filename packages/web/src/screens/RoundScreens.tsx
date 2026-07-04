@@ -20,7 +20,8 @@ export function BriefScreen(props: { view: Extract<ViewModel, { kind: 'BRIEF' }>
 export function EventScreen(props: { view: Extract<ViewModel, { kind: 'EVENT' }> }) {
   const act = useGame(s => s.act);
   return (
-    <Card>
+    <Card className={props.view.major ? 'major-event' : undefined}>
+      {props.view.major && <p className="kicker major-kicker">✦ 人生节点</p>}
       <h2>{props.view.title}</h2>
       <p className="event-text">{props.view.text}</p>
       <div className="choices">

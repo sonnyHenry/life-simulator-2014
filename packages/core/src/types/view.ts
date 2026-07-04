@@ -32,6 +32,7 @@ export type ViewModel =
       eventId: string;
       title: string;
       text: string;
+      major: boolean;
       choices: { id: string; text: string }[];
     }
   | { kind: 'OUTCOME'; text: string; deltas: StatDeltas }

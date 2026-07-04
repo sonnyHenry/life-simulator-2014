@@ -379,6 +379,16 @@ h2 {
   font-size: 13px;
 }
 
+.major-event {
+  border: 1.5px solid #d8c48f;
+  box-shadow: 0 2px 12px rgba(180, 150, 60, 0.12);
+}
+
+.major-kicker {
+  color: #8a6a2f;
+  letter-spacing: 2px;
+}
+
 .share-score {
   display: flex;
   align-items: center;
