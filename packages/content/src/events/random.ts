@@ -373,48 +373,6 @@ export const randomEvents: GameEvent[] = [
     ],
   },
   {
-    id: 'ev_random_annual_review',
-    pools: ['random'],
-    category: 'career',
-    title: '年度总结',
-    text: '年底，你打开文档写年度总结。写着写着发现，这一年好像一直在处理问题，却很难说自己真正完成了什么。',
-    trigger: { all: [{ year: { from: 2023 } }, working] },
-    choices: [
-      {
-        id: 'a',
-        text: '认真复盘，找下一年重点',
-        outcomes: [
-          {
-            weight: 2,
-            text: '你列出三件真正重要的事，删掉了一堆虚假的目标。计划不能保证未来，但至少能让你别被日程推着走。',
-            effects: [{ stats: { knowledge: 3, mindset: 3 } }],
-          },
-          {
-            weight: 1,
-            text: '复盘越写越心惊：去年立的目标，一多半原样躺在今年的清单里。你合上电脑，新一年还没开始，焦虑先到账了。',
-            effects: [{ stats: { knowledge: 2, mindset: -3 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '沿用去年的框架',
-        outcomes: [
-          {
-            weight: 2,
-            text: '你复制了去年的结构，换了几个关键词。领导批了“继续努力”，你也确实继续努力了。',
-            effects: [{ stats: { mindset: -1 } }],
-          },
-          {
-            weight: 1,
-            text: '年底领导在忙更大的事，总结根本没人细看。你省下的两个晚上，一个用来睡觉，一个跟爸妈视频——事后看，这可能是全年性价比最高的两晚。',
-            effects: [{ stats: { mindset: 3 } }],
-          },
-        ],
-      },
-    ],
-  },
-  {
     id: 'ev_random_gym_card',
     pools: ['random'],
     category: 'health',
@@ -476,78 +434,6 @@ export const randomEvents: GameEvent[] = [
               { moneyCost: { rate: 0.2, max: 20000, roundTo: 1000, reason: 'daily' } },
               { stats: { mindset: 8, health: 16 } },
             ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_random_parents_video',
-    pools: ['random'],
-    category: 'family',
-    title: '视频通话',
-    text: '疫情之后，爸妈学会了视频通话。从此每周日晚上，你的手机都会准时响起。镜头永远怼在天花板或者鼻孔上，但他们乐此不疲。',
-    trigger: { year: { from: 2020 } },
-    choices: [
-      {
-        id: 'a',
-        text: '认真接，教他们把镜头端正',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你教了三遍，他们终于学会了把脸放进画面里。妈妈开始给你直播家里的菜地和新买的沙发。信号经常卡，但有些东西一点都没卡：比如她每次结尾都问“钱够不够花”。',
-            effects: [{ stats: { mindset: 5 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '正忙，挂了回头再说',
-        outcomes: [
-          {
-            weight: 2,
-            text: '你按掉了，想着忙完这阵回过去。等你想起来，已经是三天后。爸妈没有怪你，这比怪你更让你难受。',
-            effects: [{ stats: { mindset: -3 } }],
-          },
-          {
-            weight: 1,
-            text: '你忙完回拨过去，妈妈压低声音说“你爸刚睡着”。你们轻声聊了五分钟，她说“知道你忙，我们就是看看你”。有些牵挂不挑时间，补上就还算数。',
-            effects: [{ stats: { mindset: 1 } }],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_random_health_report',
-    pools: ['random'],
-    category: 'health',
-    title: '体检报告',
-    text: '公司体检的报告出来了。你盯着 APP 上“查看报告”四个字看了半天，像大学时不敢查挂科成绩。点开：结节、脂肪肝倾向、几个向上的箭头。',
-    trigger: { all: [{ year: { from: 2023 } }, working] },
-    choices: [
-      {
-        id: 'a',
-        text: '认真对待，复查+调作息',
-        outcomes: [
-          {
-            weight: 1,
-            text: '复查结果问题不大，医生说“多数是熬出来的，少熬就行”。你开始十二点前睡觉，外卖从“随便”改成了“少油”。身体是唯一跟你签了终身合同的同事，你想跟它搞好关系。',
-            effects: [
-              { moneyCost: { rate: 0.06, max: 1500, roundTo: 100, reason: 'medical' } },
-              { stats: { mindset: 4, health: 7 } },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '年轻人都这样，先放着',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你把报告塞进了抽屉最深处，和去年的那份放在一起。它们在黑暗中安静地叠着，像两张还没到期的账单。',
-            effects: [{ stats: { mindset: -2, health: -6 } }],
           },
         ],
       },
