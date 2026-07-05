@@ -490,12 +490,21 @@
 - 全仓库 grep 确认删除的 3 个 id 未被任何 `schedule`/`trigger`/文档交叉引用,可安全整体删除。
 - 验证:`typecheck`/`test`(21 通过)/`validate`(0 error/0 warning,105 事件)/`simulate -n 1000 --check`(事件覆盖 104/105,未触发 `ev_drama_stock_options`——延续 M5 第二十三轮就存在的已知抽样方差,与本轮改动无关)/`simulate -n 3000 --check`(105/105 全覆盖,`✅ 分布目标校验通过`)/`web build`/`miniprogram build:weapp` 全部通过。
 
+### M5 第二十五轮(修复 GitHub Actions `pnpm simulate -n 300 --check` 门禁失败)
+
+由 Claude Code(Sonnet 5)完成,内容版本 0.15.9 → 0.15.10。背景:`.github/workflows/deploy.yml` 的 Quality gates 用 `pnpm simulate -n 300 --check`(比日常验证用的 n=1000/3000 样本小得多),CI 报错 `事件覆盖不完整: 107/108` + `结局从未到达: end_gold`(该次失败对应的是尚未推送的 M5 第二十四轮之前的 origin/main,事件总数还是 108;本地在第二十四轮删减到 105 之后复现为 104/105,且多出一个同样从未到达的 `end_finance_survivor`)。逐一定位到三个独立问题,而不是同一个根因:
+
+- **`ev_drama_stock_options` 覆盖不到(`packages/content/src/events/drama.ts`)**:门控 `career_cs + big_platform_start + year 2020-2021`,只影响"进大厂"这个 cs 子分支,但它挂在 `pools:['work']` 里跟几十个通用 work/invest/random 事件抢每年 3 个 `eventSlots`,窗口又只有 2 年,大样本下才勉强抽到、n=300 时经常抽不到。对照 `career-cs.ts` 里同样是"career_cs + 某年份"门控的里程碑事件(996/裁员/ChatGPT 冲击等)全部是 `mandatory: true`,这个事件按同样的模式补上 `mandatory: true`——它本来就该和其他大厂线里程碑一样是"该来的时候一定来",不该跟泛用随机事件抢名额。
+- **`end_gold`("小有成就")结构性死结局(`packages/content/src/endings/endings.ts`)**:条件是 `money≥50万 & mindset≥45`,原 priority=140,排在 `end_house_key`(115,`has_house & mindset≥20`)和 `end_city_drifter`(120,`no_house & money≥10万 & mindset≥25`)之后。但 `ev_work_buy_house_question`(2021-2023 强制触发一次)保证每个玩家最终必然带上 `has_house` 或 `no_house` 之一,而 end_gold 的门槛严格强于这两条结局的门槛——换句话说,任何满足 end_gold 条件的玩家必然也满足 house_key 或 city_drifter 中的一个,而后两者 priority 更小、判定顺序更靠前,end_gold 因此**在任何 seed/任何样本量下都不可能被命中**,是一个和 vc-simulator 那种 `() => false` 死结局同性质的排序 bug,不是抽样方差。修复:把 priority 从 140 调整到 114(插在 `end_married`=112 之后、`end_house_key`=115 之前),让它只在没有更具体职业/关系剧情线可归类、但数值明显更好的玩家身上生效。
+- **`end_finance_survivor`("牛熊过客")实际不可达**:条件原是 `career_finance & not laid_off & mindset≥25`。金融线是全部职业线里 mandatory 剧情最狠的一条(2015 实习/2018 入职/2018-19 资管新规/2020 基金热/2021 抱团崩塌五个强制节点,`incomes.ts` 里金融相关的年度 `mindsetDelta` 也是 -4~-8,全部门类里最低),抱团崩塌那个 2021 强制事件还会让约一半留任玩家被动触发 `laid_off`。实测哪怕 n=1000/3000 也只有 0.2%-0.5% 命中率(此前 M5 第二十二/二十三轮的 handoff 记录里已经提到"样本量偏小"但当时判断"不是分布超标",没意识到 mindset≥25 这个门槛本身在这条数值曲线下已经接近摸不到),n=300 时直接掉到 0。金融线的叙事本意是"熬过去、还留在牌桌上"而非"混得开心"(shareCard tone 本来就是 `bitter`),因此把 mindset 门槛从 ≥25 降到 ≥5——只要求"没有彻底崩溃"(高于 `end_burnout_quit` 的 mindset≤4 早退红线一点点),而不是"心态良好"。
+- 验证:`typecheck`/`test`(21 通过)/`validate`(0 error/0 warning)/`simulate -n 300 --check`(**105/105 全覆盖,19 个结局全部命中,✅ 分布目标校验通过**——这是 CI 实际跑的档位)/`simulate -n 1000 --check`(同样 105/105 全覆盖 + ✅ 通过,`end_gold` 2 局/`end_finance_survivor` 5 局)/`web build` 全部通过。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.15.9'
+version: '0.15.10'
 title: '2014：我的十二年'
 ```
 
@@ -516,14 +525,13 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过:
+最近一次完整验证通过(M5 第二十五轮):
 
 - `pnpm typecheck`
 - `pnpm test`(21 通过)
 - `pnpm validate`
-- `pnpm simulate -n 1000 --check`(见下方已知边界情况说明)/ `pnpm simulate -n 3000 --check`(全通过)
+- `pnpm simulate -n 300 --check`(CI 实跑档位,全通过)/ `pnpm simulate -n 1000 --check`(全通过)
 - `pnpm --filter @life-sim/web build`
-- `pnpm --filter @life-sim/miniprogram build:weapp`
 
 最近一次 `pnpm validate`:
 
@@ -532,18 +540,28 @@ pnpm --filter @life-sim/miniprogram build:weapp
 完成: 0 errors, 0 warnings
 ```
 
+最近一次 `pnpm simulate -n 300 --check`(与 `.github/workflows/deploy.yml` 完全一致的档位):
+
+```text
+事件覆盖: 105/105
+19 个结局全部命中,含此前从未到达的 end_gold(1 局)、end_finance_survivor(2 局)
+提前结局占比: 6.3%
+✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
+```
+
 最近一次 `pnpm simulate -n 1000 --check`:
 
 ```text
-事件覆盖: 104/105 (未触发: ev_drama_stock_options)
+事件覆盖: 105/105
 金钱分位: p10=¥109000 p50=¥211300 p90=¥395601
 心态分位: p10=3 p50=30 p90=66
 提前结局占比: 8.1%
+✅ 分布目标校验通过
 ```
 
-**已知边界情况**:`ev_drama_stock_options`(门控 `career_cs + big_platform_start + year 2020-2021`,M5 第二十二轮前就存在)命中率本身就低,`baseSeed=42` 在 n=1000 时偶发漏抽,与本轮删减事件无关(该边界情况在 M5 第二十三轮已有记录)。`pnpm simulate -n 3000 --check` 稳定 105/105 全覆盖、`✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)`。
+**M5 第二十四轮遗留的边界情况已解决**:`ev_drama_stock_options` 覆盖不到、`end_gold`/`end_finance_survivor` 从未到达,三者的根因和修复方式见上方"M5 第二十五轮"小节,不再是已知问题。
 
-按职业线分组(n=1000,随机 bot):金融均财 ¥349,687/心态均值 23(样本仅 11 局)、医学均财 ¥222,898/心态均值 51(56 局)、计算机均财 ¥344,520/心态均值 20、教育均财 ¥257,685/心态均值 43、体制内均财 ¥168,575/心态均值 52。
+按职业线分组(n=1000,随机 bot):金融均财 ¥349,687/心态均值 23(样本仅 11 局)、医学均财 ¥222,898/心态均值 51(56 局)、计算机均财 ¥343,267/心态均值 20、教育均财 ¥257,685/心态均值 43、体制内均财 ¥168,575/心态均值 52。
 
 最近一次 `pnpm simulate -n 500 --compare`(M5 第二十一轮,金融/医学线加入前;尚未在新内容上重跑):
 
@@ -564,12 +582,11 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 - **`GAME_DESIGN.md` 第四节"职业线(4 条精做)"密度**:计算机线现有 10 个专属事件(2018-2026 全程覆盖)、师范线 8 个(2018-2026 全程覆盖),金融/医学仍是 5/4 个且只覆盖到 2021/2023——本轮只补了计算机/师范的断更(用户已确认本轮范围),金融/医学线 2024-2026 若也要做"回望"收官事件,是明确留给下一轮的候选项。内容总量 105 个(M5 第二十四轮删减了 3 个同质化的 random 池事件),仍低于设计文档最初设想的约 125 个。
 - 结局数量当前是 19 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要再次挤高兜底或某个单一结局。
-- 金融线样本量偏小(1000 局随机 bot 仅 11 局落在金融职业线,因为「金融学」只在 985/211/一本三档、且这三档专业选项本身较多),`end_finance_survivor`(牛熊过客)命中率目前只有 0.3%——不是分布超标,但如果后续想让这条线更常被玩到,可以考虑扩大专业投放档次或提高该批次里金融学被随机选中的权重。
+- 金融线样本量偏小(1000 局随机 bot 仅 11 局落在金融职业线,因为「金融学」只在 985/211/一本三档、且这三档专业选项本身较多),`end_finance_survivor`(牛熊过客)命中率目前 0.2%-0.7%——M5 第二十五轮已把它的 mindset 门槛从 ≥25 降到 ≥5(修复了 n=300 时完全摸不到的问题),但样本量本身偏小的问题还在,如果后续想让这条线更常被玩到,可以考虑扩大专业投放档次或提高该批次里金融学被随机选中的权重。
 - 临床医学专业选"考公"分支时会有已知的次要叙事错位(仍会触发 2020 出征事件但拿不到 career_medicine),详见 M5 第二十二轮小节,不影响任何门禁,暂不计划修复。
 - 分享图 Canvas 渲染已通过类型检查和构建,但还没有在真实浏览器里点过"保存分享图",上线前建议人工玩一局到结局验证一次。
 - 金钱/心态等数值已经可玩,但还需要继续根据 simulate 分布调平衡;`--compare` 的策略 bot 对比还没有在金融/医学线加入后、也没有在本轮 cs/edu 补完 + 师范线收入重构后重新跑过。
-- `ev_drama_stock_options`(career_cs + big_platform_start + 2020-2021 三层门控)命中率偏低,`simulate -n 1000 --check` 的 `baseSeed=42` 偶发漏抽,详见本轮"最近一次验证结果"说明;如果希望 n=1000 的标准检查更稳定通过,可以考虑适度放宽这个事件的年份窗口,但这已经是修改前一轮(M5 第二十二轮之前)就存在的内容,本轮判断为抽样方差、不属于本次任务范围,未做改动。
-- 协作过程中发现仓库里还有一个未纳入 git 的 `apps/minigame/` 目录(微信小游戏端口脚手架),疑似另一个并行会话在做的独立工作;本轮 commit 已刻意排除这个目录和它带来的 `pnpm-lock.yaml` workspace 条目变化,接手的模型如果看到 `git status` 里有这个未跟踪目录,不要误删或误提交,先向用户确认归属。
+- `apps/minigame/`(微信小游戏端口脚手架)已在另一个并行会话里正式提交入库(见 `feat: add minigame app scaffold` 一次提交),不再是游离的未跟踪目录;后续如需继续这条线,直接在 `apps/minigame` 里迭代即可。
 
 ## 给下一个模型的建议
 

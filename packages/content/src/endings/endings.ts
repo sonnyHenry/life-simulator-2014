@@ -141,11 +141,13 @@ export const endings: EndingDef[] = [
     text: '2015年股灾、2018年资管新规、2021年抱团崩塌——这个行业每隔几年就要洗一次牌，你亲眼见过多少"顶流"从神坛跌下来，连朋友圈都不敢再发业绩截图。2026年，你还站在这个牌桌上。没有人再问你信不信"这次不一样"，因为你早就知道，牛熊都会过去，过去的人才算数。',
     category: 'final',
     priority: 109,
+    // 金融线本身就是全职业线里 mandatory 剧情最狠的一条(2015/2018/2018-19/2020/2021 五个强制节点全是负向心态),
+    // "牛熊过客"的门槛应该是"没被行业淘汰",不是"心态还很好"——25 分的心态门槛在这条线的数值曲线下基本摸不到。
     condition: {
       all: [
         { flag: 'career_finance' },
         { not: { flag: 'laid_off' } },
-        { stat: 'mindset', op: '>=', value: 25 },
+        { stat: 'mindset', op: '>=', value: 5 },
       ],
     },
     shareCard: { tone: 'bitter', tagline: '牛熊都会过去，留下来的人才算数。' },
@@ -222,7 +224,12 @@ export const endings: EndingDef[] = [
     title: '小有成就',
     text: '十二年攒下的存款，在这座城市还是买不起太多东西，但它是你一份一份工资、一个一个选择攒出来的。深夜加完班，你请自己吃了顿好的。账单弹出来的时候，你没有犹豫。',
     category: 'final',
-    priority: 140,
+    // 原本 priority 140 排在 end_house_key(115)/end_city_drifter(120) 之后:但几乎每个玩家到 2026 年
+    // 都会被 ev_work_buy_house_question 打上 has_house 或 no_house 之一,而这条件(money≥50万+mindset≥45)
+    // 严格强于那两条结局的门槛(money≥10万+mindset≥20/25),导致 end_gold 在 priority 排序下永远被截胡、
+    // 从未被 simulate 命中过。挪到 married(112) 之后、house_key(115) 之前,让它只在没有更具体职业/关系
+    // 剧情线可归类、但数值上明显过得更好的玩家身上生效。
+    priority: 114,
     condition: {
       all: [
         { stat: 'money', op: '>=', value: 500000 },

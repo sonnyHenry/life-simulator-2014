@@ -160,6 +160,9 @@ export const dramaEvents: GameEvent[] = [
     category: 'money',
     tier: 'major',
     title: '期权行权书',
+    // 大厂线的专属里程碑,和 career-cs.ts 里逐年的强制事件同级:只影响 big_platform_start 这个子分支,
+    // 不应该跟普通 work 池事件抢 eventSlots 名额(否则窗口期很窄,大样本模拟里可能永远抽不到)。
+    mandatory: true,
     trigger: {
       all: [{ flag: 'career_cs' }, { flag: 'big_platform_start' }, { year: { from: 2020, to: 2021 } }],
     },
