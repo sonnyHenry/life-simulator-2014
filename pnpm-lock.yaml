@@ -12,6 +12,22 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
+  apps/minigame:
+    dependencies:
+      '@life-sim/content':
+        specifier: workspace:*
+        version: link:../../packages/content
+      '@life-sim/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.7
+        version: 6.4.3(@types/node@24.13.2)(jiti@2.7.0)(less@3.13.1)(lightningcss@1.32.0)(sass@1.101.0)(stylus@0.64.0)(terser@5.48.0)(tsx@4.22.4)
+
   apps/miniprogram:
     dependencies:
       '@babel/runtime':

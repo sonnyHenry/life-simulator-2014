@@ -5,3 +5,4 @@ coverage/
 .DS_Store
 .swc/
 apps/miniprogram/project.private.config.json
+apps/minigame/project.private.config.json

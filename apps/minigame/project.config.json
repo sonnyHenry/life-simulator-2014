@@ -1,0 +1,40 @@
+{
+  "miniprogramRoot": "dist/",
+  "projectname": "life-simulator-2014-minigame",
+  "description": "2014：我的十二年 - 微信小游戏",
+  "appid": "wxf1f7a1e15b7f0e51",
+  "compileType": "game",
+  "libVersion": "3.16.2",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": false,
+    "minified": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": false,
+    "minifyWXML": false,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {},
+  "simulatorPluginLibVersion": {},
+  "isGameTourist": false
+}
