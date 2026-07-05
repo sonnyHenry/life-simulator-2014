@@ -18,72 +18,6 @@ const working: Condition = {
 
 export const workEvents: GameEvent[] = [
   {
-    id: 'ev_cs_first_job_2018',
-    pools: ['work'],
-    category: 'career',
-    title: '第一份技术岗',
-    text: '2018年，你正式进入技术岗。招聘网站上大家都叫自己工程师，但工牌背后的起点差异很快显现：学校、专业、实习、内推，每一项都会变成面试官的眼神。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_cs' }, { year: { from: 2018, to: 2018 } }] },
-    choices: [
-      {
-        id: 'elite',
-        text: '接住大平台的机会',
-        visibleIf: { flag: 'first_job_track', equals: 'big_tech_candidate' },
-        outcomes: [
-          {
-            weight: 1,
-            text: '你进了大平台。系统复杂，同事很强，日报周报也很密。985/211 没有让你轻松，但它确实把你送到了更大的牌桌旁。',
-            effects: [
-              { stats: { money: 18000, knowledge: 5, network: 5, mindset: -4 } },
-              { setFlag: 'big_platform_start' },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'ordinary',
-        text: '从普通技术岗做起',
-        visibleIf: {
-          any: [
-            { flag: 'first_job_track', equals: 'ordinary_tech_candidate' },
-            { flag: 'first_job_track', equals: 'big_tech_candidate' },
-          ],
-        },
-        outcomes: [
-          {
-            weight: 1,
-            text: '你进了一家中小公司，什么都要做：前端、后端、上线、客服群答疑。履历不够亮，就只能先靠手上的活把路凿出来。',
-            effects: [
-              { stats: { money: 9000, knowledge: 6, mindset: -2 } },
-              { setFlag: 'ordinary_platform_start' },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'applied',
-        text: '先做实施和外包项目',
-        visibleIf: {
-          any: [
-            { flag: 'major_track', equals: 'cs_applied' },
-            { flag: 'first_job_track', equals: 'ordinary_tech_candidate' },
-          ],
-        },
-        outcomes: [
-          {
-            weight: 1,
-            text: '你从实施、驻场和外包项目开始。工作不体面，但很具体。你学会了和甲方沟通，也学会了在烂需求里保住基本尊严。',
-            effects: [
-              { stats: { money: 6000, knowledge: 4, network: 2, mindset: -3 } },
-              { setFlag: 'outsourcing_start' },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
     id: 'ev_postgrad_grind',
     pools: ['work'],
     category: 'career',
@@ -117,55 +51,6 @@ export const workEvents: GameEvent[] = [
               { stats: { knowledge: 4, mindset: -2 } },
               { setFlag: 'postgrad_weak' },
             ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_work_996',
-    pools: ['work'],
-    category: 'career',
-    title: '大小周',
-    text: '部门开始执行“大小周”，加班费给得不含糊，但周日的太阳你已经一个月没见过了。组长在周会上说：“现在是业务关键期，大家再顶一顶。”',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_cs' }, { year: { from: 2019, to: 2019 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '顶就顶，趁年轻多攒钱',
-        outcomes: [
-          {
-            weight: 1,
-            text: '这一年你的工资条很好看，体检报告不太好看。你在工位抽屉里备了枸杞和护肝片，同事说你这叫“朋克养生”。',
-            effects: [{ stats: { money: 15000, mindset: -16, health: -14 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '到点下班，绩效随缘',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你成了组里唯一准点走的人。绩效拿了个“符合预期”，年终奖薄了一截。但你重新捡起了跑步，体重和心情都轻了一点。',
-            effects: [{ stats: { mindset: 3, health: 6 } }, { setFlag: 'low_perf' }],
-          },
-        ],
-      },
-      {
-        id: 'c',
-        text: '只接一个周末短单，合同和交付边界写清楚',
-        outcomes: [
-          {
-            weight: 2,
-            text: '你挑了个边界清楚的小项目，只用自己的设备，也不碰公司的客户。甲方按时付款，你多攒了一笔钱，也确认了一个现实：副业不是下班后的轻松收入，它是第二份交付责任。',
-            effects: [{ stats: { money: 32000, knowledge: 3, mindset: -8, health: -18 } }],
-          },
-          {
-            weight: 1,
-            text: '合同写得再清楚，需求还是会蔓延。短单拖成三个月，你白天开会，晚上改稿，主业汇报也开始掉线。钱是赚到了，但绩效面谈里那句“最近状态不太稳”，你听得很清楚。',
-            effects: [{ stats: { money: 12000, knowledge: 2, mindset: -12, health: -20 } }, { setFlag: 'low_perf' }],
           },
         ],
       },
@@ -762,396 +647,50 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
-    id: 'ev_cs_antitrust',
+    id: 'ev_work_startup_boom_bust_2019',
     pools: ['work'],
     category: 'career',
-    title: '风向变了',
-    text: '2021年，反垄断和平台治理成了新闻关键词。公司全员会上，老板不再讲“星辰大海”，开始讲“组织健康”和“长期主义”。你听懂了：增长不再是万能答案。',
+    title: '朋友圈两极分化',
+    text: '2019年，你的朋友圈开始泾渭分明：一条是大学同学晒出创业公司的融资喜报，配图是庆功宴上举着的香槟；另一条是另一个同学转发的万字长文《裁员实录》，字字都在讲“降本增效”——这个词，比它在大厂里流行的时间还要早两年。你划着屏幕，一半是喜报，一半是实录，拇指停在中间不知道点哪个赞。',
     mandatory: true,
-    trigger: { all: [{ flag: 'career_cs' }, { year: { from: 2021, to: 2021 } }] },
+    trigger: { all: [{ year: { from: 2019, to: 2019 } }, working] },
     choices: [
       {
         id: 'a',
-        text: '收缩预期，先保住位置',
+        text: '认真读完那篇《裁员实录》，未雨绸缪',
         outcomes: [
           {
             weight: 1,
-            text: '你把跳槽网站的简历状态改成了“暂不考虑”。少谈理想，多做交付。成年人的安全感，有时就是下个月工资照发。',
-            effects: [{ stats: { money: 20000, mindset: -4 } }],
+            text: '你把长文逐字读完，顺手截了几张图存进备忘录：现金流、试用期条款、竞业协议，这些词第一次让你觉得和自己有关。焦虑是真的多了一点，但你也第一次开始认真规划“万一”这两个字。',
+            effects: [{ stats: { knowledge: 4, mindset: -2 } }],
           },
         ],
       },
       {
         id: 'b',
-        text: '趁窗口还在，换到更核心团队',
+        text: '只点赞不深想，继续过自己的日子',
         outcomes: [
           {
             weight: 1,
-            condition: { stat: 'network', op: '>=', value: 20 },
-            text: '你靠内推换到了更核心的业务。新团队更累，但履历更硬。你第一次感觉，人脉不是饭局，是关键时刻有人愿意把你的简历递进去。',
-            effects: [{ stats: { money: 30000, network: 5, mindset: -7 } }],
-          },
-          {
-            weight: 1,
-            text: '你投了几家，都没有后续。市场突然冷了下来，HR 的已读不回也变得很有礼貌。',
-            effects: [{ stats: { mindset: -6 } }, { setFlag: 'cs_switch_failed' }],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_cs_layoff_2022',
-    pools: ['work'],
-    category: 'career',
-    tier: 'major',
-    title: '毕业名单',
-    text: '2022年春天，公司内网多了一个新词：“组织优化”。一开始只是传闻，某个业务线“合并”了，某个高管“个人原因”离开了。然后会议室开始被 HR 长期征用，门上贴着“占用中”，一贴就是一整周。你看到平时一起吃午饭的同事被一个个叫进去，出来的时候有人平静，有人眼圈红着，共同点是当天下午工位就清空了。茶水间没人聊八卦了，大家都在低头刷手机——刷的都是脉脉。这天上午十点，你的日历上弹出一个半小时后的会议邀请，发起人是 HRBP，没有议题，没有附件。你盯着那个通知看了很久，第一次觉得胸前的工牌这么轻。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_cs' }, { year: { from: 2022, to: 2022 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '接受补偿，重新找',
-        outcomes: [
-          {
-            weight: 1,
-            text: '会议室里，HR 的话术标准得像录音：“感谢你的贡献……业务调整……N+1。”你听着，忽然发现自己在数她桌上的纸巾盒——原来是给谁准备的，现在知道了。你没有用上纸巾。签字，交电脑，退工卡，整个流程四十分钟，比入职快多了。抱着纸箱走出大堂时，春天的太阳很好，好得有点讽刺。N+1 到账那天，你的心情很复杂：钱是真的，一下子空出来的日子也是真的。那晚你把简历翻出来改到凌晨，改着改着想起上一次这么认真填自己的信息，还是高考报志愿。好，那就再考一次。',
-            effects: [
-              { stats: { money: 90000, mindset: -16, health: 2 } },
-              { setFlag: 'laid_off' },
-              { schedule: { eventId: 'ev_cs_reemployment', afterRounds: 1 } },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '主动降预期，留在船上',
-        outcomes: [
-          {
-            weight: 1,
-            text: '那场会不是裁你，是给你选择：转岗到一个更累的业务，薪包“结构调整”，干不干？你想起每个月的账单、想起家里的电话、想起脉脉上“三十岁投一百份简历无人问津”的帖子，说：干。于是你留下来了。留下来的代价是接手了三个人的活，奖金缩了一圈，团建取消，连零食柜都变得空空荡荡。离开的同事在群里发“山高水长，后会有期”，配了合照。你盯着合照看了一会儿，把它保存了下来。幸存者没有掌声，只有更多的需求排期，和一个再也不敢关声音的钉钉。',
-            effects: [
-              { stats: { money: 15000, mindset: -14, health: -8 } },
-              { setFlag: 'survived_layoff' },
-              { schedule: { eventId: 'ev_cs_second_wave', afterRounds: 1 } },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_cs_ai_2023',
-    pools: ['work'],
-    category: 'career',
-    tier: 'major',
-    title: 'AI 来了',
-    text: '2023年初，部门群里开始疯转 ChatGPT 的截图：它写的周报比组长写得像周报，它生成的代码能跑，它甚至会用你们内部黑话编冷笑话。一开始大家当乐子看，后来笑声慢慢变了味——测试组的同事用它十分钟写完了以前一下午的用例，隔壁组开始讨论“提效之后编制怎么算”。中午吃饭，有人半开玩笑地说：“咱们是不是在给自己的替代品当陪练？”没人接话，筷子声都轻了。下午你打开那个对话框，光标一闪一闪。你敲了第一个问题，像推开一扇有风的门：门后面不知道是什么，但风已经吹到脸上了。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_cs' }, { year: { from: 2023, to: 2023 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '把它当新工具，立刻学',
-        outcomes: [
-          {
-            weight: 1,
-            condition: { flag: 'survived_layoff' },
-            text: '去年裁员留下来的人里，你是学得最凶的那个。别人下班你在调提示词，别人周末你在搭工作流，组里第一个把 AI 接进业务流程的方案是你写的，评审会上连一贯挑刺的架构师都点了头。你比谁都清楚自己为什么这么拼：上一轮活下来靠的是降预期，那是运气加姿态；这一轮要活，得靠真本事。年底绩效面谈，领导说了句“你今年的成长曲线很陡”。你笑了笑没解释——陡，是因为悬崖就在脚后跟。AI 没有让你变得更安全，但它确实让你变得更有用。在 2023 年，这已经是能拿到的最好的东西了。',
-            effects: [
-              { stats: { knowledge: 11, money: 20000, mindset: -1, health: -4 } },
-              { setFlag: 'ai_adapted' },
-            ],
-          },
-          {
-            weight: 1,
-            condition: { not: { flag: 'survived_layoff' } },
-            text: '你决定不跟它较劲，跟它合作。先是让它写脚手架和单元测试，然后是查文档、理旧代码，再后来你的简历也让它改了一版——它把“负责若干模块开发”改成了三行带数字的成果，你看着有点脸红，但确实更好。效率实打实地上去了，焦虑却没有消失，只是换了个位置：以前怕活干不完，现在怕自己干的活太容易被描述清楚。你在某个加班的深夜想明白了一件事，并把它写进了年度总结：工具越强，越提醒你别只做工具能做的事。这句话领导画了波浪线，批注“深刻”。',
-            effects: [
-              { stats: { knowledge: 10, money: 20000, mindset: -2, health: -4 } },
-              { setFlag: 'ai_adapted' },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '先观望，别被概念割韭菜',
-        outcomes: [
-          {
-            weight: 2,
-            text: '你见过太多风口了：O2O、区块链、元宇宙，每一个都说要改变世界，每一个都先改变了一批人的钱包。所以这次你决定等子弹飞一会儿。子弹飞得比你想的快：半年后，它进了公司的工具链，变成了周会上的“提效指标”；一年后，新来的实习生用它的熟练度让你沉默。你开始补课，补得很快——基本功还在，追上不难。只是最早那波红利，和红利期里那种“我在浪潮前排”的心气，是补不回来的。你没有被割韭菜，只是这一次，谨慎本身也是有价格的。',
-            effects: [{ stats: { knowledge: 3, mindset: -4 } }],
-          },
-          {
-            weight: 1,
-            text: '半年后，概念潮水退了一轮：隔壁组 all-in 的“大模型创新项目”没跑出指标，连人带项目一起被“优化”了。你按自己的节奏补课入场，工具照用、班照上，反而躲过了那轮折腾。风口上第一批起飞的和第一批摔下来的，经常是同一批人。',
-            effects: [{ stats: { knowledge: 6, mindset: 2 } }],
+            text: '你给两条朋友圈都点了赞，然后继续刷下一条。眼下的日子过得还算安稳，未来的事，未来再说。',
+            effects: [{ stats: { mindset: 2, knowledge: -1 } }],
           },
         ],
       },
       {
         id: 'c',
-        text: '裸辞加入朋友的 AI 创业公司，拿期权赌一把',
-        outcomes: [
-          {
-            weight: 3,
-            text: '故事的开头很热血：天使轮、路演、通宵改 demo。故事的结尾很常见：A 轮没融到，公司在第十四个月解散。期权变成一段 GitHub 链接，存款烧掉一半，你重新回到招聘软件上，把“创业经历”字斟句酌地包装成“0 到 1 项目经验”。',
-            outcomeTag: 'failure',
-            effects: [
-              { moneyCost: { rate: 0.45, max: 100000, roundTo: 1000, reason: 'investment' } },
-              { stats: { mindset: -12, health: -10, knowledge: 6 } },
-            ],
-          },
-          {
-            weight: 1,
-            text: '你们做的方向踩中了一波真需求，第二年被一家大厂整体收购。期权按比例折了现，虽然不是财务自由的数目，但足够让你在同学群里保持沉默的微笑。更值钱的是履历：你从“用 AI 的人”变成了“做过 AI 产品的人”。',
-            outcomeTag: 'success',
-            effects: [{ stats: { money: 150000, knowledge: 9, network: 6, mindset: 4, health: -9 } }, { setFlag: 'ai_adapted' }],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_cs_second_wave',
-    pools: [],
-    category: 'career',
-    title: '第二轮优化',
-    text: '“降本增效”进入第二季。这次没有全员大会，只有一个个被拉进小会议室的日历邀请。你去年主动降过预期，但名单从来不看苦劳。',
-    choices: [
-      {
-        id: 'a',
-        text: '主动申请转岗，去离收入最近的业务',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你赶在名单敲定前转去了商业化团队。新业务节奏更狠，但至少工牌还是热的。你开始明白，大厂里最稳的岗位，是离钱最近的岗位。',
-            effects: [{ stats: { money: 12000, knowledge: 4, mindset: -2, health: -4 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '不折腾，赌名单上没有我',
+        text: '心动，托人内推去那家融资的创业公司',
         outcomes: [
           {
             weight: 2,
-            text: '这一轮的刀落在了隔壁组。你继续留在原地，只是把工位上的私人物品，悄悄减到了一个背包能装下的量。',
-            effects: [{ stats: { money: 8000, mindset: 2 } }],
+            condition: { stat: 'network', op: '>=', value: 15 },
+            text: '内推链路很顺，两轮面试后对方发来了 offer。你没有立刻答应，回去把两份 offer 的画饼含量对比了一下——一份画的是“星辰大海”，一份画的是“稳定现金流”。最后你选了后者，但这一圈面试认识的人，后来还挺管用。',
+            effects: [{ stats: { network: 6, mindset: 1 } }],
           },
           {
             weight: 1,
-            text: '日历邀请最终还是来了。HR 的话术，和去年你目送同事离开时听到的一模一样。N+1 到账，你在楼下坐了很久，把去年没敢想的问题想完了。',
-            outcomeTag: 'failure',
-            effects: [
-              { stats: { money: 80000, mindset: -18, health: -4 } },
-              { setFlag: 'laid_off' },
-              { schedule: { eventId: 'ev_cs_reemployment', afterRounds: 1 } },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_cs_reemployment',
-    pools: [],
-    category: 'career',
-    title: '空窗期之后',
-    text: '被裁后的第几个月，你已经数不清投了多少份简历。面试官的问题越来越像审讯：“这段空窗期你在做什么？”这天，你同时收到两个消息：一个降薪三成的 offer，和一句“再等等，还有更合适的”的猎头留言。',
-    choices: [
-      {
-        id: 'a',
-        text: '降薪也先上车，活下来再说',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你签了。工资少了一截，心里的石头却落了地。入职第一天，你把新工卡拍照发给爸妈。他们不懂“降薪三成”意味着什么，只回了一句：“上班就好。”',
-            effects: [{ stats: { money: 25000, mindset: 8 } }, { setFlag: 'restarted_after_layoff' }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '再撑一撑，等一个不将就的机会',
-        outcomes: [
-          {
-            weight: 1,
-            text: '三个月后，你等到了那个位置——薪资没降，方向也对。回头看，那段空窗期像一场没人监考的考试，你交卷交得比想象中体面。',
-            effects: [{ stats: { money: 40000, mindset: 10 } }, { setFlag: 'restarted_after_layoff' }],
-          },
-          {
-            weight: 1,
-            text: '存款以肉眼可见的速度变薄，合适的机会始终差半步。最后你接了一份过渡的工作。成年人的底气，原来是按月发放的。',
-            effects: [
-              { moneyCost: { rate: 0.15, max: 15000, roundTo: 1000, reason: 'daily' } },
-              { stats: { mindset: -6 } },
-              { setFlag: 'restarted_after_layoff' },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_edu_first_class',
-    pools: ['work'],
-    category: 'career',
-    title: '第一堂课',
-    text: '你站在讲台前，下面几十双眼睛看着你。备课时写满三页纸，开口后才发现，真正难的不是讲完知识点，是让他们愿意听。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_edu' }, { year: { from: 2018, to: 2020 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '认真磨课，慢慢站稳',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你把每节课都复盘一遍，连板书顺序都改了三次。学生不一定记得你的辛苦，但成绩单会记得。',
-            effects: [{ stats: { knowledge: 6, mindset: 4, money: 5000, health: -3 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '先按老教师的方法来',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你少走了些弯路，也少了点自己的东西。办公室里大家说你“稳”，你一时分不清这是夸奖还是提醒。',
-            effects: [{ stats: { money: 4000, network: 4, health: 2 } }],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_edu_online_2020',
-    pools: ['work'],
-    category: 'career',
-    title: '网课时代',
-    text: '2020年，教室搬进了屏幕。你对着摄像头讲课，学生头像一排排灰着。点名时有人掉线，提问时全班静音。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_edu' }, { year: { from: 2020, to: 2020 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '重新设计互动方式',
-        outcomes: [
-          {
-            weight: 2,
-            text: '你学会了用投票、弹幕和小测把学生拉回来。效果不完美，但至少屏幕那头有人开始回“老师我在”。',
-            effects: [{ stats: { knowledge: 5, network: 3, mindset: 2 } }],
-          },
-          {
-            weight: 1,
-            text: '你搬出了十八般武艺，弹幕确实活跃了——活跃成了聊天室。一节课下来进度只走了一半，你盯着“老师再见”的刷屏，分不清自己是老师还是主播。',
-            effects: [{ stats: { knowledge: 2, mindset: -4 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '按打磨多年的原课件讲',
-        outcomes: [
-          {
-            weight: 2,
-            text: '课讲完了，你也累空了。后台数据显示观看时长断崖式下跌，它比任何领导听课都诚实。',
-            effects: [{ stats: { mindset: -5 } }],
-          },
-          {
-            weight: 1,
-            text: '期末你收到一条学生留言：“老师，你的课像深夜电台，我妈以为我在听睡前故事，其实我真的在记笔记。”花活会过时，把一件事讲清楚不会。',
-            effects: [{ stats: { mindset: 3, network: 1 } }],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_edu_double_reduction',
-    pools: ['work'],
-    category: 'career',
-    tier: 'major',
-    title: '双减落地',
-    text: '2021年7月的那个周末，文件全文刷屏了。你逐字读完，又读了一遍，然后打开工作群——平时消息 99+ 的群，安静得像考场。周一上班，一切都在肉眼可见地塌缩：楼下那家上市机构的灯箱招牌拆了，电梯里遇到的同行在打电话问“房子能不能提前退租”，家长群里有人小心翼翼地问“课还上吗”，没有人敢用官方口径以外的话回答。朋友圈分成两种人：一种在转“教育回归本质”的评论文章，一种在转简历。你入行时以为教育是慢行业，慢到可以托付半生。这个夏天你才知道，行业没有快慢，只有周期——而你正站在周期折断的地方。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_edu' }, { year: { from: 2021, to: 2021 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '转向校内和编制机会',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你做了决定：回到体制内的轨道上去。白天照常上课，晚上摊开教综和学科真题，台灯一开就是三个小时。你重新背起了教育学名词，像回到大学考试周，只是这次没有室友陪你熬夜，只有出租屋的冰箱嗡嗡作响。有天深夜你合上题册，忽然觉得命运有点幽默：很多年前，你靠考试从小地方走出来；现在行业塌了，你还是只能靠考试，给自己重新找一块站得住的地面。也好。会考试，至少是这么多年风浪里，从来没有背叛过你的那门手艺。',
-            effects: [
-              { stats: { knowledge: 6, mindset: -4, health: -3 } },
-              { setFlag: 'edu_to_public_school' },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '做素质教育和线上小课',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你决定不离场，换赛道。课程表推翻重写：“数学提分班”变成“思维训练营”，“阅读写作”变成“表达力与演讲”。你重新设计课件、重新谈场地、重新一个个跟老学员家长沟通。有意思的是，家长们嘴上说着“孩子终于能轻松点了”，转头就问你：“这个思维课，对以后升学……有帮助吧？”你笑着给出一个合规的回答。深夜整理报名表时你想：焦虑是守恒的，政策能改变它的形状，改变不了它的总量。而你能做的，是在新的形状里，继续把课讲好——这一点，从来不需要换包装。',
-            effects: [
-              { stats: { money: 12000, network: 5, mindset: -6 } },
-              { setFlag: 'edu_reinvented' },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ev_edu_exam_heat',
-    pools: ['work'],
-    category: 'career',
-    title: '考编热',
-    text: '2022年，考编群越来越热闹。每个人都在问资料、问岗位、问分数线。稳定这两个字，终于从父母的唠叨变成了年轻人的共识。',
-    mandatory: true,
-    trigger: { all: [{ flag: 'career_edu' }, { year: { from: 2022, to: 2022 } }] },
-    choices: [
-      {
-        id: 'a',
-        text: '全力考编',
-        outcomes: [
-          {
-            weight: 2,
-            condition: { stat: 'knowledge', op: '>=', value: 55 },
-            text: '你上岸了。不是童话结局，但至少暑假是真的，五险一金也是真的。',
-            outcomeTag: 'success',
-            effects: [
-              { stats: { mindset: 10, money: 8000 } },
-              { setFlag: 'career_gov' },
-              { setFlag: 'teacher_public' },
-            ],
-          },
-          {
-            weight: 1,
-            text: '你没考上。成绩出来后你躺了一下午，晚上还是把错题整理完了。人到这个年纪，崩溃也要排进日程表。',
-            outcomeTag: 'failure',
-            effects: [{ stats: { mindset: -7, knowledge: 3 } }],
-          },
-        ],
-      },
-      {
-        id: 'b',
-        text: '继续在市场化教育里找机会',
-        outcomes: [
-          {
-            weight: 1,
-            text: '你没去挤那条独木桥。收入更波动，自由也更多。你开始学着把课卖给真正愿意买的人。',
-            effects: [{ stats: { money: 18000, network: 4, mindset: -2 } }],
+            text: '简历递过去，对方说“再等等消息”，然后就没有然后了。融资喜报和已读不回，原来可以是同一家公司的两面。',
+            effects: [{ stats: { mindset: -3 } }],
           },
         ],
       },
@@ -1339,6 +878,60 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你跟了三个月，小赚了一笔，然后在某次“内部信号”翻车、群里开始互相指责时果断退了群。赚的钱刚好覆盖入群费再多一点。复盘时你想明白了：那三个月赚钱靠的是行情，不是信号——牛市里，连扔飞镖都是股神。',
             effects: [{ stats: { money: 12000, mindset: -2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_work_trend_chasing_2024',
+    pools: ['work'],
+    category: 'career',
+    title: '追风口',
+    text: '2024年，朋友圈里的风口一个接一个换脸：做短剧的同学晒出“7天回本”的投流后台截图；做外贸的同学发了一组东南亚仓库的照片，配文“出海才是新蓝海”；隔壁工位每天在群里转发新能源产业链的研报，末尾都带一句“上车不晚”。你划着这些消息，盘算着自己剩下的存款和精力，够不够再赌一把。',
+    mandatory: true,
+    trigger: { all: [{ year: { from: 2024, to: 2024 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '小额入伙朋友的短剧发行项目',
+        outcomes: [
+          {
+            weight: 2,
+            outcomeTag: 'failure',
+            text: '朋友说这单“投流打得好，7 天能回本”。剧确实拍完了，投流也确实打了，只是回本的那天一直没等到——平台流量突然变贵，分账周期又拖了两个月。你的本金变成了一部剧的“署名出品人”credit，挂在没人点开的片尾。',
+            effects: [
+              { moneyCost: { rate: 0.2, max: 8000, roundTo: 100, reason: 'investment' } },
+              { stats: { mindset: -5 } },
+            ],
+          },
+          {
+            weight: 1,
+            outcomeTag: 'success',
+            text: '你投的那部剧踩中了一个小爆点，分账比预期到得快。钱不多，但你第一次明白：短剧这门生意赚的不是剧情，是投流公式——谁先算明白流量成本和回本周期，谁先赚到那一波钱。',
+            effects: [{ stats: { money: 6000, knowledge: 2, mindset: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '打听同事的出海业务，考虑要不要申请调岗',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你约那位做出海业务的同事吃了顿饭，听他讲了两小时东南亚市场的坑：汇率、物流、当地合规，每一项都比国内业务复杂一圈。你没有立刻申请调岗，但记下了几个联系人——这年头，多一条能走的路，不亏。',
+            effects: [{ stats: { knowledge: 3, network: 4, mindset: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '不追了，把钱和精力留给确定的事',
+        outcomes: [
+          {
+            weight: 1,
+            text: '短剧、出海、新能源，你一个都没上车。同事们讨论风口时你安静地听，偶尔插一句“听着不错”。年底盘点，你没赚到风口的钱，但也没有一笔投进去打了水漂的钱。',
+            effects: [{ stats: { money: 2000, mindset: 2 } }],
           },
         ],
       },
@@ -1744,6 +1337,56 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_work_mortgage_pressure_2025',
+    pools: ['work'],
+    category: 'money',
+    title: '月供的分量',
+    mandatory: true,
+    trigger: { all: [{ flag: 'has_house' }, { year: { from: 2025, to: 2025 } }] },
+    text: '猎头找到你，聊了个薪资更高的机会——只是要去外地，行业也没现在这份稳。你打开计算器，把每月雷打不动要还的房贷数字摆在旁边比划了半天。那一刻你才明白，“背上房贷”这四个字里，“背”是个动词，天天都在用力。',
+    choices: [
+      {
+        id: 'a',
+        text: '拒绝机会，先保住现在的收入和月供节奏',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你回绝了猎头。理由说得体面，心里想的其实很简单：现在这份工作换来的确定性，够还房贷；那份新工作画的饼，不够。安全感这东西，有时候就是每月8号那条扣款短信照常发出去。',
+            effects: [{ stats: { mindset: -2, health: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '冒险接受新机会，赌一个更高的天花板',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { stat: 'knowledge', op: '>=', value: 60 },
+            text: '你跳了。新城市、新行业，头三个月每天都在补功课，但薪资涨幅确实覆盖了月供压力，还多出一截。异地也意味着要重新找中介、重新适应通勤，只是这一次，你是主动选的辛苦。',
+            effects: [{ stats: { money: 20000, knowledge: 4, mindset: -3, health: -4 } }],
+          },
+          {
+            weight: 1,
+            text: '你跳了，新行业却比猎头描述的更颠簸，试用期没过完公司就开始收缩。你一边还房贷一边投简历，才明白“天花板更高”这句话背后，通常也藏着“地板更不结实”这半句。',
+            effects: [{ stats: { mindset: -8, health: -3 } }, { setFlag: 'cs_switch_failed' }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '找银行申请延长贷款年限，先松口气',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你跑了趟银行，把还款年限往后延了几年。总利息会多付一些，但每月划走的数字小了一截，日子松快了一点。有些选择不解决问题，只是把问题铺得更薄一些——但薄一点，也是真的轻松一点。',
+            effects: [{ stats: { money: 4000, mindset: 4 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_work_blind_date',
     pools: ['work'],
     category: 'relationship',
@@ -1807,6 +1450,61 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你把问题往后推了推。成年人不是不知道问题在那儿，只是有时候真的需要先把今天过完。',
             effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_life_marriage_or_kids_2025',
+    pools: ['work'],
+    category: 'relationship',
+    title: '催婚催育',
+    mandatory: true,
+    trigger: { year: { from: 2025, to: 2025 } },
+    text: '家庭群里，催婚催育的话题又被翻了出来。表姐晒娃、表弟晒婚戒，你妈发来一句“你看看人家”，后面跟着一个不太自然的笑脸表情。饭桌上，长辈的关心和逼问总是长得很像。',
+    choices: [
+      {
+        id: 'plan_kids',
+        text: '和伴侣认真商量要不要要孩子',
+        visibleIf: { npcStage: 'first_love', stage: 'married' },
+        outcomes: [
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '>=', value: 150000 },
+            text: '你们算了算账户余额和双方父母能搭把手的程度，决定要孩子。决定做出的那晚，两个人罕见地失眠——一半是期待，一半是突然意识到，往后十几年的每一个决定，都要多算一个人进去。',
+            effects: [
+              { moneyCost: { rate: 0.12, max: 15000, roundTo: 500, reason: 'family' } },
+              { stats: { mindset: 6 } },
+              { npcFavor: 'first_love', delta: 10 },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你们商量了很久，最后决定再等等——事业、房贷、精力，哪一项都还没到能松口气的程度。你们没有跟双方父母解释太多，只是在饭桌上笑着说“快了快了”，转头在家里认真核对了一遍两个人的体检报告。',
+            effects: [{ stats: { mindset: -2 } }, { npcFavor: 'first_love', delta: 4 }],
+          },
+        ],
+      },
+      {
+        id: 'push_back',
+        text: '跟父母摊牌，讲清楚自己的节奏',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把工作、存款和自己的想法一条条摆给父母听，语气尽量平静。他们没有完全被说服，但至少那句“你看看人家”，之后出现的频率低了一些。',
+            effects: [{ stats: { mindset: -3, network: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'go_with_flow',
+        text: '“随缘”糊弄过去，先岔开话题',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你笑着说“随缘随缘”，然后迅速把话题引到今年的年夜饭菜单上。饭桌上的紧张气氛暂时散了，只是你知道，这个话题明年还会准时回来。',
+            effects: [{ stats: { mindset: -1 } }],
           },
         ],
       },

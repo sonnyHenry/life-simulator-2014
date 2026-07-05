@@ -565,4 +565,162 @@ export const collegeEvents: GameEvent[] = [
       },
     ],
   },
+  {
+    id: 'ev_college_mobile_wave_2014',
+    pools: ['college'],
+    category: 'campus',
+    title: '开学季的红包大战',
+    text: '2014年9月，你拖着行李箱刚在宿舍坐下，室友的手机就没停过响：抢红包的提示音一个接一个。楼下，滴滴和快的的地推举着传单在校门口拦人，喊着“打车立减”；营业厅的海报贴得比迎新横幅还显眼——“开学不换4G，流量不够用”。你摸出兜里那部用了三年的手机，忽然觉得，这个学校比高中班主任描述的“大学生活”要吵得多。',
+    mandatory: true,
+    trigger: { year: { from: 2014, to: 2014 } },
+    choices: [
+      {
+        id: 'a',
+        text: '跟风换4G套餐，装上打车软件到处探索',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你办了张4G卡，又装了两个打车软件抢新人补贴，来回穿梭在陌生的城市里找便宜又好吃的馆子。流量费比预想的高，但你比同班同学更早摸熟了这座城市的地图。',
+            effects: [{ stats: { money: -300, network: 4, mindset: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '加入宿舍抢红包群，图个热闹',
+        outcomes: [
+          {
+            weight: 2,
+            text: '开学第一周，你的手指比脑子先学会了大学生活——抢红包。群里几十个人拼手速，你抢到的最大一个是八块八，最小的是三分钱，室友笑你“天道酬勤”。',
+            effects: [{ stats: { money: 200, mindset: 4, health: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '你没抢到几个大红包，倒是抢红包抢到凌晨一点，第二天军训差点晕倒在操场上。教官的眼神比太阳还毒。',
+            effects: [{ stats: { money: 30, mindset: -2, health: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '继续用老手机，省下这笔钱',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有跟风换套餐装软件。室友调侃你的手机是“活化石”，你也懒得反驳——省下的钱够吃半个月食堂。只是每次约饭对方发个定位链接，你都要多问一句地址在哪。',
+            effects: [{ stats: { money: 300, network: -2, mindset: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_campus_trends_2016',
+    pools: ['college'],
+    category: 'campus',
+    title: '校园里的新生意',
+    text: '2016年，公告栏和宿舍楼道里贴满了花花绿绿的小广告：“无需家长同意，凭学生证秒批”“开直播，日入过百不是梦”。隔壁班有人换上了最新款手机，朋友圈配文“分期不影响生活”；还有人架起手机支架，对着镜头唱歌聊天，说这是“第二份收入”。你划着朋友圈，盘算着自己那点生活费还能怎么折腾。',
+    mandatory: true,
+    trigger: { year: { from: 2016, to: 2016 } },
+    choices: [
+      {
+        id: 'a',
+        text: '办个校园贷分期，买台新手机',
+        outcomes: [
+          {
+            weight: 2,
+            outcomeTag: 'failure',
+            text: '“凭学生证秒批”的背后是你没细看的服务费和逾期滞纳金。分期账单一个月比一个月长，你东拆西补才把窟窿填上，手机倒是用上了，只是每次它震动，你都会先心里一紧，怕是催款短信。',
+            effects: [
+              { moneyCost: { rate: 0.35, max: 9000, roundTo: 100, reason: 'other' } },
+              { stats: { mindset: -8, knowledge: -2 } },
+            ],
+          },
+          {
+            weight: 1,
+            outcomeTag: 'success',
+            text: '你精打细算，按期还完了每一期分期，没有踩坑。手机用上了，你也第一次认真读完了一份贷款合同——这门课，学校没教，但你自己补上了。',
+            effects: [{ stats: { money: -1500, knowledge: 3, mindset: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '架起手机，试试校园主播',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你对着镜头唱了几首歌，聊了聊上课的糗事，攒了一小撮粉丝，也收到几个礼物打赏。钱不多，但你第一次体会到，什么叫“被陌生人看着”的紧张和上瘾。',
+            effects: [{ stats: { money: 800, network: 5, mindset: 2, health: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '你播了几场，观众加起来没超过十个人，倒是被高中同学截图发到了群里调侃。你把设备收进了柜子最底层，决定这事以后不提。',
+            effects: [{ stats: { mindset: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '不折腾，专心把学业过好',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有凑这些热闹，把时间还给了图书馆和社团。室友分期买的新手机、隔壁班同学攒的粉丝，跟你没什么关系——你的绩点倒是稳稳往上走。',
+            effects: [{ stats: { knowledge: 6, network: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_bike_share_2017',
+    pools: ['college'],
+    category: 'campus',
+    title: '押金骑上共享单车',
+    text: '2017年，五颜六色的共享单车一夜之间堆满了校门口，比自行车棚还壮观。扫码交99元押金就能骑走一辆，你盘算着：以后去教学楼、去实习单位、去校外约会，都能省下不少时间。只是你也隐约听说，有的平台押金退得没那么痛快。',
+    mandatory: true,
+    trigger: { year: { from: 2017, to: 2017 } },
+    choices: [
+      {
+        id: 'a',
+        text: '交押金骑车通勤，图个方便',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你交了99元押金，从此上课、实习、约会都靠它。风里来雨里去，你确实省下了不少公交钱和等车的时间——只是押金这笔钱，你渐渐忘了它本该是能退的。',
+            effects: [{ stats: { money: -99, mindset: 2, health: 3 } }],
+          },
+          {
+            weight: 1,
+            outcomeTag: 'failure',
+            text: '你交了押金骑了大半年，后来想退的时候，APP 里的“退款申请”转了好几圈也没到账。你在维权群里刷到几百个和你一样的人，最后不了了之——99块钱，买了一年的方便，外加一节关于“押金”和“预付费”的公开课。',
+            effects: [{ stats: { money: -99, mindset: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '兼职做单车运维，顺便赚点生活费',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你接了平台的运维兼职，晚上去挨个扶起东倒西歪的单车、把堆在角落的车挪回停车区。工资不算高，但你比谁都更早看懂：风口上那些五颜六色的车，背后是密密麻麻的运维和调度成本。',
+            effects: [{ stats: { money: 1200, knowledge: 3, health: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '继续挤公交，不凑这个热闹',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有交押金，依旧挤着永远不准点的公交。室友吐槽你落伍，你倒觉得，至少这笔押金的钱，安安稳稳留在了自己兜里。',
+            effects: [{ stats: { money: 200, mindset: 1, health: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
 ];

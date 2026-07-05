@@ -37,9 +37,44 @@ export const incomes: IncomeRule[] = [
     mindsetDelta: -10,
   },
   {
-    id: 'inc_edu',
-    label: '教育行业收入',
-    when: { flag: 'career_edu' },
+    id: 'inc_edu_public',
+    label: '体制内教师工资',
+    when: { all: [{ flag: 'career_edu' }, { flag: 'teacher_public' }] },
+    amount: 32000,
+    mindsetDelta: -1,
+    healthDelta: -1,
+  },
+  {
+    id: 'inc_edu_transferred',
+    label: '转编制中的教育行业收入',
+    when: {
+      all: [{ flag: 'career_edu' }, { flag: 'edu_to_public_school' }, { not: { flag: 'teacher_public' } }],
+    },
+    amount: 28000,
+    mindsetDelta: -2,
+    healthDelta: -2,
+  },
+  {
+    id: 'inc_edu_reinvented',
+    label: '素质教育/机构讲师收入',
+    when: {
+      all: [{ flag: 'career_edu' }, { flag: 'edu_reinvented' }, { not: { flag: 'teacher_public' } }],
+    },
+    amount: 30000,
+    mindsetDelta: -4,
+    healthDelta: -1,
+  },
+  {
+    id: 'inc_edu_market',
+    label: '教育行业收入(未分流)',
+    when: {
+      all: [
+        { flag: 'career_edu' },
+        { not: { flag: 'teacher_public' } },
+        { not: { flag: 'edu_to_public_school' } },
+        { not: { flag: 'edu_reinvented' } },
+      ],
+    },
     amount: 26000,
     mindsetDelta: -3,
     healthDelta: -2,
