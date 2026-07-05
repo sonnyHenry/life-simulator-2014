@@ -446,12 +446,25 @@
 - 最新验证:`typecheck` / `test`(19 通过) / `validate` / `simulate -n 1000 --check` / `web build` / `miniprogram build:weapp` 全部通过;
   `simulate -n 500 --compare` 显示无明显必胜解(随机 42、卷钱 41、保心态 62、卷总分 68)。
 
+### M5 第二十二轮(补完职业线:金融线 + 医学线)
+
+由 Claude Code(Sonnet 5)完成,内容版本 → 0.15.7,事件 85 → 94,结局 17 → 19,收入规则 10 → 16。背景:`GAME_DESIGN.md` 第四节规划的 4 条职业线里,金融/医学此前是"二期"未落地(全仓库 grep 零命中)。本轮补完到与计算机线/师范线一致的密度——专属里程碑事件对齐现状的 5/4 个,而非文档原定的"25 个/线"(计算机/师范实际也从未达到过 25 个)。
+
+- **金融线**(`career_finance` flag,`finance` trackFlag):新增 `events/career-finance.ts` 5 个专属事件——2015 股灾实习(从业者视角,college 阶段,区别于散户视角的 `ev_invest_stock_2015`)、2018 第一份金融岗(前台/中后台分档,仿计算机线 elite/ordinary 结构)、2018-2019 资管新规、2020 基金热、2021 抱团崩塌(`tier:'major'`,金融线情绪高点,"顶住"/"离场"两个确定性分支,离场分支直接复用现成的 `laid_off`/`ev_cs_reemployment` 机制,已确认该事件文案完全通用无 CS 痕迹)。新增专业「金融学」(985/211/一本)、结局「牛熊过客」(priority 109)、收入规则 `inc_fin_front_office`(¥78000/-8/-7,全游戏最高年度心态/健康消耗速率)与 `inc_fin_back_office`(¥42000/-4/-4)。
+- **医学线**(`career_medicine` flag,`medicine` trackFlag,过渡 flag `medicine_resident`):新增 `events/career-medicine.ts` 4 个专属事件——2018 规培开始(设 `medicine_resident`)、2020 出征(`tier:'major'`,全游戏最高光剧情,请战一线/后方支援/申请轮岗三选项)、2021 规培结束(清除 `medicine_resident`,分流 `doctor_public`/`doctor_private`/`doctor_left`)、2023 编制与尊严。设计文档"5 年本科 + 3 年规培"完全靠 flag 在既有固定时间线(2018-2026)上模拟,不改引擎架构,与"考研推迟 3 年入场"现有实现方式同构。**关键设计**:2020 出征事件按 `{ major: '临床医学' }` 而非 `career_medicine` 门控——后者的赋值时机因求职(2018)/考研(2021,经 `ev_postgrad_exit`)分流路径而异,按 major 门控才能保证所有临床医学专业玩家都不会错过这条主线;已验证 `settleRound` 在年内事件全部结算完后才结算收入,故规培低薪正好只覆盖 2018/2019/2020 三年,与"3 年规培"吻合,无需额外处理。新增专业「临床医学」(985/211/一本/二本)、结局「白衣执甲」(priority 111,标题取自设计文档原句)、收入规则 `inc_med_resident`(¥6000/-6/-5,刻意做到全游戏最低档,规培工资"煎熬"的数值落地)、`inc_med_attending_public`/`inc_med_attending_private`/`inc_med_left`(¥34000/¥50000/¥28000)。
+- **引擎改动**(唯一必须的 `packages/core` 改动):`handleCrossroad` 的「求职」分支新增金融/医学两个 `else if` 分支——不这样做,新专业玩家会一直落进 `local` 兜底,所有靠新 flag 触发的事件永久 0 覆盖。`ev_postgrad_exit` 追加金融/医学两个 `visibleIf` 选项。`inc_generic_job` 排除条件补上 `not career_finance`/`not career_medicine`,避免新职业线重复吃通用兜底收入。`CROSSROAD_OPTIONS.recommendedFor`、`validate.ts` 的 `KNOWN_TRACK_FLAGS`、`simulate.ts` 的 `CAREER_LABELS` 同步补齐。
+- **测试补全**:`engine.test.ts` 新增「career crossroad branches」describe 块,直接断言金融/医学专业选择求职后 `career`/`career_xxx` flag/`first_job_track` 写入正确——此前 `handleCrossroad` 的专业字符串匹配分支完全没有单测覆盖,只靠 simulate 间接兜底。
+- **规培期间的互斥门控**(验证过程中人工抽查种子发现,非计划原定范围):种子回放发现规培医生会命中「领导的反馈」("owner 意识"黑话)、「试用期汇报」(PPT 汇报)等强企业职场语境的共享事件,与"规培"身份不符(仿 M5 第十二轮"互斥情节门控"precedent)。给 `ev_work_probation`/`ev_work_manager_feedback`/`ev_work_first_bonus`/`ev_work_remote_office` 四个事件的 `trigger` 加上 `not: { flag: 'medicine_resident' }`,规培结束后这些事件恢复正常触发。
+- **执行顺序调整**:原计划拆成金融/医学两轮分别验证、分别 commit(降低平衡调参时的排查难度)。实施中发现 `applications.ts`/`engine.ts`/`ev_postgrad_exit` 是两条线共享的同一批文件——金融的专业条目一旦落地,`validate` 的 `KNOWN_TRACK_FLAGS` 白名单检查就要求医学的 trackFlag 也必须同时补上,两轮拆分在这一层没有实际隔离效果,遂合并成一轮实现、一次验证、一次 commit。
+- **已知的次要边界情况(不修复)**:临床医学专业选"考公"(而非求职/考研)时不会拿到 `career_medicine`/`medicine_resident`,但仍会因 major 门控触发 2020 出征事件,出现"考公方向的医学生也经历一线请战"的轻微叙事错位(已用 seed 18 实测复现)。触达概率低、不影响任何门禁;现实中也有医疗口公务员/疾控系统被抽调参与抗疫的对应情形。
+- 验证:`typecheck`/`test`(21 通过,+2 新测试)/`validate`(0 error/0 warning)/`simulate -n 1000 --check` 全部通过,94/94 事件覆盖、19 个结局全可达(白衣执甲 1.4%、牛熊过客 0.1%——金融专业录取率本身较低,1000 局仅 9 局落在金融职业线)、提前结局占比 8.2%(与上一轮持平,医学线规培三年低薪 + 疫情高健康消耗的叠加压力**未**导致早退结局超标,原本担心的平衡风险未成真);`web build`、`miniprogram build:weapp` 均通过。按职业线分组:金融均财 ¥419,700/心态均值 23(全场最低,符合"高薪高耗"设计意图,样本量小需谨慎解读)、医学均财 ¥258,404/心态均值 48(健康区间,规培叠加压力未引发死亡螺旋)。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.15.6'
+version: '0.15.7'
 title: '2014：我的十二年'
 ```
 
@@ -484,22 +497,23 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次 `pnpm validate`:
 
 ```text
-事件 85, 结局 17, NPC 5, 题目 37, 收入规则 10
+事件 94, 结局 19, NPC 5, 题目 37, 收入规则 16
 完成: 0 errors, 0 warnings
 ```
 
 最近一次 `pnpm simulate -n 1000 --check`:
 
 ```text
-事件覆盖: 85/85
-金钱分位: p10=¥114700 p50=¥211700 p90=¥439000
-心态分位: p10=3 p50=30 p90=64
+事件覆盖: 94/94
+金钱分位: p10=¥114200 p50=¥207900 p90=¥433700
+心态分位: p10=3 p50=30 p90=65
 提前结局占比: 8.2%
-兜底结局占比: 23.0%
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
-最近一次 `pnpm simulate -n 500 --compare`:
+按职业线分组(n=1000,随机 bot):金融均财 ¥419,700/心态均值 23(样本仅 9 局)、医学均财 ¥258,404/心态均值 48(51 局)、计算机均财 ¥343,983/心态均值 19、教育均财 ¥256,207/心态均值 36、体制内均财 ¥183,938/心态均值 54。
+
+最近一次 `pnpm simulate -n 500 --compare`(M5 第二十一轮,金融/医学线加入前;尚未在新内容上重跑):
 
 ```text
 随机 42 · 卷钱 41 · 保心态 62 · 卷总分 68
@@ -516,10 +530,12 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 已知问题 / 后续建议
 
-- 内容量还没有达到设计文档里的约 125 个事件,当前是 85 个。
-- 结局数量当前是 17 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要再次挤高兜底或某个单一结局。
+- **`GAME_DESIGN.md` 第四节"职业线(4 条精做)"已全部落地**(计算机/师范/金融/医学),但密度对齐的是计算机/师范线的实际现状(5/4 个专属里程碑事件 + 共享社会事件池),而非文档最初设想的"25 个/线"——内容量还没有达到设计文档里的约 125 个事件,当前是 94 个。
+- 结局数量当前是 19 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要再次挤高兜底或某个单一结局。
+- 金融线样本量偏小(1000 局随机 bot 仅 9 局落在金融职业线,因为「金融学」只在 985/211/一本三档、且这三档专业选项本身较多),`end_finance_survivor`(牛熊过客)命中率目前只有 0.1%——不是分布超标,但如果后续想让这条线更常被玩到,可以考虑扩大专业投放档次或提高该批次里金融学被随机选中的权重。
+- 临床医学专业选"考公"分支时会有已知的次要叙事错位(仍会触发 2020 出征事件但拿不到 career_medicine),详见 M5 第二十二轮小节,不影响任何门禁,暂不计划修复。
 - 分享图 Canvas 渲染已通过类型检查和构建,但还没有在真实浏览器里点过"保存分享图",上线前建议人工玩一局到结局验证一次。
-- 金钱/心态等数值已经可玩,但还需要继续根据 simulate 分布调平衡。
+- 金钱/心态等数值已经可玩,但还需要继续根据 simulate 分布调平衡;`--compare` 的策略 bot 对比还没有在金融/医学线加入后重新跑过。
 
 ## 给下一个模型的建议
 

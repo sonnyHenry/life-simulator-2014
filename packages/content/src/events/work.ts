@@ -600,6 +600,69 @@ export const workEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'finance',
+        text: '去金融机构，做分析或投研',
+        visibleIf: { major: '金融学' },
+        outcomes: [
+          {
+            weight: 1,
+            condition: { flag: 'postgrad_strong' },
+            text: '你拿到了一份不错的金融岗 offer。研究生期间打磨的建模和报告能力，让你一进场就没有被当成"什么都不懂的新人"。晚入场三年，你带着一份更扎实的底子。',
+            effects: [
+              { stats: { money: 24000, knowledge: 6, network: 6, mindset: 3 } },
+              { setCareer: 'finance' },
+              { setFlag: 'career_finance' },
+              { setFlag: 'postgrad_done' },
+              { setFlag: 'finance_front_office' },
+              { setFlag: 'finance_postgrad_premium' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'postgrad_strong' } },
+            text: '你进了一家机构做基础分析工作。同批新人里研究生不算稀奇，但你至少不用从头补一遍行业常识。',
+            effects: [
+              { stats: { money: 13000, knowledge: 5, network: 4 } },
+              { setCareer: 'finance' },
+              { setFlag: 'career_finance' },
+              { setFlag: 'postgrad_done' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'medicine',
+        text: '回到临床，走规培并轨',
+        visibleIf: { major: '临床医学' },
+        outcomes: [
+          {
+            weight: 1,
+            condition: { flag: 'postgrad_strong' },
+            text: '你的专业硕士和规培"并轨"完成，直接定级进了医院编制。三年没有白读——同批规培的本科生还在熬资历，你已经站稳了脚跟。',
+            effects: [
+              { stats: { money: 15000, knowledge: 7, mindset: 4 } },
+              { setCareer: 'medicine' },
+              { setFlag: 'career_medicine' },
+              { setFlag: 'postgrad_done' },
+              { setFlag: 'doctor_public' },
+              { setFlag: 'medicine_postgrad_premium' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'postgrad_strong' } },
+            text: '你的专业硕士和规培"并轨"总算走完，进了医院体系。三年读下来，白大褂穿在身上依然是那件白大褂，只是你比刚毕业时更清楚它有多重。',
+            effects: [
+              { stats: { money: 7000, knowledge: 5 } },
+              { setCareer: 'medicine' },
+              { setFlag: 'career_medicine' },
+              { setFlag: 'postgrad_done' },
+              { setFlag: 'doctor_public' },
+            ],
+          },
+        ],
+      },
+      {
         id: 'local',
         text: '先找份稳定工作',
         outcomes: [
@@ -1287,7 +1350,7 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '试用期汇报',
     text: '入职几个月后，你要做第一次试用期汇报。PPT 上写着“成长与反思”，但你最想写的是“我真的尽力了”。',
-    trigger: { all: [{ year: { from: 2018, to: 2019 } }, working] },
+    trigger: { all: [{ year: { from: 2018, to: 2019 } }, working, { not: { flag: 'medicine_resident' } }] },
     choices: [
       {
         id: 'a',
@@ -1346,7 +1409,7 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '领导的反馈',
     text: '绩效沟通时，领导说你“执行不错，但要更有 owner 意识”。你点头记录，心里翻译成中文：活要多想，锅也要多背。',
-    trigger: { all: [{ year: { from: 2019 } }, working] },
+    trigger: { all: [{ year: { from: 2019 } }, working, { not: { flag: 'medicine_resident' } }] },
     choices: [
       {
         id: 'a',
@@ -1378,7 +1441,7 @@ export const workEvents: GameEvent[] = [
     category: 'money',
     title: '第一笔年终奖',
     text: '年终奖到账了。金额没有传说中那么夸张，但比你学生时代见过的大多数数字都大。你打开购物车，又打开银行卡余额。',
-    trigger: { all: [{ year: { from: 2019, to: 2020 } }, working] },
+    trigger: { all: [{ year: { from: 2019, to: 2020 } }, working, { not: { flag: 'medicine_resident' } }] },
     choices: [
       {
         id: 'a',
@@ -1430,7 +1493,7 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '远程办公',
     text: '2020年，客厅变成办公室。视频会议里有人忘关麦，有人孩子在旁边哭，有人把头像停在“网络不佳”。',
-    trigger: { all: [{ year: { from: 2020, to: 2020 } }, working] },
+    trigger: { all: [{ year: { from: 2020, to: 2020 } }, working, { not: { flag: 'medicine_resident' } }] },
     choices: [
       {
         id: 'a',

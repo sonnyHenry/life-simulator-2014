@@ -53,6 +53,8 @@ const CAREER_LABELS: Record<string, string> = {
   education: '教育',
   gov: '体制内',
   local: '县城/本地',
+  finance: '金融',
+  medicine: '医学',
 };
 const STRATEGY_LABELS: Record<Strategy, string> = {
   random: '随机',

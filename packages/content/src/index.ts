@@ -8,6 +8,8 @@ import { collegeEvents } from './events/college';
 import { workEvents } from './events/work';
 import { randomEvents } from './events/random';
 import { dramaEvents } from './events/drama';
+import { careerFinanceEvents } from './events/career-finance';
+import { careerMedicineEvents } from './events/career-medicine';
 import { endings } from './endings/endings';
 import { npcs } from './npcs/npcs';
 import { incomes } from './economy/incomes';
@@ -15,7 +17,7 @@ import { incomes } from './economy/incomes';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.15.6',
+    version: '0.15.7',
     title: '2014：我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 10,
@@ -25,7 +27,14 @@ export const contentPack: ContentPack = {
     },
   },
   timeline: phases,
-  events: [...collegeEvents, ...workEvents, ...randomEvents, ...dramaEvents],
+  events: [
+    ...collegeEvents,
+    ...workEvents,
+    ...randomEvents,
+    ...dramaEvents,
+    ...careerFinanceEvents,
+    ...careerMedicineEvents,
+  ],
   incomes,
   endings,
   examBank,

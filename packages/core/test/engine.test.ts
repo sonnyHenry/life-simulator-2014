@@ -221,6 +221,50 @@ describe('M2 flow support', () => {
   });
 });
 
+describe('career crossroad branches', () => {
+  function reachCrossroad(seed: number) {
+    const pack = miniPack();
+    pack.timeline.splice(1, 0, {
+      kind: 'flow',
+      id: 'crossroad',
+      label: '三岔口',
+      date: { year: 2018, month: 3 },
+      steps: ['CROSSROAD'],
+    });
+    const engine = createEngine(pack);
+    let state = engine.start(seed);
+    state = engine.dispatch(state, { type: 'START' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'SKIP_EXAM' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
+    state = engine.dispatch(state, { type: 'CONTINUE' });
+    return { engine, state };
+  }
+
+  it('routes a finance major choosing 求职 into career_finance', () => {
+    const { engine, state } = reachCrossroad(3);
+    state.profile.major = '金融学';
+    expect(engine.view(state).kind).toBe('CROSSROAD');
+    const after = engine.dispatch(state, { type: 'CHOOSE_CROSSROAD', optionId: 'job' });
+    expect(after.profile.career).toBe('finance');
+    expect(after.flags['career_finance']).toBe(true);
+    expect(after.flags['first_job_track']).toBe('finance_ordinary_candidate');
+  });
+
+  it('routes a clinical-medicine major choosing 求职 into career_medicine + medicine_resident', () => {
+    const { engine, state } = reachCrossroad(3);
+    state.profile.major = '临床医学';
+    expect(engine.view(state).kind).toBe('CROSSROAD');
+    const after = engine.dispatch(state, { type: 'CHOOSE_CROSSROAD', optionId: 'job' });
+    expect(after.profile.career).toBe('medicine');
+    expect(after.flags['career_medicine']).toBe(true);
+    expect(after.flags['medicine_resident']).toBe(true);
+    expect(after.flags['first_job_track']).toBe('medicine_ordinary_candidate');
+  });
+});
+
 describe('evalCondition', () => {
   const pack = miniPack();
   const engine = createEngine(pack);

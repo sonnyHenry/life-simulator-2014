@@ -136,6 +136,36 @@ export const endings: EndingDef[] = [
     shareCard: { tone: 'bitter', tagline: '地震之后还站在讲台上，就是答案。' },
   },
   {
+    id: 'end_finance_survivor',
+    title: '牛熊过客',
+    text: '2015年股灾、2018年资管新规、2021年抱团崩塌——这个行业每隔几年就要洗一次牌，你亲眼见过多少"顶流"从神坛跌下来，连朋友圈都不敢再发业绩截图。2026年，你还站在这个牌桌上。没有人再问你信不信"这次不一样"，因为你早就知道，牛熊都会过去，过去的人才算数。',
+    category: 'final',
+    priority: 109,
+    condition: {
+      all: [
+        { flag: 'career_finance' },
+        { not: { flag: 'laid_off' } },
+        { stat: 'mindset', op: '>=', value: 25 },
+      ],
+    },
+    shareCard: { tone: 'bitter', tagline: '牛熊都会过去，留下来的人才算数。' },
+  },
+  {
+    id: 'end_medicine_frontline',
+    title: '白衣执甲',
+    text: '2020年那个除夕夜，你在请战书上按下手印的时候，没有想那么多以后的事。2026年回头看，编制定没定、留没留在临床，好像都不再是最重要的问题——重要的是那一年，穿上防护服的人里，有你一个。白大褂后来换了又换，但那份手印，一直算数。',
+    category: 'final',
+    priority: 111,
+    condition: {
+      all: [
+        { flag: 'career_medicine' },
+        { flag: 'pandemic_frontline' },
+        { stat: 'mindset', op: '>=', value: 30 },
+      ],
+    },
+    shareCard: { tone: 'triumph', tagline: '那一年请战的人里，有你一个。' },
+  },
+  {
     id: 'end_stable_gov',
     title: '上岸人',
     text: '你的工位上摆着一盆绿萝，水杯里泡着菊花茶。大学同学在群里聊融资、聊期权、聊裁员，你偶尔冒个泡，发一张单位食堂三块钱的午饭。有人羡慕你，有人替你“可惜”。但日子是过给自己的，不是过给群友看的。',

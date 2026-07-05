@@ -24,19 +24,19 @@ const CROSSROAD_OPTIONS = [
     id: 'postgrad',
     label: '考研',
     text: '再把青春押给一次考试。晚几年入场，也许能换一张更硬的门票。',
-    recommendedFor: ['计算机科学与技术', '软件工程', '师范类'],
+    recommendedFor: ['计算机科学与技术', '软件工程', '师范类', '金融学', '临床医学'],
   },
   {
     id: 'job',
     label: '求职',
     text: '先上车再说。简历、群面、笔试、offer，毕业季的风会把人推着往前走。',
-    recommendedFor: ['计算机科学与技术', '软件工程', '计算机应用'],
+    recommendedFor: ['计算机科学与技术', '软件工程', '计算机应用', '金融学', '临床医学'],
   },
   {
     id: 'civil_service',
     label: '考公',
     text: '回到一张安静的书桌前，把不确定的人生复习成确定的题型。',
-    recommendedFor: ['师范类', '工商管理'],
+    recommendedFor: ['师范类', '工商管理', '金融学'],
   },
 ] as const;
 
@@ -470,6 +470,19 @@ export function createEngine(pack: ContentPack): Engine {
             { setCareer: 'education' },
             { setFlag: 'career_edu' },
             { setFlag: 'first_job_track', value: 'education_candidate' },
+          );
+        } else if (major.includes('金融')) {
+          effects.push(
+            { setCareer: 'finance' },
+            { setFlag: 'career_finance' },
+            { setFlag: 'first_job_track', value: eliteBonus ? 'finance_elite_candidate' : 'finance_ordinary_candidate' },
+          );
+        } else if (major.includes('临床医学') || major.includes('医学')) {
+          effects.push(
+            { setCareer: 'medicine' },
+            { setFlag: 'career_medicine' },
+            { setFlag: 'medicine_resident' },
+            { setFlag: 'first_job_track', value: eliteBonus ? 'medicine_tertiary_candidate' : 'medicine_ordinary_candidate' },
           );
         } else {
           effects.push(
