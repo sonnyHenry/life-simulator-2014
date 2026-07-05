@@ -1,7 +1,8 @@
 # 《2014:我的十二年》技术架构文档 v1.0
 
 > 配套文档:[GAME_DESIGN.md](./GAME_DESIGN.md)(玩法设计)
-> 2026-07-03 定稿。目标:支撑长期内容扩展(年份/事件/NPC/职业线)与多平台移植(Web → 微信小程序)。
+> 2026-07-03 定稿,目标:支撑长期内容扩展(年份/事件/NPC/职业线)与多平台移植(Web → 微信小程序)。
+> 2026-07-05 更新:三、四两节已按当前代码(`packages/core`)重新核对并补充 mermaid 图解,修正了与 v1.0 设计稿不一致的地方(详见各节内联说明)。
 
 ---
 
@@ -103,92 +104,259 @@ life-simulator-2014/
 
 ## 三、引擎层设计
 
-### 3.1 Redux 式纯函数 API(移植性的根基)
+> 本节 2026-07-05 按当前代码(`packages/core/src`)重新核对过一遍,修正了与最初 v1.0 设计不一致的地方。如果你是被 `drama.ts` 里的 TS 绕晕了来看这一节,建议先看 3.0。
+
+### 3.0 给不熟悉 TS 的读者:先认 5 个符号
+
+后面的 Schema 代码反复用这几种写法,先认脸,不用记语法细节:
+
+| 写法 | 怎么读 | 例子 | 意思 |
+|---|---|---|---|
+| `interface X { a: T }` | "X 长这样" | `interface NpcState { favor: number }` | 一个 X 类型的值,必须有字段 `a`,类型是 `T` |
+| `a?: T` | "a 可以不写" | `weight?: number` | 可选字段,不写就相当于没有 |
+| `A \| B` | "A 或 B" | `'文' \| '理'` | 值只能是这两种之一 |
+| `T[]` | "一堆 T" | `GameEvent[]` | T 的数组 |
+| `Record<string, T>` | "字符串做 key 的字典" | `Record<string, NpcState>` | 类似 `{ roommate: {...}, mentor: {...} }` |
+
+**判别联合(discriminated union)是最值得先弄懂的写法**,因为 `Condition`、`Effect`、`ViewModel` 全是这么定义的:一个类型不是"把所有字段填满",而是"只长成列出的其中一种形状"。比如:
 
 ```ts
-// 引擎只有三个入口,全部是纯函数,不碰 DOM、不碰存储、不产生副作用
-interface Engine {
-  start(input: SetupInput, seed?: number): GameState;
-  view(state: GameState): ViewModel;                    // 当前该渲染什么
-  dispatch(state: GameState, action: PlayerAction): GameState;  // 玩家操作 → 新状态
-}
-
-// ViewModel 是判别联合,UI 层只做"模式匹配渲染",不含任何游戏逻辑
-type ViewModel =
-  | { kind: 'TITLE' }
-  | { kind: 'BACKGROUND_DRAW'; card: BackgroundCard }          // 家境抽卡
-  | { kind: 'SETUP'; provinces: ProvinceOption[]; tracks: ... } // 省份/文理
-  | { kind: 'EXAM'; question: ExamQuestion; index: number; total: number }
-  | { kind: 'EXAM_RESULT'; score: number; band: ScoreBand }
-  | { kind: 'APPLICATION'; options: ApplicationOption[] }       // 志愿填报
-  | { kind: 'BRIEF'; year: number; phaseLabel: string; text: string }  // 时代背景简报
-  | { kind: 'EVENT'; event: RenderedEvent; choices: RenderedChoice[] }
-  | { kind: 'OUTCOME'; text: string; statDeltas: StatDeltas }
-  | { kind: 'SETTLEMENT'; yearSummary: ... }                    // 年度结算
-  | { kind: 'ENDING'; ending: RenderedEnding; shareCard: ShareCardData };
+type Condition =
+  | { flag: string; equals?: ... }
+  | { year: { from?: number; to?: number } }
+  | { all: Condition[] }
+  | ...;
 ```
 
-**为什么这样设计**:小程序移植时,`Engine` 和 `ViewModel` 原样复用,新平台只需为每种 `kind` 写一个渲染组件。游戏逻辑永远只有一份。
+`{ flag: 'in_love' }` 是这个类型合法的一个值,`{ year: { from: 2020 } }` 也是——但不会同时看到 `flag` 和 `year` 出现在同一个对象里。引擎靠 `if ('flag' in cond)` 这种"看这个对象有没有某个字段"的写法来判断"现在拿到的是哪一种"(`dsl/evaluate.ts:22-69` 整个函数都在做这件事)。**以后在事件文件里看到一坨 `{ xxx: ... }`,第一步永远是:去 `Condition` 或 `Effect` 的定义里找它长得像哪一种,再查那一种的字段含义。**
 
-### 3.2 GameState(单一状态树)
+### 3.1 三个函数就是整个引擎(`packages/core/src/engine/engine.ts`)
+
+```ts
+interface Engine {
+  start(seed?: number): GameState;                              // 开一局新游戏,seed 不传就随机生成
+  view(state: GameState): ViewModel;                             // 这个状态现在该画成什么画面
+  dispatch(state: GameState, action: PlayerAction): GameState;   // 玩家的操作 + 旧状态 → 新状态
+}
+```
+
+`dispatch` 内部先把 `state` 整个复制一份(`clone()`,直接 `JSON.parse(JSON.stringify(state))`),所有修改都发生在这份拷贝上,原状态不会被动——调用方(React 组件、`simulate` CLI、以后的小程序 UI)可以放心拿新旧两个状态对比、存档、回放。
+
+`view()` 是一个大 `switch(state.screen)`,`state.screen` 是"当前在哪一页"的指针,取值是(`types/state.ts:3-15`):
+
+```ts
+type ScreenId =
+  | 'TITLE' | 'BACKGROUND_DRAW' | 'SETUP' | 'EXAM' | 'EXAM_RESULT'
+  | 'APPLICATION' | 'CROSSROAD' | 'BRIEF' | 'EVENT' | 'OUTCOME'
+  | 'SETTLEMENT' | 'ENDING';
+```
+
+一局游戏,本质上就是这个指针不断跳转。拆成两张图更容易看清——因为"一次性流程"和"每轮重复的循环"节奏完全不同。
+
+**第一张:开局的一次性流程(`flow` 类型阶段,只走一遍)**
+
+```mermaid
+flowchart LR
+    TITLE -->|START| BACKGROUND_DRAW
+    BACKGROUND_DRAW -->|CONTINUE 抽到家境卡| SETUP
+    SETUP -->|CHOOSE_SETUP 选省份+文理| EXAM
+    EXAM -->|答完/SKIP_EXAM| EXAM_RESULT
+    EXAM_RESULT -->|CONTINUE| APPLICATION
+    APPLICATION -->|APPLY 报志愿| O1(OUTCOME)
+    O1 -->|进入大学第1轮| BRIEF1(BRIEF)
+```
+
+**第二张:每一轮重复的循环(`rounds` 类型阶段,大学 4 轮 / 社会 9 轮都走这个循环)**
+
+```mermaid
+flowchart TD
+    BRIEF -->|本轮抽到了事件| EVENT
+    BRIEF -->|本轮没抽到事件| SETTLEMENT
+    EVENT -->|CHOOSE 选了一个选项| OUTCOME
+    OUTCOME -->|队列里还有下一个事件| EVENT
+    OUTCOME -->|本轮事件全部处理完| SETTLEMENT
+    SETTLEMENT -->|本阶段还没打完,年份+1| BRIEF
+    SETTLEMENT -->|本阶段打完,进入下一阶段| NEXT["下一阶段<br/>(CROSSROAD 或 ENDING)"]
+    OUTCOME -.->|任意时刻满足提前结局| ENDING
+    SETTLEMENT -.->|结算时满足提前结局/最后一轮打完| ENDING
+```
+
+`CROSSROAD`(大四三岔口)本身是第三个、只有一步的 `flow` 阶段,跟第一张图长得一样:`CROSSROAD --CHOOSE_CROSSROAD--> OUTCOME --进入社会第1轮--> BRIEF`,不再单独画图。
+
+两张图里最容易让人困惑的是 **`OUTCOME` 是个十字路口**:同一个"确认"按钮(`CONTINUE`),会跳到 `EVENT`、`BRIEF` 还是 `SETTLEMENT`,取决于 `state.pendingFlowAdvance` 这个布尔开关(`engine.ts:551-595` 的 `continueAfterOutcome`)——报志愿、选三岔口这类"一次性流程步骤"会把它设成 `true`,表示"这一步是阶段推进,不是普通事件",引擎就知道接下来该进入下一个阶段(第一张图的路径)而不是继续弹事件(第二张图的路径)。
+
+### 3.2 GameState:唯一的状态树(`packages/core/src/types/state.ts`)
 
 ```ts
 interface GameState {
-  schemaVersion: number;        // 存档迁移用
-  seed: number;
-  rngState: number;             // RNG 当前内部状态(存档恢复后随机序列不断裂)
-  phaseId: string;              // 当前时间线阶段(来自内容层配置,不写死)
-  roundIndex: number;
+  schemaVersion: 1;
+  seed: number;                  // 开局种子
+  rngState: number;              // RNG 当前内部状态,决定"下一次随机"会摇出什么
+  screen: ScreenId;              // 见上,当前该画哪一页
+  phaseIndex: number;            // 当前处于 timeline 里第几个阶段(高考季/大学/三岔口/社会…)
+  flowStepIndex: number;         // 阶段是 "flow" 类型时,当前走到第几个流程步骤
+  roundIndex: number;            // 阶段是 "rounds" 类型时,当前是第几轮(第几学年/第几年)
+  roundCounter: number;          // 全局累计轮数,不随阶段重置,给 schedule(延迟事件)当时间戳用
   date: { year: number; month: number };
-  screen: ScreenId;             // UI 状态机指针
-  stats: { knowledge: number; money: number; mindset: number; network: number };
-  profile: { background: string; province: string; track: '文'|'理';
-             examScore: number; university: string; major: string; career: string|null };
-  flags: Record<string, boolean|number|string>;   // 通用标记(事件链/剧情开关)
-  npcs: Record<NpcId, { favor: number; stage: string; alive: boolean }>;
-  scheduled: ScheduledEvent[];  // 延迟事件队列(事件链)
-  history: HistoryEntry[];      // 全部已发生事件+选择(结局判定和分享卡都用它)
+  currentBrief: string | null;   // 本轮的"时代背景简报"文案
+  eventQueue: string[];          // 本轮要依次弹出的事件 id 队列
+  eventCursor: number;           // 队列走到第几个了
+  pendingOutcome: { text: string; deltas: StatDeltas } | null;  // OUTCOME 页要显示的文案+数值变化
+  pendingFlowAdvance: boolean;   // 见上,OUTCOME 十字路口的开关
+  forcedEndingId: string | null; // 被某个 effect(triggerEnding)强制指定的结局
+  pendingJumpPhaseId: string | null; // 被某个 effect(jumpToPhase)指定要跳去的阶段(如"复读"跳回高考)
+  examPaper: string[]; examCursor: number; examCorrect: number; examEarnedPoints: number; // 高考答题过程
+  stats: Stats;                  // { knowledge, money, mindset, network, health }
+  profile: Profile;              // 家境/省份/文理/分数/大学/专业/职业
+  flags: Record<string, boolean | number | string>;  // 万能扩展槽,见下
+  npcs: Record<string, { favor: number; stage: string }>;  // 每个 NPC 的好感度+剧情阶段
+  scheduled: { eventId: string; dueRound: number }[];  // 延迟事件队列(事件链)
+  triggeredEventIds: string[];   // 已经触发过的事件 id(配合 once 去重)
+  history: HistoryEntry[];       // 全部已发生的事件/志愿/三岔口记录,结局判定和 historyCount 条件都读它
   endingId: string | null;
 }
 ```
 
-设计要点:
-- **flags 是通用扩展点**:任何新剧情机制(比如以后加"房产""子女")先用 flag 承载,常用后再升格为一等字段(配迁移)。
-- **rngState 入档**:同一种子 + 同一操作序列 = 完全相同的一局(测试、回放、"挑战同一人生"分享都依赖它)。
+**`flags` 是整个内容系统的万能扩展槽**:任何新机制,不管是"是否在恋爱中"(`in_love`)、"是否被裁员"(`laid_off`)、"大学录取批次"(`university_tier`),都先塞进这个字典里,不需要现在就在 `GameState` 上加新字段。`drama.ts` 里几乎每个 `condition`/`trigger` 最终都在读这个字典。
 
-### 3.3 回合调度(时间线配置驱动)
+### 3.3 时间线:阶段配置驱动主循环(`packages/content/src/timeline/phases.ts`)
 
-引擎的主循环不知道"大学四年""2026 结束"这些概念,它只消费内容层的时间线配置:
+引擎的主循环完全不知道"大学四年""2026 年结束"这些具体概念,只认两种阶段形状(`types/content.ts:61-79`):
 
 ```ts
-// packages/content/src/timeline/phases.ts
-const phases: PhaseConfig[] = [
-  { id: 'gaokao',    label: '高考季',  date: { year: 2014, month: 6 },
-    flow: ['BACKGROUND_DRAW','SETUP','EXAM','APPLICATION'] },        // 特殊流程阶段
-  { id: 'college-1', label: '大一学年', date: { year: 2014, month: 9 },
-    rounds: 1, eventSlots: 3, pools: ['college','npc','random'] },
-  // ... college-2/3/4
-  { id: 'crossroad', label: '大四三岔口', date: { year: 2018, month: 3 },
-    flow: ['CROSSROAD_DECISION'] },
-  { id: 'work-2018', label: '2018', rounds: 1, eventSlots: 3,
-    pools: ['career','npc','invest','random'], mandatoryPools: ['era'] },
-  // ... 每年一个,直到:
-  { id: 'work-2026', label: '2026', ..., isFinal: true },            // 唯一的"终点"标记
+type PhaseConfig =
+  | { kind: 'flow'; id: string; label: string; date: GameDate;
+      steps: ('BACKGROUND_DRAW'|'SETUP'|'EXAM'|'APPLICATION'|'CROSSROAD')[] }
+  | { kind: 'rounds'; id: string; label: string; date: GameDate;
+      rounds: number; eventSlots: number; pools: string[]; briefs: string[]; isFinal?: boolean };
+```
+
+真实配置长这样(`phases.ts` 节选):
+
+```ts
+export const phases: PhaseConfig[] = [
+  { kind: 'flow', id: 'gaokao', label: '高考季', date: { year: 2014, month: 6 },
+    steps: ['BACKGROUND_DRAW', 'SETUP', 'EXAM', 'APPLICATION'] },
+  { kind: 'rounds', id: 'college', label: '大学时代', date: { year: 2014, month: 9 },
+    rounds: 4, eventSlots: 3, pools: ['college', 'npc', 'invest', 'random'], briefs: [/* 4条 */] },
+  { kind: 'flow', id: 'crossroad', label: '大四三岔口', date: { year: 2018, month: 3 },
+    steps: ['CROSSROAD'] },
+  { kind: 'rounds', id: 'work', label: '社会十年', date: { year: 2018, month: 7 },
+    rounds: 9, eventSlots: 3, pools: ['work', 'invest', 'random'], briefs: [/* 9条 */], isFinal: true },
 ];
 ```
 
-**把游戏延长到 2030** = ① 把 `isFinal` 挪到 `work-2030`;② 为新年份追加 era 简报和事件;③ 补充/调整结局条件。引擎零改动。
+**想把游戏延长到 2030**:把 `work` 阶段的 `rounds` 从 9 改成 13、补 4 条 `briefs`,`isFinal` 保持在最后一个阶段;引擎代码零改动——这是"内容即数据"原则在时间线上的体现。
 
-### 3.4 事件调度器(每回合的核心算法)
+### 3.4 每一轮怎么选出要弹的事件(`packages/core/src/systems/scheduler.ts`)
 
-每个事件回合按固定顺序执行:
+`rounds` 类型的阶段每进一轮(`startRound`),都会调用 `pickRoundEvents` 决定这一轮弹哪几个事件,按固定优先级填满 `eventSlots`:
 
-1. **到期的延迟事件**(`scheduled` 队列,事件链的后续节)——最高优先
-2. **强制时代节点**(`mandatory: true` 且条件满足,如 2021 双减 × 师范线)
-3. **NPC 阶段推进事件**(各 NPC 状态机检查是否到达下一剧情节点)
-4. **常规池加权抽取**(该阶段 `pools` 里所有 `trigger` 满足的事件,按 `weight` 加权随机,`once` 事件去重,近期出现过的降权防重复)
+```mermaid
+flowchart TD
+    A[进入新一轮 startRound] --> B["① 到期的延迟事件<br/>(state.scheduled 里 dueRound ≤ 当前轮次)"]
+    B --> C["② 强制时代节点<br/>(mandatory: true 且 trigger 满足)<br/>如 2021 双减·师范线"]
+    C --> D["③ NPC 阶段推进事件<br/>(每个 NPC 的 stages[当前stage].advanceWhen 满足)"]
+    D --> E{"④ 候选池还没填满 eventSlots?"}
+    E -- 是 --> F["从本阶段 pools 里筛出:<br/>trigger 满足 · 没触发过(once) · 没被选过<br/>按 weight 加权随机抽一个"]
+    F --> E
+    E -- 否 --> G["按 order 字段稳定排序<br/>(默认 0,值越小越靠前)"]
+    G --> H[得到本轮事件 id 队列 eventQueue]
+```
 
-抽取结果填满该回合的 `eventSlots` 数即停。
+①②③ **不占用 `eventSlots` 的名额,是额外保证入队**的——如果强制时代节点或 NPC 剧情节点被 `eventSlots` 挤掉,会导致强制剧情永久卡死或漏掉,所以代码里(`scheduler.ts:26-40`)专门把这两类和"常规随机池填充"分开处理。只有第④步"常规池"才受 `eventSlots` 限制。
+
+### 3.5 玩家选一个选项之后发生了什么(`resolveChoice`,`engine.ts:525-549`)
+
+用你正在看的 `drama.ts` 里 `ev_drama_pig_butchering`(屏幕那头的人)这个真实事件走一遍。它的选项 `a`(投两千试试)配置了两条互斥的 `outcomes`:
+
+```ts
+{
+  id: 'a',
+  text: '投两千试试，能提现就是真的',
+  outcomes: [
+    { weight: 1, condition: { flag: 'in_love' },          text: '……另一半已经在门口站了很久。', effects: [...] },
+    { weight: 1, condition: { not: { flag: 'in_love' } }, text: '……你不是在钓鱼，你是鱼。',       effects: [...] },
+  ],
+}
+```
+
+对应的结算流程:
+
+```mermaid
+sequenceDiagram
+    participant UI as 玩家点击选项 a
+    participant EG as engine.resolveChoice
+    UI->>EG: dispatch({type:'CHOOSE', choiceId:'a'})
+    EG->>EG: 在 ev.choices 里找 id='a' 且 visibleIf 通过的选项
+    EG->>EG: 筛选它的 outcomes:condition 通过的留下(eligible)
+    Note over EG: 有 in_love flag → 只剩第1条<br/>没有 → 只剩第2条<br/>(两条都不满足才会 fallback 用全部 outcomes)
+    EG->>EG: 在 eligible 里按 weight 加权随机抽一条(rng.weightedPick)
+    EG->>EG: applyEffects(抽中的 effects, state, pack)
+    EG->>EG: history.push({kind:'event', eventId, choiceId, outcomeTag})
+    EG-->>UI: state.screen = 'OUTCOME',显示抽中的 text + 数值变化
+```
+
+**这就是为什么同一份代码看起来选项很少,但实际体验千变万化**:每个选项背后可能挂 1~3 条按 `condition` 互斥、按 `weight` 加权的 outcome,`flag`(如 `in_love`)、`stat`(如学识/心态)、`chance`(纯概率)都可以拿来当筛选条件。
+
+### 3.6 NPC 是一台独立的状态机,不是"事件"
+
+每个 NPC(`packages/content/src/npcs/npcs.ts`)不写具体剧情,只维护"现在在哪个阶段"+"好感度",阶段之间的跳转条件和跳转时触发的剧情事件是配置出来的:
+
+```ts
+interface NpcDef {
+  id: string; name: string;
+  initialStage: string; initialFavor: number;
+  stages: Record<string, { advanceWhen?: Condition; eventId?: string }>;
+}
+```
+
+以"创业室友"(`roommate`)为例,真实配置画成状态机是这样:
+
+```mermaid
+stateDiagram-v2
+    [*] --> freshman: 初始好感度20
+    freshman --> cofounder: 2015年→弹出ev_npc_roommate_startup_pitch<br/>(选"投钱入伙")
+    freshman --> observer: 2015年→同一个事件<br/>(选"不入伙")
+    cofounder --> distant: 2017年→弹出ev_npc_roommate_startup_reality
+    observer --> distant: 2017年→同一个事件
+    distant --> livestream_comeback: 2020年→弹出ev_npc_roommate_2020
+    distant --> close_friend: 2020年→同一个事件
+    livestream_comeback --> [*]
+    close_friend --> [*]
+```
+
+调度器每轮都会检查(`scheduler.ts:32-40`):当前 stage 配置的 `advanceWhen` 满不满足(通常是"年份到了"),满足就把对应 `eventId` 塞进本轮队列,玩家在那个事件里做的选择(`effects` 里的 `npcStage` 字段)决定跳到哪个下一阶段。**同一个 NPC 定义,靠"阶段+条件"就能表达出好几条分岔剧情线,不需要为每条分支单独写一个"NPC"。**
+
+### 3.7 结局怎么判定(`packages/core/src/systems/ending.ts`)
+
+```ts
+function findEnding(state, pack, rng, categories) {
+  const sorted = pack.endings
+    .filter(e => categories.includes(e.category))   // 'early' 或 'final'
+    .sort((a, b) => a.priority - b.priority);         // priority 越小越优先
+  for (const ending of sorted) {
+    if (evalCondition(ending.condition, ctx)) return ending;  // 第一个满足条件的胜出
+  }
+  return null;
+}
+```
+
+```mermaid
+flowchart TD
+    A["每次 OUTCOME 确认 / 每轮 SETTLEMENT"] --> B["findEnding(category='early')"]
+    B --> C{有 early 结局条件成立?}
+    C -- 是 --> D["立刻结束:进入 ENDING(如心态归零/破产提前退场)"]
+    C -- 否 --> E{是最后一个阶段的最后一轮?}
+    E -- 否 --> F["继续下一轮/下一事件"]
+    E -- 是 --> G["findEnding(category='early'+'final')"]
+    G --> H{有结局条件成立?}
+    H -- 是 --> D
+    H -- 否 --> I["用 fallbackEndingId 兜底(如'普通人')"]
+    I --> D
+```
+
+**关键设计**:`early` 结局在游戏进行中随时可能触发(每次选完选项都检查一次),`final` 结局只在 2026 年最后一轮结算时参与排序;`priority` 决定"如果同时满足好几个结局,听谁的"——新加结局时要想清楚它和已有结局的 priority 相对位置,否则可能被更靠前的结局"截胡",永远摸不到。这也是为什么 `pnpm simulate` 要跑大样本:光看 condition 写得对不对,看不出它会不会被别的结局挡住。
 
 ---
 
@@ -196,33 +364,51 @@ const phases: PhaseConfig[] = [
 
 ### 4.1 条件/效果 DSL(内容可校验性的关键)
 
-**不用裸函数写条件**(vc-simulator 的教训:函数无法被工具分析,死条件无法检测),用可序列化的声明式 DSL:
+**不用裸函数写条件**(vc-simulator 的教训:函数无法被工具分析,死条件无法检测),用可序列化的声明式 DSL(`packages/core/src/types/dsl.ts`,已按当前代码核对):
 
 ```ts
+type Op = '>' | '>=' | '<' | '<=' | '==';
+
 type Condition =
-  | { stat: 'knowledge'|'money'|'mindset'|'network'; op: '>'|'>='|'<'|'<='|'=='; value: number }
-  | { flag: string; equals?: boolean|number|string }
+  | { always: true }
+  | { stat: 'knowledge'|'money'|'mindset'|'network'|'health'; op: Op; value: number }
+  | { flag: string; equals?: boolean|number|string }        // 不写 equals 就是"只要这个 flag 是 truthy"
   | { year: { from?: number; to?: number } }
   | { career: string } | { background: string } | { major: string }
-  | { npcFavor: NpcId; op: Op; value: number } | { npcStage: NpcId; stage: string }
-  | { historyCount: { category: string; outcome?: string; op: Op; value: number } }  // "失败项目≥3个"这类
-  | { chance: number }                                   // 概率门
+  | { npcFavor: string; op: Op; value: number } | { npcStage: string; stage: string }
+  | { historyCount: { category?: string; outcomeTag?: string; op: Op; value: number } }  // "过去发生过≥3次某类事件"
+  | { chance: number }                                   // 概率门,不看状态,纯掷骰子
   | { all: Condition[] } | { any: Condition[] } | { not: Condition }
-  | { fn: string };   // 逃生舱:引用 content/fns 注册表里的命名函数(<10% 的复杂场景才用)
+  | { fn: string };   // 逃生舱:引用 content 里 fns 注册表的命名函数(<10% 的复杂场景才用)
 
 type Effect =
-  | { stats: Partial<StatDeltas> }                       // 数值增减(引擎负责 clamp 0-100)
-  | { moneyCost: { rate: number; min?: number; max?: number; roundTo?: number; reason?: string } }
-  | { setStat: 'money'|'knowledge'|'mindset'|'network'|'health'; value: number }
+  | { stats: Partial<Record<'knowledge'|'money'|'mindset'|'network'|'health', number>> }  // 数值增减,引擎负责 clamp
+  | { moneyCost: { rate: number; min?: number; max?: number; roundTo?: number;
+                   reason?: 'daily'|'medical'|'family'|'investment'|'scam'|'house'|'other' } }  // 详见 4.1.1
+  | { setStat: 'knowledge'|'money'|'mindset'|'network'|'health'; value: number }
   | { setFlag: string; value?: boolean|number|string }
-  | { npcFavor: NpcId; delta: number } | { npcStage: NpcId; stage: string }
-  | { schedule: { eventId: string; afterRounds: number } }   // 事件链:N回合后触发后续
-  | { setCareer: string } | { jumpToPhase: string }          // 复读→回到高考;考研→时间线分支
-  | { triggerEnding: string }                                // 提前结局
+  | { npcFavor: string; delta: number } | { npcStage: string; stage: string }
+  | { schedule: { eventId: string; afterRounds: number } }   // 事件链:N 轮后触发后续事件
+  | { setCareer: string } | { jumpToPhase: string }          // 复读→跳回高考阶段;考研→跳到不同时间线
+  | { triggerEnding: string }                                // 强制指定结局(下一次 OUTCOME 确认时生效)
   | { fn: string; args?: Record<string, unknown> };
 ```
 
 `fn` 注册表让 DSL 覆盖不了的逻辑仍有出口,但强制**具名、集中、可测试**,不会散落在数据里。
+
+**拿 `drama.ts` 里真实的一行代码练手**:文件顶部定义了一个复用的条件常量 `working`,专门判断"当前是不是已经在上班"——
+
+```ts
+const working: Condition = {
+  all: [
+    { any: [{ flag: 'entered_job_market_2018' }, { flag: 'postgrad_done' },
+             { flag: 'career_gov' }, { flag: 'civil_service_failed' }] },
+    { any: [{ not: { flag: 'laid_off' } }, { flag: 'restarted_after_layoff' } ] },
+  ],
+};
+```
+
+拆解读法:最外层是 `all`(数组里每一条都要成立,相当于"且");里面两个 `any`(数组里任意一条成立即可,相当于"或")。翻译成人话就是:**"(求职成功 或 读研毕业 或 进了体制内 或 考公落榜后转求职) 且 (没被裁员 或 被裁后又重新上岸了)"**。这个常量之后在好几个事件的 `trigger` 里被直接引用,比如 `ev_drama_pig_butchering` 的 `trigger: { all: [{ year: { from: 2020, to: 2023 } }, working] }` 读作:"年份在 2020-2023 之间,并且这个人正在上班"。
 
 ### 4.1.1 金钱扣减 DSL 设计(防固定金额超扣)
 
@@ -291,26 +477,30 @@ type SetStatEffect = { setStat: 'money'; value: 0 };
 4. 跑 `pnpm simulate -n 1000 --check` 和四策略 compare,观察金钱分位、提前结局、兜底结局是否偏移。
 5. 如果未来需要彻底禁止所有固定负扣款,再把万元以内小额支出的豁免收紧为显式字段或白名单。
 
-### 4.2 事件 Schema
+### 4.2 事件 Schema(`packages/core/src/types/content.ts`)
 
 ```ts
 interface GameEvent {
-  id: string;                   // 'ev_cs_2022_layoff'
-  pools: string[];              // 属于哪些池:'career-cs' | 'college' | 'npc-roommate' | ...
+  id: string;                   // 'ev_drama_pig_butchering'
+  pools: string[];              // 属于哪些池:'college' | 'work' | 'npc' | 'invest' | 'random' | ...
   title: string;
-  text: string;                 // 支持插值:{university} {npc.roommate.name} {stats.money}
-  trigger?: Condition;
-  weight?: number;              // 默认 1;时代大事件可加权
-  once?: boolean;               // 默认 true
-  mandatory?: boolean;          // 强制时代节点
+  text: string;                 // 纯静态中文文案,没有插值机制,想带数值就得在文案里手写
+  category?: string;            // 'money' | 'relationship' | 'career' | ... ,只给结局的 historyCount 统计用
+  trigger?: Condition;          // 这个事件本轮"有没有资格"被抽到
+  weight?: number;              // 默认 1,常规池加权抽取时用;是个死数字,不会根据状态动态变化
+  once?: boolean;               // 默认 true(只能触发一次);显式设 false 才能重复触发
+  mandatory?: boolean;          // 强制时代节点,不受 eventSlots 限制,trigger 满足就必进队
+  order?: number;               // 同轮内的排序,默认 0,数值越小越靠前(如"毕业散伙饭"排最后)
+  tier?: 'major';               // 打上这个标记的事件文案更长,UI 会显示"关键节点"标识
   choices: Array<{
     id: string;
     text: string;
-    visibleIf?: Condition;      // 隐藏选项(如 人脉>60 才出现"找内推")
-    outcomes: Array<{           // 一个选择可有多个概率结果
+    visibleIf?: Condition;      // 隐藏选项(如人脉>60 才出现"找内推")
+    outcomes: Array<{           // 一个选择可以有多个互斥/加权的结果
       weight: number;
-      condition?: Condition;    // 结果也可带条件(学识高→成功率高:用两个 outcome+条件实现)
+      condition?: Condition;    // 满足才进入候选;全都不满足时 fallback 用全部 outcomes(见 3.5)
       text: string;
+      outcomeTag?: string;      // 'success'|'failure' 这类标签,给结局的 historyCount 统计用
       effects: Effect[];
     }>;
   }>;
@@ -324,18 +514,17 @@ interface GameEvent {
 ```ts
 interface NpcDef {
   id: string;                   // 'roommate'
-  name: string;
-  intro: string;
+  name: string;                 // '创业室友'
   initialStage: string;
+  initialFavor: number;
   stages: Record<string, {
-    label: string;                       // 'startup_pitch' → 'startup_failed' → 'livestream_comeback'
-    advanceWhen?: Condition;             // 满足即推进(通常是年份+flag)
-    eventId?: string;                    // 到达该阶段时触发的剧情事件
+    advanceWhen?: Condition;    // 满足即推进到这个阶段(通常是"年份到了"),不写就是"终局阶段,不再推进"
+    eventId?: string;           // 到达该阶段时触发的剧情事件
   }>;
 }
 ```
 
-**加一个 NPC** = 一个 NpcDef 文件 + 它引用的剧情事件(放进 `npc-<id>` 池)。引擎的 NPC 系统是通用的,不认识任何具体角色。
+**加一个 NPC** = 一个 `NpcDef`(放进 `npcs.ts`) + 它引用的剧情事件(放进 `npc` 池)。引擎的 NPC 系统是通用的,不认识任何具体角色,3.6 有 `roommate` 的完整状态机图。
 
 ### 4.4 结局 Schema
 
@@ -344,10 +533,10 @@ interface EndingDef {
   id: string;
   title: string;                // '小镇做题家的胜利'
   text: string;
-  category: 'early' | 'final'; // 提前结局(每回合检查) / 终局结算
-  priority: number;             // 越小越优先,同 vc-simulator 机制
+  category: 'early' | 'final';  // 提前结局(随时检查) / 终局结算(仅最后一轮参与排序)
+  priority: number;             // 越小越优先,同一轮里可能好几个结局同时满足,只有 priority 最小的会被选中
   condition: Condition;         // 声明式 → simulate 工具能统计每个结局的实际到达率
-  shareCard: { tone: 'triumph'|'bitter'|'warm'; tagline: string };
+  shareCard?: { tone: 'triumph'|'bitter'|'warm'; tagline: string };  // 不写就用通用兜底文案
 }
 ```
 
@@ -355,20 +544,50 @@ interface EndingDef {
 
 ```ts
 interface ContentPack {
-  meta: { id: string; version: string };
+  meta: { id: string; version: string; title: string;
+          fallbackEndingId: string; examQuestionCount: number; scoring?: ScoringConfig };
   timeline: PhaseConfig[];
   events: GameEvent[];
-  npcs: NpcDef[];
-  careers: CareerDef[];
+  incomes: IncomeRule[];        // 见 4.6,职业线的年度被动收入
   endings: EndingDef[];
   examBank: ExamQuestion[];
-  backgrounds: BackgroundCard[];
+  provinces: ProvinceOption[];  // 高考省份档位(分数线加减)
+  backgrounds: BackgroundCard[];// 家境抽卡
+  applications: ApplicationOption[];  // 志愿批次(985/211/一本/…)
+  npcs: NpcDef[];
   fns: Record<string, ContentFn>;
 }
 const engine = createEngine(contentPack);   // 引擎实例化时注入
 ```
 
-预留能力:未来可支持多个 pack 合并(`mergePacks(base, medicalDLC)`),职业线/剧情包按 DLC 方式增量开发。
+> 和 v1.0 设计稿的差异:当前**没有** `careers: CareerDef[]` 这个字段——职业线不是一个独立的数据结构,而是靠 `flags`(`career_cs`/`first_job_track` 之类)+ 对应的 `career-xx` 事件池 + `incomes.ts` 里按 flag 匹配的收入规则拼出来的。`mergePacks` 多 DLC 合并目前也**尚未实现**,现在是单一 `ContentPack`(见 `packages/content/src/index.ts`)。
+
+### 4.6 年度被动收入 IncomeRule(`packages/content/src/economy/incomes.ts`)
+
+工资/生活费不是靠事件选项手动加的,而是每年结算时(`settleRound` → `applyAnnualIncome`,`engine.ts:339-351`)统一按规则结算一遍:
+
+```ts
+interface IncomeRule {
+  id: string; label: string;
+  when: Condition;         // 满足才生效,通常按 career_xx flag 匹配职业线
+  amount: number;          // 年度净储蓄(元/年),可以是负数(比如失业期消耗存款)
+  mindsetDelta?: number;   // 这份工作对心态的年度损耗/恢复
+  healthDelta?: number;    // 这份工作对健康的年度损耗/恢复
+}
+```
+
+真实例子:
+
+```ts
+{ id: 'inc_cs_big_platform', label: '大厂工资',
+  when: { all: [{ flag: 'career_cs' }, { flag: 'big_platform_start' }, employed] },
+  amount: 62000, mindsetDelta: -6, healthDelta: -5 },
+{ id: 'inc_unemployed_gap', label: '空窗期消耗',
+  when: { all: [{ flag: 'laid_off' }, { not: { flag: 'restarted_after_layoff' } }] },
+  amount: -50000, mindsetDelta: -10 },
+```
+
+每年结算时,**所有** `when` 成立的规则都会生效(不是只选一条),所以"大厂工资"和"空窗期消耗"分别对应两种互斥的 flag 组合,同一年不会同时触发。这是"职业线"在数值上的真正落地方式——事件文案负责剧情起伏,`incomes.ts` 负责每年稳定的现金流。
 
 ---
 
@@ -469,12 +688,12 @@ React 18 + Vite + TypeScript + Zustand(仅做 UI 状态壳,真状态在 GameStat
 |---|---|---|
 | 加一个事件 | 对应池文件加一个 `GameEvent` → `validate` → `simulate` | 内容 |
 | 加一个 NPC | 新 `NpcDef` + 其剧情事件池 | 内容 |
-| 加一条职业线 | `CareerDef` + `career-xx` 事件池 + 相关结局 | 内容 |
+| 加一条职业线 | `setCareer`+`career_xx` flag + `career-xx` 事件池 + `incomes.ts` 收入规则 + 相关结局 | 内容 |
 | 延长到 2030 | timeline 追加 phases + 新年份 era 事件 + 调整 `isFinal` | 内容 |
 | 加结局 | `EndingDef` 一条,注意 priority 排位 → simulate 看到达率 | 内容 |
 | 加数值维度 | `stats` 加字段 + 存档迁移 + DSL 自动支持 | 引擎(小改)+ 内容 |
 | 移植小程序 | Taro 壳 + WxStorageAdapter + screens 适配 | 平台层(新增) |
-| 出 DLC 剧情包 | 独立 ContentPack + `mergePacks` | 内容 |
+| 出 DLC 剧情包 | 独立 ContentPack(`mergePacks` 尚未实现,目前只能单一 pack) | 内容 + 引擎(待补) |
 
 ---
 
