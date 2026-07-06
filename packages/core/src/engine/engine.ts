@@ -24,13 +24,13 @@ const CROSSROAD_OPTIONS = [
     id: 'postgrad',
     label: '考研',
     text: '再把青春押给一次考试。晚几年入场，也许能换一张更硬的门票。',
-    recommendedFor: ['计算机科学与技术', '软件工程', '师范类', '金融学', '临床医学'],
+    recommendedFor: ['计算机科学与技术', '师范类', '金融学', '临床医学'],
   },
   {
     id: 'job',
     label: '求职',
     text: '先上车再说。简历、群面、笔试、offer，毕业季的风会把人推着往前走。',
-    recommendedFor: ['计算机科学与技术', '软件工程', '计算机应用', '金融学', '临床医学'],
+    recommendedFor: ['计算机科学与技术', '计算机应用', '金融学', '临床医学'],
   },
   {
     id: 'civil_service',
@@ -498,7 +498,7 @@ export function createEngine(pack: ContentPack): Engine {
           { setFlag: 'entered_job_market_2018' },
           { stats: { money: eliteBonus ? 8000 : 3000, network: eliteBonus ? 4 : 1 } },
         ];
-        if (major.includes('计算机') || major.includes('软件')) {
+        if (major.includes('计算机')) {
           effects.push(
             { setCareer: 'cs' },
             { setFlag: 'career_cs' },

@@ -563,7 +563,7 @@ export const workEvents: GameEvent[] = [
       {
         id: 'cs',
         text: '去互联网，做技术岗',
-        visibleIf: { any: [{ major: '计算机科学与技术' }, { major: '软件工程' }, { major: '计算机应用' }] },
+        visibleIf: { any: [{ major: '计算机科学与技术' }, { major: '计算机应用' }] },
         outcomes: [
           {
             weight: 1,
