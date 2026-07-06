@@ -27,8 +27,15 @@ export const npcs: NpcDef[] = [
         advanceWhen: { year: { from: 2020, to: 2020 } },
         eventId: 'ev_npc_roommate_2020',
       },
-      livestream_comeback: {},
-      faded: {},
+      livestream_comeback: {
+        advanceWhen: { year: { from: 2025, to: 2025 } },
+        eventId: 'ev_npc_roommate_2025',
+      },
+      faded: {
+        advanceWhen: { year: { from: 2025, to: 2025 } },
+        eventId: 'ev_npc_roommate_2025',
+      },
+      old_friend: {},
     },
   },
   {
@@ -45,14 +52,21 @@ export const npcs: NpcDef[] = [
         advanceWhen: { year: { from: 2018, to: 2018 } },
         eventId: 'ev_love_distance',
       },
-      missed: {},
-      separated: {},
+      missed: {
+        advanceWhen: { year: { from: 2024, to: 2024 } },
+        eventId: 'ev_npc_first_love_2024',
+      },
+      separated: {
+        advanceWhen: { year: { from: 2024, to: 2024 } },
+        eventId: 'ev_npc_first_love_2024',
+      },
       steady: {
         advanceWhen: { year: { from: 2022, to: 2023 } },
         eventId: 'ev_love_marriage',
       },
       married: {},
       steady_long: {},
+      memory: {},
     },
   },
   {
@@ -73,8 +87,15 @@ export const npcs: NpcDef[] = [
         advanceWhen: { year: { from: 2022, to: 2022 } },
         eventId: 'ev_npc_grinder_layoff',
       },
-      mirror_friend: {},
-      distant_star: {},
+      mirror_friend: {
+        advanceWhen: { year: { from: 2024, to: 2024 } },
+        eventId: 'ev_npc_grinder_2024',
+      },
+      distant_star: {
+        advanceWhen: { year: { from: 2024, to: 2024 } },
+        eventId: 'ev_npc_grinder_2024',
+      },
+      parallel_lives: {},
     },
   },
   {

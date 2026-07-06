@@ -1,6 +1,6 @@
 import type { GameEvent } from '@life-sim/core';
 
-// 金融线专属里程碑事件(对标计算机线密度:5 个专属事件)。
+// 金融线专属里程碑事件(7 个,2015-2026 全程覆盖,与计算机线对齐)。
 // 与已有的散户视角投资事件(ev_invest_stock_2015/ev_invest_p2p 等)刻意区分开:
 // 这里全部是"从业者"视角——同样的时代节点,吃瓜群众看热闹,这条线的人要扛业绩。
 export const careerFinanceEvents: GameEvent[] = [
@@ -230,6 +230,105 @@ export const careerFinanceEvents: GameEvent[] = [
               { setFlag: 'laid_off' },
               { schedule: { eventId: 'ev_cs_reemployment', afterRounds: 1 } },
             ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2024 收官前奏:限薪/降本与出海,金融线 2022-2026 断更补齐(M5 handoff 遗留项)
+    id: 'ev_fin_pay_cut_2024',
+    pools: ['work'],
+    category: 'career',
+    title: '限薪令下',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_finance' }, { year: { from: 2024, to: 2024 } }] },
+    text: '2024年，这个曾经以年终奖论英雄的行业，开始集体谈论"限薪"和"退薪"。内部通知一封接一封：绩效递延、福利瘦身、差旅降级。与此同时，公司新设的"出海业务部"在悄悄招人——国内卷不动的钱，正在寻找新的地图。酒局上，老同事举着杯感慨："以前是选赛道，现在是选出口。"',
+    choices: [
+      {
+        id: 'a',
+        text: '接受降薪留守，把周期熬过去',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你签了新的薪酬确认函，数字比三年前瘦了一圈。你把工位上的日历翻到年底，给自己写了句话："牌桌还在，就还有下一局。"降薪的日子里你反而睡得早了——欲望和焦虑，原来是同一笔账的两面。',
+            effects: [{ stats: { mindset: -4, health: 4, knowledge: 3 } }],
+          },
+          {
+            weight: 1,
+            text: '降薪之后是第二轮"组织优化"，你的部门被合并，汇报线换了三次。你留了下来，但每天上班像在玩抢椅子——音乐随时会停。',
+            effects: [{ stats: { mindset: -8, health: -2, money: -3000 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '内部转岗出海业务，跟着资金找出口',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你转去了出海业务部，研究的东西从"国内怎么卷"变成"新加坡的牌照、中东的钱、墨西哥的厂"。半年飞了八趟国外，时差和汇率成了你的日常词汇。薪水没有回到巅峰，但你重新有了那种"在牌桌前排"的感觉。',
+            effects: [
+              { stats: { money: 18000, knowledge: 5, network: 4, health: -5 } },
+              { setFlag: 'fin_went_overseas' },
+            ],
+          },
+          {
+            weight: 1,
+            text: '出海听起来性感，落地全是琐碎：牌照卡审批、合作方跳票、汇兑损失吃掉利润。一年下来项目黄了两个，你在机场贵宾厅里改完最后一版清盘报告，突然很想念从前只用加班不用倒时差的日子。',
+            effects: [{ stats: { money: 5000, mindset: -7, health: -6, knowledge: 4 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '趁早转身，把金融经验卖给实业',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你跳去了一家制造业公司做投融资总监。薪水打了八折，但没有净值焦虑，没有监管窗口指导，董事长听完你第一次汇报说："你们金融口的人，讲话真是又快又密。"你笑了笑——那是从前每一个路演现场刻进骨子里的语速。',
+            effects: [
+              { stats: { money: 8000, mindset: 5, health: 3, network: -3 } },
+              { setFlag: 'fin_left_industry' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2026 收官:与 cs/edu 线"十二年回望"对齐的金融线终章
+    id: 'ev_fin_decade_2026',
+    pools: ['work'],
+    category: 'career',
+    title: '牛熊之间，十二年',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_finance' }, { year: { from: 2026, to: 2026 } }] },
+    text: '2026年，你整理旧物，翻出2015年股灾实习时的工牌照片。十二年，你见过散户排队开户的疯狂，也见过赎回潮里客户的眼泪；见过年终奖能买一辆车的年份，也见过"退薪"写进新闻的年份。这个行业教会你的第一课是复利，最后一课是周期——而你自己，就是这两个词共同的作品。',
+    choices: [
+      {
+        id: 'stayed',
+        text: '回望这十二年一直没下牌桌的日子',
+        visibleIf: {
+          not: { any: [{ flag: 'laid_off' }, { flag: 'fin_left_industry' }] },
+        },
+        outcomes: [
+          {
+            weight: 1,
+            text: '牛市你没有膨胀到离场创业，熊市你没有崩溃到彻底转行。十二年后还坐在这张牌桌前的人，同期入行的十个里剩不到三个。你不算最成功的，但你是活得最久的——在这个行业，这两件事往往是同一件。',
+            effects: [{ stats: { mindset: 6, knowledge: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        text: '回望从金融离开之后的日子',
+        visibleIf: { any: [{ flag: 'laid_off' }, { flag: 'fin_left_industry' }] },
+        outcomes: [
+          {
+            weight: 1,
+            text: '离开的时候你以为自己输了，后来才发现，K线之外的生活也有自己的涨跌，只是没有人天天盯着报价。现在偶尔有朋友问你股票，你都说"少看账户，多睡觉"——这句话，是你用十二年学费换来的研究成果。',
+            effects: [{ stats: { mindset: 7, health: 3 } }],
           },
         ],
       },

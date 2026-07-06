@@ -30,7 +30,9 @@ jobs:
           pnpm typecheck
           pnpm test
           pnpm validate
-          pnpm simulate -n 300 --check
+          # n=300 对 118 事件 + 19 结局(含 <1% 命中率的长尾内容)抽样方差过大,
+          # 任何 RNG 流偏移都会随机漏掉 1-2 个窄门控事件;n=1000 起才稳定全覆盖
+          pnpm simulate -n 1000 --check
       - name: Build web
         run: pnpm --filter @life-sim/web build
         env:

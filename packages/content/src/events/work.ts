@@ -1079,7 +1079,8 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '试用期汇报',
     text: '入职几个月后，你要做第一次试用期汇报。PPT 上写着“成长与反思”，但你最想写的是“我真的尽力了”。',
-    trigger: { all: [{ year: { from: 2018, to: 2019 } }, working, { not: { flag: 'medicine_resident' } }] },
+    // 窗口延到 2021:考研玩家 2021 年毕业入职,同样有自己的试用期
+    trigger: { all: [{ year: { from: 2018, to: 2021 } }, working, { not: { flag: 'medicine_resident' } }] },
     choices: [
       {
         id: 'a',
@@ -1559,8 +1560,9 @@ export const workEvents: GameEvent[] = [
     pools: ['work'],
     category: 'mindset',
     title: '三十岁的暗示',
-    text: '你发现自己开始关注体检套餐、睡眠质量和岗位天花板。曾经以为很远的三十岁，现在坐在对面，像一个不太熟的同事。',
-    trigger: { year: { from: 2025, to: 2026 } },
+    text: '你发现自己开始关注体检套餐、睡眠质量和岗位天花板。曾经以为很远的三十岁，正在走近，像一个不太熟的同事。',
+    // 窗口提前到 2023-2024:"暗示"是三十岁前的预感,2025 的正式节点交给《三十岁，照镜子》
+    trigger: { year: { from: 2023, to: 2024 } },
     choices: [
       {
         id: 'a',
@@ -1586,6 +1588,86 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你把问题往后推了推。成年人不是不知道问题在那儿，只是有时候真的需要先把今天过完。',
             effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2025 全职业线"三十而立"节点:回看前面十年的选择,后期最缺的 payoff 型事件。
+    // outcome 按 has_house/restarted_after_layoff/婚恋 npcStage 等长期 flag 分支,
+    // 让玩家在这里"撞见"自己前几年的决定。
+    id: 'ev_work_thirty_mirror_2025',
+    pools: ['work'],
+    category: 'mindset',
+    tier: 'major',
+    title: '三十岁，照镜子',
+    mandatory: true,
+    order: -5,
+    trigger: { year: { from: 2025, to: 2025 } },
+    text: '2025年，你三十岁了。生日那天没有仪式感，你在下班路上买了个小蛋糕，一个人吃掉了大半。手机里躺着几条生日祝福，有爸妈的、有老同学的，还有一条来自银行的账单提醒。你点开相册，从2014年那张考场外的照片开始往下翻：军训、宿舍、毕业照、工牌、体检报告……十一年翻完只用了五分钟。三十岁不是一道门，更像一面镜子——你站在它面前，第一次认真打量这些年自己活成的样子。',
+    choices: [
+      {
+        id: 'a',
+        text: '认真盘一次账：这十年攒下了什么',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { flag: 'has_house' },
+            text: '资产表的第一行是那套房子。你还记得凑首付那阵子的兵荒马乱，也记得拿到钥匙那天的踏实。房贷还有很多年，但三十岁的你至少可以说：这座城市里，有一盏灯是为你亮的。你把房产证的照片看了一会儿，又默默算了算提前还款的可能性——成年人的浪漫，大抵如此。',
+            effects: [{ stats: { mindset: 5, knowledge: 2 } }],
+          },
+          {
+            weight: 1,
+            condition: { all: [{ not: { flag: 'has_house' } }, { flag: 'restarted_after_layoff' }] },
+            text: '你的十年账本里有一段明显的断层——被裁的那年。但你也看到了断层之后的曲线：重新投简历、重新面试、重新开始。存款不算多，履历不算完美，可你比谁都清楚，账本上最值钱的一行是隐形的："跌倒过，爬起来了。"',
+            effects: [{ stats: { mindset: 6, knowledge: 2 } }],
+          },
+          {
+            weight: 1,
+            condition: { all: [{ not: { flag: 'has_house' } }, { not: { flag: 'restarted_after_layoff' } }] },
+            text: '没有房子，账户里是这些年一点点攒下的数字。你算了算收入曲线，又对照了一遍当年的选择：有的钱是熬出来的，有的钱是运气，有的坑是自己跳的。三十岁的资产负债表不算漂亮，但每一行你都能说出来历——这大概就是"自己的人生"的意思。',
+            effects: [{ stats: { mindset: 3, knowledge: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '把重要的人约出来，好好吃顿饭',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { npcStage: 'first_love', stage: 'married' },
+            text: '生日饭是在家吃的。伴侣做了几个菜，插了根蜡烛让你许愿。你看着对面这个从校服时代一路走到婚戒的人，突然觉得十年里做过的所有选择题，答对最重要的是这一道。愿望你没说出口——它已经坐在对面了。',
+            effects: [{ stats: { mindset: 8, network: 2 } }],
+          },
+          {
+            weight: 1,
+            condition: { all: [{ flag: 'in_love' }, { not: { npcStage: 'first_love', stage: 'married' } }] },
+            text: '你和恋人找了家小馆子，聊起各自的三十岁计划。聊到一半，对方忽然说："那接下来的十年，也一起过吧。"不算正式的求婚，但你们碰了杯——有些约定不需要仪式，需要的是说出口的勇气。',
+            effects: [{ stats: { mindset: 7, network: 2 } }],
+          },
+          {
+            weight: 1,
+            condition: { all: [{ not: { flag: 'in_love' } }, { not: { npcStage: 'first_love', stage: 'married' } }] },
+            text: '你把几个老朋友约了出来，饭桌上聊的一半是当年宿舍的段子，一半是现在的房贷、体检和跳槽。散场时有人说："三十岁也就那样嘛。"你笑着点头。回家路上你想：一个人过三十岁不可怕，可怕的是没有能约出来吃这顿饭的人——还好，你有。',
+            effects: [{ stats: { mindset: 5, network: 4 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '不总结不庆祝，把它当成普通的一天',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你没有发朋友圈，没有写年度总结，蛋糕吃完就洗了盘子睡觉。三十岁的第一课是祛魅：它不是审判日，不是里程碑，只是又一个星期二。人生不靠整数节点变好，靠的是每一个普通日子的复利。',
+            effects: [{ stats: { mindset: 4, health: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你想把它过成普通的一天，但凌晨一点还是没忍住，翻完了整个相册。有几张照片你盯了很久：有的人再没联系，有的路没走下去。你没哭，只是给爸妈的家庭群发了句"我挺好的"。发完你发现，妈妈秒回了一个拥抱的表情——凌晨一点，她也没睡。',
+            effects: [{ stats: { mindset: -2, network: 2, health: -1 } }],
           },
         ],
       },
@@ -2000,6 +2082,144 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你按原计划走完了这一年。年底复盘，你发现自己当初的几个判断并没有错——前辈的话是地图，但路终究是自己脚下这条。信別人之前先信过自己，这一年不亏。',
             effects: [{ stats: { knowledge: 2, mindset: 3 } }, { npcStage: 'mentor', stage: 'ally' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // NPC 终段(2024):卷王线收官,与玩家的"三十而立"互为镜像
+    id: 'ev_npc_grinder_2024',
+    pools: [],
+    category: 'npc',
+    title: '卷王的朋友圈停更了',
+    text: '你突然发现，卷王同学的朋友圈停更半年了。上一条还是2023年的行业峰会九宫格。你正想着要不要问候一句，他先发来消息："下个月路过你的城市，见一面？"见面那天，他穿着你从没见过的休闲装，说现在在一家小公司带十个人的团队，"不卷了，卷不动了，也想明白了"。那个从大一就永远在赶路的人，第一次在你面前把语速放慢了。',
+    choices: [
+      {
+        id: 'a',
+        text: '聊聊彼此这十年，认真地',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { npcStage: 'grinder', stage: 'mirror_friend' },
+            text: '从保研、大厂、被裁到现在，他把十年讲成了一部行业兴衰史，你听得比任何播客都认真。分开时他说："当年在学校，我一直拿你当参照物。"你笑了："巧了，我也是。"两个互相较劲了十年的人，终于承认对方是自己的镜子。',
+            effects: [
+              { stats: { mindset: 6, network: 4 } },
+              { npcFavor: 'grinder', delta: 10 },
+              { npcStage: 'grinder', stage: 'parallel_lives' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { npcStage: 'grinder', stage: 'distant_star' },
+            text: '你们不算熟络，这顿饭一开始有点客气。聊到第二杯，他忽然说："2022年我被裁那阵子，你发的那个表情，我看了好几遍。"你有点愧疚当年只发了个表情，他摆摆手："那时候谁说什么都没用，但有人吱一声，就不一样。"',
+            effects: [
+              { stats: { mindset: 4, network: 3 } },
+              { npcFavor: 'grinder', delta: 8 },
+              { npcStage: 'grinder', stage: 'parallel_lives' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '寒暄几句，各自赶路',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你那阵子正忙，饭吃了不到一小时就散了。回去的路上你想，有些人注定只能陪你走一段——他是你青春里的计时器，现在你们都不需要计时了。',
+            effects: [
+              { stats: { mindset: 1, network: -1 } },
+              { npcStage: 'grinder', stage: 'parallel_lives' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // NPC 终段(2024):初恋 missed/separated 分支收官——设计文档"多年后朋友圈点赞"线
+    id: 'ev_npc_first_love_2024',
+    pools: [],
+    category: 'npc',
+    title: '朋友圈的红点',
+    text: '深夜刷朋友圈，一条动态跳出来：是她。照片里她站在一个你不认识的城市街头，笑得和当年一样，身边的人和生活都换了一轮。你的拇指在屏幕上停了几秒——你们已经很多年没说过话了，久到连"在吗"都显得突兀。',
+    choices: [
+      {
+        id: 'a',
+        text: '点个赞，就够了',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你点了赞，锁屏，睡觉。第二天她回赞了你半年前的一条动态。你们没有对话，但都收到了同一句话：我看见你过得不错，我也是。有些关系的最好结局，就是成为彼此朋友圈里安静的一个赞。',
+            effects: [{ stats: { mindset: 4 } }, { npcStage: 'first_love', stage: 'memory' }],
+          },
+          {
+            weight: 1,
+            text: '赞点下去几分钟后，她发来一句："好久不见。"你们聊了半小时，全是安全话题：工作、城市、共同认识的人。结束时谁都没说"下次约"。你放下手机，心里那页纸终于翻了过去——不是因为释怀，是因为确认了彼此都好。',
+            effects: [{ stats: { mindset: 5, network: 1 } }, { npcStage: 'first_love', stage: 'memory' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '划过去，不打扰',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有点赞，把手机扣在床头。青春的那一页不需要仪式感地合上，它早就合上了，你只是偶尔路过时多看了一眼封面。你睡得比想象中安稳。',
+            effects: [{ stats: { mindset: 2 } }, { npcStage: 'first_love', stage: 'memory' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // NPC 终段(2025):室友线收官,呼应 2015 年那份创业计划书
+    id: 'ev_npc_roommate_2025',
+    pools: [],
+    category: 'npc',
+    title: '十年后的合伙人',
+    text: '2025年，创业室友约你吃饭。十年前他在宿舍里跟你画"改变世界"的大饼，后来创业黄了、直播带货、几起几落。这次见面，他递给你一张新名片——一家小而稳的供应链公司，"这次不画饼了，就是门生意"。他说这些年最感谢的是当年宿舍里那些愿意听他吹牛的人："梦想没成，但听众都还在。"',
+    choices: [
+      {
+        id: 'a',
+        text: '举杯，敬这十年的折腾',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { npcStage: 'roommate', stage: 'livestream_comeback' },
+            text: '从创业计划书到直播间再到这张名片，你算是全程见证了他的十年。他给你倒满，说："下次融资……开玩笑的，没有下次融资了。"你们笑作一团。有的人用十年撞了一路南墙,最后撞出了一扇自己的门。',
+            effects: [
+              { stats: { mindset: 5, network: 4 } },
+              { npcFavor: 'roommate', delta: 10 },
+              { npcStage: 'roommate', stage: 'old_friend' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { npcStage: 'roommate', stage: 'faded' },
+            text: '你们已经很多年没正经聊过天了，这顿饭却出乎意料地不尴尬。他把这些年的起落讲成段子，你把职场的荒诞讲成相声。散场时他说："当年在宿舍，我就觉得你会一直是我朋友。"迟到了很多年的这顿饭，把断掉的线又接上了。',
+            effects: [
+              { stats: { mindset: 4, network: 5 } },
+              { npcFavor: 'roommate', delta: 12 },
+              { npcStage: 'roommate', stage: 'old_friend' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '问他还记不记得当年的计划书',
+        outcomes: [
+          {
+            weight: 1,
+            text: '他愣了一下，从手机备忘录里翻出一张照片——那份计划书他一直存着。"你看这页，\'三年上市\'，哈哈哈。"你们对着那页PPT笑了很久。笑完他说："不过说真的，谢谢你当年没笑我。"你想说其实你笑了，最后只是碰了碰他的杯子。',
+            effects: [
+              { stats: { mindset: 6, network: 3 } },
+              { npcFavor: 'roommate', delta: 8 },
+              { npcStage: 'roommate', stage: 'old_friend' },
+            ],
           },
         ],
       },

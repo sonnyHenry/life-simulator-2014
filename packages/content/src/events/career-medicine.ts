@@ -1,6 +1,6 @@
 import type { GameEvent } from '@life-sim/core';
 
-// 医学线专属里程碑事件(对标师范线密度:4 个专属事件)。
+// 医学线专属里程碑事件(6 个,2018-2026 全程覆盖,与师范线对齐)。
 // "5年本科+3年规培"完全靠 flag 在既有的固定年份上模拟,不改时间线架构:
 // 2018 年求职路径统一进入 medicine_resident(规培中),2021 年结束规培、清除该 flag,
 // 与"考研推迟3年入场"目前的纯 flag 模拟方式同构。
@@ -220,6 +220,109 @@ export const careerMedicineEvents: GameEvent[] = [
             condition: { not: { flag: 'pandemic_frontline' } },
             text: '离开临床一线之后，你的生活作息第一次像个正常人。偶尔想起当年白大褂加身的那份骄傲，你不后悔——只是后悔没有早一点，明白自己真正想要的是什么。',
             effects: [{ stats: { mindset: 5, health: 5 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2024 收官前奏:集采与绩效改革,医学线 2024-2026 断更补齐(M5 handoff 遗留项)
+    id: 'ev_med_reform_2024',
+    pools: ['work'],
+    category: 'career',
+    title: '集采之后',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_medicine' }, { year: { from: 2024, to: 2024 } }] },
+    text: '2024年，药品集采一轮接一轮，曾经一盒几百块的"明星药"如今几块钱就能开到；DRG 按病种付费落地，科室开会的关键词从"业务量"变成了"控费"。患者的账单确实薄了，但绩效表的算法也换了——这行的收入结构，正在被重新发牌。',
+    choices: [
+      {
+        id: 'public',
+        text: '在公立体系里适应新规则',
+        visibleIf: { flag: 'doctor_public' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你花了半年弄懂 DRG 的分组逻辑，把病历首页质量抓成了科室第一。绩效没有回到从前，但主任在全科会上点名表扬了你——在规则变化的年代，先读懂规则的人总是稍微好过一点。',
+            effects: [{ stats: { knowledge: 5, mindset: 2, money: 4000, health: -3 } }],
+          },
+          {
+            weight: 1,
+            text: '控费指标压下来，你开每一张检查单前都要多想三秒。有位老患者问你"怎么不给我开那个进口的了"，你解释了很久。那天下班，你在停车场坐了十分钟才发动车子。',
+            effects: [{ stats: { mindset: -6, knowledge: 3, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'private',
+        text: '在市场化医疗里找自己的位置',
+        visibleIf: { flag: 'doctor_private' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '集采的浪没有直接打到私立这边，但患者的钱包变紧了，你所在的机构开始卷"服务体验"。你学会了用患者听得懂的话解释病情，复诊率成了你的新绩效——你有点怀念只谈医术的日子，但也承认，被好好对待的患者是真的会回来。',
+            effects: [{ stats: { money: 8000, network: 3, mindset: -2, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        text: '在行业外看这场改革',
+        visibleIf: { flag: 'doctor_left' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你现在的工作和集采文件打交道比和患者多。前同事在群里吐槽绩效，你一边回"抱抱"，一边把最新政策整理成内部简报——离开临床的人，反而成了前同事们的"政策翻译"。',
+            effects: [{ stats: { knowledge: 4, network: 4, money: 3000 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2026 收官:与 cs/edu/金融线"十二年回望"对齐的医学线终章
+    id: 'ev_med_decade_2026',
+    pools: ['work'],
+    category: 'career',
+    title: '白大褂的十二年',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_medicine' }, { year: { from: 2026, to: 2026 } }] },
+    text: '2026年，实习时的带教老师退休，科室聚餐给他送行。饭桌上有人提起2020年那个春节，包间突然安静了几秒，然后有人举杯："都过去了。"你想起解剖课上的第一刀、规培时的第一个夜班、还有那些没能救回来的人和救回来的人。十二年，这身白大褂教你的事，比任何教科书都厚。',
+    choices: [
+      {
+        id: 'frontline',
+        text: '回望从请战书开始的这些年',
+        visibleIf: { flag: 'pandemic_frontline' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '那张按了红手印的请战书，你手机里还存着照片。这些年你没跟太多人讲过那段日子，不是不愿意讲，是讲不清楚。但每次职业倦怠到想放弃时，你都会想起隔离病房外那句隔着玻璃喊的"谢谢"——然后第二天，照常查房。',
+            effects: [{ stats: { mindset: 8, knowledge: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'stayed',
+        text: '回望一直守在临床的这些年',
+        visibleIf: {
+          all: [{ not: { flag: 'pandemic_frontline' } }, { not: { flag: 'doctor_left' } }],
+        },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有惊天动地的高光时刻，只有一万多个小时的门诊、查房和夜班。有位从你规培时就挂你号的老病人，今年带着孙女来，说"还是找你看着放心"。这句话不值钱，也最值钱——它是十二年临床生涯的年终总评。',
+            effects: [{ stats: { mindset: 6, network: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        text: '回望离开临床之后的这些年',
+        visibleIf: { flag: 'doctor_left' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你离开了临床，但没有离开医疗。这些年你做过的每一份工作，多少都带着当年白大褂的影子。同学聚会上有人问你后不后悔学医，你想了想说："后悔过，但如果重来一次，大概还是会在志愿表上写下那五个字。"',
+            effects: [{ stats: { mindset: 6, health: 2 } }],
           },
         ],
       },
