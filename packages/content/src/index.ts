@@ -5,6 +5,7 @@ import { provinces } from './setup/provinces';
 import { applications } from './setup/applications';
 import { examBank } from './exam/questions';
 import { collegeEvents } from './events/college';
+import { collegeMajorEvents } from './events/college-majors';
 import { workEvents } from './events/work';
 import { randomEvents } from './events/random';
 import { dramaEvents } from './events/drama';
@@ -33,6 +34,7 @@ export const contentPack: ContentPack = {
   timeline: phases,
   events: [
     ...collegeEvents,
+    ...collegeMajorEvents,
     ...workEvents,
     ...randomEvents,
     ...dramaEvents,
