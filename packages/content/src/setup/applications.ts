@@ -19,6 +19,7 @@ export const applications: ApplicationOption[] = [
       { id: 'mba', name: '工商管理', trackFlag: 'management' },
       { id: 'fin', name: '金融学', trackFlag: 'finance' },
       { id: 'med', name: '临床医学', trackFlag: 'medicine' },
+      { id: 'psy', name: '心理学', trackFlag: 'psychology' },
     ],
   },
   {
@@ -37,6 +38,7 @@ export const applications: ApplicationOption[] = [
       { id: 'mba', name: '工商管理', trackFlag: 'management' },
       { id: 'fin', name: '金融学', trackFlag: 'finance' },
       { id: 'med', name: '临床医学', trackFlag: 'medicine' },
+      { id: 'psy', name: '心理学', trackFlag: 'psychology' },
     ],
   },
   {
@@ -55,6 +57,7 @@ export const applications: ApplicationOption[] = [
       { id: 'mba', name: '工商管理', trackFlag: 'management' },
       { id: 'fin', name: '金融学', trackFlag: 'finance' },
       { id: 'med', name: '临床医学', trackFlag: 'medicine' },
+      { id: 'psy', name: '心理学', trackFlag: 'psychology' },
     ],
   },
   {

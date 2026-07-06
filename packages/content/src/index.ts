@@ -13,6 +13,7 @@ import { careerFinanceEvents } from './events/career-finance';
 import { careerMedicineEvents } from './events/career-medicine';
 import { careerCsEvents } from './events/career-cs';
 import { careerEducationEvents } from './events/career-education';
+import { careerPsychologyEvents } from './events/career-psychology';
 import { endings } from './endings/endings';
 import { npcs } from './npcs/npcs';
 import { incomes } from './economy/incomes';
@@ -40,6 +41,7 @@ export const contentPack: ContentPack = {
     ...careerMedicineEvents,
     ...careerCsEvents,
     ...careerEducationEvents,
+    ...careerPsychologyEvents,
   ],
   incomes,
   endings,

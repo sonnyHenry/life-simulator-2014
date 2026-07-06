@@ -684,6 +684,38 @@ export const workEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'psy',
+        text: '进高校心理中心或咨询机构，做心理服务',
+        visibleIf: { major: '心理学' },
+        outcomes: [
+          {
+            weight: 1,
+            condition: { flag: 'postgrad_strong' },
+            text: '你应聘进了一所高校的心理中心。研究生三年攒下的个案时数和督导记录，让你跳过了"接线助理"那一段最清贫的日子。坐进自己的咨询室那天你想：这行认的不是学历本身，是学历背后那些一小时一小时坐出来的功夫。',
+            effects: [
+              { stats: { money: 10000, knowledge: 6, mindset: 5, network: 4 } },
+              { setCareer: 'psychology' },
+              { setFlag: 'career_psychology' },
+              { setFlag: 'postgrad_done' },
+              { setFlag: 'psy_school' },
+              { setFlag: 'psy_trained' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'postgrad_strong' } },
+            text: '你进了一家心理咨询机构。研究生学历让你的简历不再石沉大海，但个案时数还得从头攒。带你的督导说："这行没有速成，读研只是让你少走弯路，路还是要自己走。"',
+            effects: [
+              { stats: { money: 5000, knowledge: 5, mindset: 2 } },
+              { setCareer: 'psychology' },
+              { setFlag: 'career_psychology' },
+              { setFlag: 'postgrad_done' },
+              { setFlag: 'psy_counselor' },
+            ],
+          },
+        ],
+      },
+      {
         id: 'local',
         text: '先找份稳定工作',
         outcomes: [

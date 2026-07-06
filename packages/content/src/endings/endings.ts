@@ -168,6 +168,27 @@ export const endings: EndingDef[] = [
     shareCard: { tone: 'triumph', tagline: '那一年请战的人里，有你一个。' },
   },
   {
+    id: 'end_psychology_listener',
+    title: '倾听者',
+    text: '十二年前，这个专业最常被问的是"能算命吗"；十二年后，你的预约表排到了下个月。热线、双减、需求爆发、行业整顿，每一站你都在场。你没有治好这个时代的焦虑，但你陪很多人在焦虑里坐稳了。这门手艺没有让你大富大贵——它只是让一些人的深夜，比原来好过了一点。',
+    category: 'final',
+    priority: 112,
+    condition: {
+      all: [
+        { flag: 'career_psychology' },
+        {
+          any: [
+            { flag: 'psy_school' },
+            { flag: 'psy_counselor' },
+            { flag: 'psy_private_practice' },
+          ],
+        },
+        { stat: 'mindset', op: '>=', value: 20 },
+      ],
+    },
+    shareCard: { tone: 'warm', tagline: '你没有治好时代的焦虑，但你接住了很多深夜。' },
+  },
+  {
     id: 'end_stable_gov',
     title: '上岸人',
     text: '你的工位上摆着一盆绿萝，水杯里泡着菊花茶。大学同学在群里聊融资、聊期权、聊裁员，你偶尔冒个泡，发一张单位食堂三块钱的午饭。有人羡慕你，有人替你“可惜”。但日子是过给自己的，不是过给群友看的。',
