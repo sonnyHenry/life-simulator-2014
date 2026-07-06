@@ -1,7 +1,8 @@
 import type { Condition, IncomeRule } from '@life-sim/core';
 
 // 每个"年度回合"结算一次的净储蓄(工资 - 生活开销后攒下的钱,单位:元/年)。
-// 大学阶段没有职业 flag,天然不产生收入;读研期间同理(穷但值得)。
+// 大学阶段没有职业 flag,天然不产生收入;读研期间只有一条微薄的补助规则,
+// 结算屏上和上班同学的工资对照,是"延迟入场"的数值化表达。
 const employed: Condition = {
   any: [{ not: { flag: 'laid_off' } }, { flag: 'restarted_after_layoff' }],
 };
@@ -132,6 +133,12 @@ export const incomes: IncomeRule[] = [
     amount: 28000,
     mindsetDelta: 1,
     healthDelta: 2,
+  },
+  {
+    id: 'inc_postgrad_stipend',
+    label: '研究生补助与兼职',
+    when: { all: [{ flag: 'postgrad' }, { not: { flag: 'postgrad_done' } }] },
+    amount: 8000,
   },
   {
     id: 'inc_gov',

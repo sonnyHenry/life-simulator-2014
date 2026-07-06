@@ -8,6 +8,7 @@ import { collegeEvents } from './events/college';
 import { workEvents } from './events/work';
 import { randomEvents } from './events/random';
 import { dramaEvents } from './events/drama';
+import { pandemicEvents } from './events/pandemic';
 import { careerFinanceEvents } from './events/career-finance';
 import { careerMedicineEvents } from './events/career-medicine';
 import { careerCsEvents } from './events/career-cs';
@@ -34,6 +35,7 @@ export const contentPack: ContentPack = {
     ...workEvents,
     ...randomEvents,
     ...dramaEvents,
+    ...pandemicEvents,
     ...careerFinanceEvents,
     ...careerMedicineEvents,
     ...careerCsEvents,

@@ -57,6 +57,142 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
+    // 读研中段(2019):填补考研线 2019-2021 的内容空窗
+    id: 'ev_postgrad_lab_2019',
+    pools: ['work'],
+    category: 'career',
+    title: '横向、论文与工位',
+    mandatory: true,
+    trigger: {
+      all: [{ flag: 'postgrad' }, { not: { flag: 'postgrad_done' } }, { year: { from: 2019, to: 2019 } }],
+    },
+    text: '研二这年，你终于看清了研究生生活的真实构成：三分之一是文献，三分之一是导师的横向项目，剩下三分之一是在工位上刷同龄人的朋友圈——本科直接工作的同学已经在晒年终奖，你的"年终奖"是导师群里的一句"辛苦了"。开题的日子越来越近，实验室的椅子越坐越硬。',
+    choices: [
+      {
+        id: 'a',
+        text: '跟着导师做横向项目，攒经验也攒补贴',
+        outcomes: [
+          {
+            weight: 2,
+            text: '项目验收那天，甲方的技术负责人加了你微信："毕业了来找我。"你不确定这句话的含金量，但补贴到账的短信是真的，写进简历的系统是真的，凌晨两点的实验室灯光也是真的。',
+            effects: [{ stats: { money: 6000, network: 5, knowledge: 3, health: -3 } }],
+          },
+          {
+            weight: 1,
+            text: '说是做项目，你干的大多是贴发票、催合同、给师弟débug。半年下来技术没长进多少，倒是把学校财务处的报销流程摸得炉火纯青。你安慰自己：这也算一种"工程能力"。',
+            effects: [{ stats: { money: 3000, mindset: -5, network: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '推掉杂活，闷头把论文往前赶',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把自己钉在工位上，文献读到眼干，实验重跑了四轮。开题一次通过，评审老师说了句"工作量很扎实"。走出会议室，你在走廊里长舒一口气——这条路清苦，但每一步都踩在自己脚下。',
+            effects: [
+              { stats: { knowledge: 8, mindset: -3, health: -2 } },
+              { setFlag: 'postgrad_strong' },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你精心准备的选题被评审当场毙掉："创新点不够。"重新开题的那个月，你把"读研的意义"想了一百遍。后来你换了个方向重新来，进度慢了半年，但新方向确实更站得住——只是当时的你还看不到这一点。',
+            effects: [{ stats: { knowledge: 4, mindset: -7, health: -1 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '瞒着导师去实习，让简历先跑起来',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你过上了双面人生：工作日在公司写代码，周末回实验室补进度，组会前夜赶 PPT 到凌晨。累到怀疑人生，但实习转正的口头 offer 和肉眼可见变厚的简历告诉你：这份辛苦是有汇率的。',
+            effects: [
+              { stats: { money: 9000, knowledge: 4, mindset: -3, health: -4 } },
+              { setFlag: 'postgrad_strong' },
+            ],
+          },
+          {
+            weight: 1,
+            text: '导师在一次临时组会点名要看你的阶段进展，你人在三十公里外的工位上。视频里你背景虚化开到最大，还是没逃过那句"你最近心思好像不在课题上"。实习照做，但接下来半年,你在导师那里的信用额度明显变薄了。',
+            effects: [{ stats: { money: 5000, network: -4, mindset: -6 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 读研后段(2020):考研玩家的疫情弧由这个事件承担
+    // (工作玩家走 pandemic.ts 的《春节，暂停键》,临床医学走《出征》)
+    id: 'ev_postgrad_campus_2020',
+    pools: ['work'],
+    category: 'era',
+    tier: 'major',
+    title: '封校的春天',
+    mandatory: true,
+    order: -10,
+    trigger: {
+      all: [{ flag: 'postgrad' }, { not: { flag: 'postgrad_done' } }, { year: { from: 2020, to: 2020 } }],
+    },
+    text: '2020年春天，疫情把校园关成了一座岛。返校要审批，进出要报备，实验室改成预约制，组会搬到了线上——导师的头像永远定格在证件照，画面卡住时像一幅肖像画。食堂的桌子贴上了十字胶带，操场围栏外的世界近在眼前，又远得离谱。更要命的是，你明年就毕业：论文数据还差一截，秋招已经宣布全面转线上。同龄人在家办公，你在校园里"办学"，焦虑隔着口罩都能闻到。',
+    choices: [
+      {
+        id: 'a',
+        text: '留校闭环，把论文和实验往死里推',
+        outcomes: [
+          {
+            weight: 2,
+            text: '整栋宿舍楼安静得像自习室，你的日程表只剩实验、跑数据、写作三件事。三个月后，论文主体章节全部成型，导师在线上组会里难得表扬了你。你看着窗外空荡的操场想：这段被按了暂停键的时间，好歹被你攥出了一点形状。',
+            effects: [
+              { stats: { knowledge: 8, mindset: -3, health: -2 } },
+              { setFlag: 'postgrad_strong' },
+            ],
+          },
+          {
+            weight: 1,
+            text: '设备维保进不了校，你的关键实验卡了两个月，每天睁眼就是干着急。你用这段时间把文献综述改了三版，也在深夜的空操场跑了人生里最多的圈。后来你论文致谢里写：“感谢那段跑步的日子，让我没有垮掉。”',
+            effects: [{ stats: { knowledge: 4, mindset: -6, health: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '申请返乡，在老家的书房里远程读研',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你在老家书房支起了"云实验室"，妈妈的饭点比闹钟还准。网课、云组会、远程改论文，效率打了折,睡眠和三餐倒是前所未有地规律。返校时你带回来一后备箱特产，分给了整个课题组——那学期组里最受欢迎的人是你。',
+            effects: [{ stats: { mindset: 5, health: 4, knowledge: 2, network: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '在家的日子舒服得危险：起床越来越晚，文献越堆越高，导师的消息你开始"晚点再回"。直到一次线上汇报被当众问住,你才惊醒——舒适区是个好地方，但论文不会在里面自己长大。',
+            effects: [{ stats: { mindset: -4, knowledge: 1, health: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '一边赶论文，一边盯紧线上秋招',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把面试穿的衬衫挂在宿舍门后，上半身正装、下半身睡裤地面完了十几场视频面试。网络面试拉平了地域差距——往年要跨省赶场的宣讲会，如今在床上就能参加。冬天来临前，你握着两个不错的意向 offer，觉得这个荒诞的春天总算给了点补偿。',
+            effects: [{ stats: { network: 5, knowledge: 3, mindset: -3, money: 3000 } }],
+          },
+          {
+            weight: 1,
+            text: '一场关键终面进行到一半，宿舍楼的网断了。你举着手机冲到楼道找信号，重连时面试官已经离开会议室。你对着"面试已结束"的提示页坐了很久。后来你给 HR 写了封长长的解释邮件，对方回了句"理解，等下一批"。你把这五个字读出了眼泪。',
+            effects: [{ stats: { mindset: -8, knowledge: 2, network: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_invest_stock_2015',
     pools: ['invest'],
     category: 'invest',
