@@ -20,6 +20,7 @@ export const randomEvents: GameEvent[] = [
   {
     id: 'ev_random_flu',
     pools: ['random'],
+    weight: 0.5,
     category: 'health',
     title: '换季重感冒',
     text: '一场降温，你中招了。头晕、咳嗽、浑身发冷，外卖软件里的粥店你已经收藏了三家。',
@@ -62,6 +63,7 @@ export const randomEvents: GameEvent[] = [
   {
     id: 'ev_random_family_call',
     pools: ['random'],
+    weight: 0.5,
     category: 'family',
     title: '家里的电话',
     text: '晚上十点，家里打来电话。电话那头先问你吃没吃饭，又问钱够不够花，最后才装作随口一提：“最近累不累啊？”',
@@ -211,6 +213,7 @@ export const randomEvents: GameEvent[] = [
   {
     id: 'ev_random_small_trip',
     pools: ['random'],
+    weight: 0.5,
     category: 'mindset',
     title: '短途旅行',
     text: '连续忙了很久后，你突然想离开这座城市两天。不是去看什么大风景，只是想让手机信号和工作消息都慢一点。',
@@ -254,6 +257,7 @@ export const randomEvents: GameEvent[] = [
   {
     id: 'ev_random_side_hustle',
     pools: ['random'],
+    weight: 0.5,
     category: 'money',
     title: '副业诱惑',
     text: '朋友拉你进了一个副业群：写稿、剪视频、带货、知识付费。群公告写着“下班后两小时，改变人生”。',
@@ -375,6 +379,7 @@ export const randomEvents: GameEvent[] = [
   {
     id: 'ev_random_gym_card',
     pools: ['random'],
+    weight: 0.5,
     category: 'health',
     title: '年卡',
     text: '公司楼下的健身房在搞活动，销售小哥拦住你：“哥，办年卡吧，平均一天才六块钱，一杯奶茶都不到。”你捏了捏加班攒出来的肚子。',

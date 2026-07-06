@@ -420,6 +420,7 @@ export const dramaEvents: GameEvent[] = [
   {
     id: 'ev_drama_ebike_accident',
     pools: ['random'],
+    weight: 0.5,
     category: 'health',
     tier: 'major',
     title: '下班路上的三秒钟',
@@ -545,6 +546,7 @@ export const dramaEvents: GameEvent[] = [
   {
     id: 'ev_drama_side_gig_viral',
     pools: ['random'],
+    weight: 0.5,
     category: 'career',
     tier: 'major',
     title: '一夜十万粉',

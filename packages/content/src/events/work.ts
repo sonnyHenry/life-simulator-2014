@@ -717,11 +717,11 @@ export const workEvents: GameEvent[] = [
       },
       {
         id: 'local',
-        text: '先找份稳定工作',
+        text: '不进本行，先找份工作糊口',
         outcomes: [
           {
             weight: 1,
-            text: '你没有进入想象中的光鲜行业，但也算落了脚。简历上多出的那三年，最后变成了一句“抗压能力强”。',
+            text: '你没往本专业的方向走，随便找了份能开工资的活先干着。简历上多出的那三年，最后变成了一句“抗压能力强”——至于当初读的那个专业，慢慢就不提了。',
             effects: [
               { stats: { money: 4000, mindset: -2 } },
               { setCareer: 'local' },
@@ -1168,6 +1168,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_work_manager_feedback',
     pools: ['work'],
+    weight: 0.5,
     category: 'career',
     title: '领导的反馈',
     text: '绩效沟通时，领导说你“执行不错，但要更有 owner 意识”。你点头记录，心里翻译成中文：活要多想，锅也要多背。',
@@ -1200,6 +1201,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_work_first_bonus',
     pools: ['work'],
+    weight: 0.5,
     category: 'money',
     title: '第一笔年终奖',
     text: '年终奖到账了。金额没有传说中那么夸张，但比你学生时代见过的大多数数字都大。你打开购物车，又打开银行卡余额。',

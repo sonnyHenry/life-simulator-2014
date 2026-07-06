@@ -131,6 +131,9 @@ export const npcs: NpcDef[] = [
           all: [
             { stat: 'network', op: '>=', value: 24 },
             { year: { from: 2019, to: 2023 } },
+            // 读研在读期间(postgrad 已设、尚未 postgrad_done)不触发职场贵人;
+            // 读研毕业(2021 起 postgrad_done)与直接工作的玩家不受影响。
+            { any: [{ not: { flag: 'postgrad' } }, { flag: 'postgrad_done' }] },
           ],
         },
         eventId: 'ev_npc_mentor_intro',
