@@ -22,7 +22,7 @@ export const contentPack: ContentPack = {
     version: '0.15.10',
     title: '2014：我的十二年',
     fallbackEndingId: 'end_ordinary',
-    examQuestionCount: 10,
+    examQuestionCount: 7,
     scoring: {
       weights: { knowledge: 0.2, money: 0.25, mindset: 0.2, network: 0.15, health: 0.2 },
       moneyFullScore: 800000,
