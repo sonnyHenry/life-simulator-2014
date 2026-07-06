@@ -462,6 +462,45 @@ describe('income & scoring', () => {
     expect(withIncome.stats.money - base.stats.money).toBe(withIncome.roundCounter * 1000);
   });
 
+  it('settles income on entering SETTLEMENT and exposes the breakdown in the view', () => {
+    const pack = miniPack();
+    pack.incomes = [{ id: 'inc_test', label: '测试收入', when: { always: true }, amount: 1000 }];
+    const engine = createEngine(pack);
+    let state = engine.start(11);
+    let guard = 0;
+    while (guard++ < 100 && engine.view(state).kind !== 'SETTLEMENT') {
+      const view = engine.view(state);
+      let action: PlayerAction;
+      switch (view.kind) {
+        case 'TITLE':
+          action = { type: 'START' };
+          break;
+        case 'SETUP':
+          action = { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' };
+          break;
+        case 'EXAM':
+          action = { type: 'SKIP_EXAM' };
+          break;
+        case 'APPLICATION':
+          action = { type: 'APPLY', optionId: 'app1' };
+          break;
+        case 'EVENT':
+          action = { type: 'CHOOSE', choiceId: view.choices[0]!.id };
+          break;
+        default:
+          action = { type: 'CONTINUE' };
+      }
+      state = engine.dispatch(state, action);
+    }
+    const view = engine.view(state);
+    if (view.kind !== 'SETTLEMENT') throw new Error('expected SETTLEMENT view');
+    // 结算屏上的金钱已含本年收入,明细与趋势同步透出
+    expect(view.incomes).toEqual([{ label: '测试收入', amount: 1000 }]);
+    expect(view.moneyDelta).toBe(1000);
+    expect(view.moneyTrend.length).toBe(1);
+    expect(view.moneyTrend[0]!.money).toBe(view.stats.money);
+  });
+
   it('exposes a weighted score and grade on the ending view', () => {
     const pack = miniPack();
     const engine = createEngine(pack);

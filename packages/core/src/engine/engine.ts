@@ -127,6 +127,8 @@ export function createEngine(pack: ContentPack): Engine {
       triggeredEventIds: [],
       history: [],
       endingId: null,
+      lastSettlement: null,
+      yearlySnapshots: [],
     };
   }
 
@@ -216,7 +218,15 @@ export function createEngine(pack: ContentPack): Engine {
           deltas: state.pendingOutcome?.deltas ?? {},
         };
       case 'SETTLEMENT':
-        return { kind: 'SETTLEMENT', year: state.date.year, stats: state.stats };
+        return {
+          kind: 'SETTLEMENT',
+          year: state.date.year,
+          stats: state.stats,
+          incomes: state.lastSettlement?.incomes ?? [],
+          moneyDelta: state.lastSettlement?.moneyDelta ?? 0,
+          milestone: state.lastSettlement?.milestone ?? null,
+          moneyTrend: state.yearlySnapshots ?? [],
+        };
       case 'ENDING': {
         const ending = pack.endings.find(e => e.id === state.endingId);
         if (!ending) throw new Error(`ENDING screen with unknown ending: ${state.endingId}`);
@@ -230,6 +240,7 @@ export function createEngine(pack: ContentPack): Engine {
           score,
           grade,
           historyLength: state.history.length,
+          moneyTrend: state.yearlySnapshots ?? [],
           shareCard: {
             title: ending.title,
             tagline: ending.shareCard?.tagline ?? '普通人的十二年，也有自己的重量。',
@@ -336,8 +347,21 @@ export function createEngine(pack: ContentPack): Engine {
     state.screen = 'ENDING';
   }
 
-  function applyAnnualIncome(state: GameState, rng: Rng): void {
+  const MONEY_MILESTONES: { threshold: number; label: string }[] = [
+    { threshold: 1_000_000, label: '资产第一次站上一百万。当年那个数着生活费过月的人,大概不敢想。' },
+    { threshold: 500_000, label: '资产突破五十万。你开始理解"积累"这两个字的分量。' },
+    { threshold: 100_000, label: '存款第一次突破十万。你截了个图,又默默删掉了。' },
+  ];
+
+  /**
+   * 进入年度结算屏:先结算收入并把明细写入 lastSettlement,
+   * 玩家在结算页看到的是入账后的数字和收入构成。
+   * 提前结局检查仍在玩家点"翻过这一年"后的 settleRound 里做。
+   */
+  function enterSettlement(state: GameState, rng: Rng): void {
     const ctx = { state, pack, rng };
+    const moneyBefore = state.stats.money;
+    const incomes: { label: string; amount: number }[] = [];
     for (const rule of pack.incomes) {
       if (!evalCondition(rule.when, ctx)) continue;
       state.stats.money = Math.max(0, Math.round(state.stats.money + rule.amount));
@@ -347,13 +371,28 @@ export function createEngine(pack: ContentPack): Engine {
       if (rule.healthDelta) {
         state.stats.health = Math.max(0, Math.min(100, state.stats.health + rule.healthDelta));
       }
+      if (rule.amount !== 0) incomes.push({ label: rule.label, amount: rule.amount });
     }
+    const snapshots = state.yearlySnapshots ?? [];
+    const prevMoney = snapshots.length > 0 ? snapshots[snapshots.length - 1]!.money : null;
+    const milestone =
+      prevMoney === null
+        ? null
+        : (MONEY_MILESTONES.find(
+            m => prevMoney < m.threshold && state.stats.money >= m.threshold,
+          )?.label ?? null);
+    state.lastSettlement = {
+      incomes,
+      moneyDelta: state.stats.money - moneyBefore,
+      milestone,
+    };
+    state.yearlySnapshots = [...snapshots, { year: state.date.year, money: state.stats.money }];
+    state.screen = 'SETTLEMENT';
   }
 
   function settleRound(state: GameState, rng: Rng): void {
     const phase = phaseAt(state.phaseIndex);
     if (phase.kind !== 'rounds') throw new Error('settleRound outside rounds phase');
-    applyAnnualIncome(state, rng);
     const earlyAfterSettle = findEnding(state, pack, rng, ['early']);
     if (earlyAfterSettle) {
       finishWithEnding(state, earlyAfterSettle.id);
@@ -590,7 +629,7 @@ export function createEngine(pack: ContentPack): Engine {
     if (state.eventCursor < state.eventQueue.length) {
       state.screen = 'EVENT';
     } else {
-      state.screen = 'SETTLEMENT';
+      enterSettlement(state, rng);
     }
   }
 
@@ -657,7 +696,7 @@ export function createEngine(pack: ContentPack): Engine {
         if (state.eventQueue.length > 0) {
           state.screen = 'EVENT';
         } else {
-          state.screen = 'SETTLEMENT';
+          enterSettlement(state, rng);
         }
         return;
       case 'EVENT':

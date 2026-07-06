@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ViewModel } from '@life-sim/core';
 import { contentPack } from '@life-sim/content';
 import { useGame } from '../store';
-import { Card, ChoiceButton, ContinueButton, DeltaChips } from '../components/ui';
+import { Card, ChoiceButton, ContinueButton, DeltaChips, MoneyTrend } from '../components/ui';
 import { downloadShareImage } from '../platform/shareImage';
 
 export function BriefScreen(props: { view: Extract<ViewModel, { kind: 'BRIEF' }> }) {
@@ -48,10 +48,24 @@ export function OutcomeScreen(props: { view: Extract<ViewModel, { kind: 'OUTCOME
 
 export function SettlementScreen(props: { view: Extract<ViewModel, { kind: 'SETTLEMENT' }> }) {
   const act = useGame(s => s.act);
-  const { stats } = props.view;
+  const { stats, incomes, milestone, moneyTrend } = props.view;
   return (
     <Card className="center">
       <p className="kicker">{props.view.year} 年 · 年末</p>
+      {incomes.length > 0 && (
+        <div className="income-list">
+          {incomes.map(item => (
+            <div key={item.label} className="income-row">
+              <span>{item.label}</span>
+              <span className={item.amount > 0 ? 'income-up' : 'income-down'}>
+                {item.amount > 0 ? '+' : '-'}¥{Math.abs(item.amount).toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {milestone && <p className="milestone-line">✦ {milestone}</p>}
+      <MoneyTrend trend={moneyTrend} />
       <div className="settle-grid">
         <div>
           <span className="settle-num">{stats.knowledge}</span>
@@ -165,6 +179,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
           <span className="muted">健康</span>
         </div>
       </div>
+      <MoneyTrend trend={props.view.moneyTrend} />
       <p className="muted seed-line">人生编号 #{seed}</p>
       <button className="continue-btn secondary-btn" onClick={saveImage} disabled={saving}>
         {saving ? '生成中…' : '保存分享图'}

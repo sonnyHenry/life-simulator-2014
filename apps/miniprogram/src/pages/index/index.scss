@@ -235,6 +235,64 @@
   color: #8a4a4a;
 }
 
+.income-list {
+  margin: 12px 0 0;
+  text-align: left;
+  border-top: 1px dashed #e8dfc9;
+  padding-top: 8px;
+}
+
+.income-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.income-up {
+  color: #3d6b45;
+  font-weight: 600;
+}
+
+.income-down {
+  color: #8a4a4a;
+  font-weight: 600;
+}
+
+.milestone-line {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #8a6a2f;
+}
+
+.money-trend {
+  margin: 12px 0 0;
+}
+
+.money-trend-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 48px;
+}
+
+.money-trend-bar {
+  flex: 1;
+  background: #d8c48f;
+  border-radius: 2px 2px 0 0;
+  min-height: 3px;
+}
+
+.money-trend-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.small {
+  font-size: 11px;
+}
+
 .settle-grid {
   display: flex;
   flex-wrap: wrap;

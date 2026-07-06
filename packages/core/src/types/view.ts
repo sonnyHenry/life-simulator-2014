@@ -44,7 +44,19 @@ export type ViewModel =
       choices: { id: string; text: string }[];
     }
   | { kind: 'OUTCOME'; text: string; deltas: StatDeltas }
-  | { kind: 'SETTLEMENT'; year: number; stats: Stats }
+  | {
+      kind: 'SETTLEMENT';
+      year: number;
+      stats: Stats;
+      /** 本年命中的收入规则明细("大厂工资 +¥62,000"等) */
+      incomes: { label: string; amount: number }[];
+      /** 收入结算引起的金钱净变化 */
+      moneyDelta: number;
+      /** 财富里程碑提示(跨越 10万/50万/100万),无则为 null */
+      milestone: string | null;
+      /** 历年年末金钱快照,用于趋势小图 */
+      moneyTrend: { year: number; money: number }[];
+    }
   | {
       kind: 'ENDING';
       endingId: string;
@@ -54,6 +66,8 @@ export type ViewModel =
       score: number;
       grade: 'S' | 'A' | 'B' | 'C' | 'D';
       historyLength: number;
+      /** 历年年末金钱快照,供结局页/分享图做趋势展示 */
+      moneyTrend: { year: number; money: number }[];
       shareCard: {
         title: string;
         tagline: string;

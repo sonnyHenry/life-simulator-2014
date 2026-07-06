@@ -302,6 +302,53 @@ h2 {
   margin: 18px 0 6px;
 }
 
+.income-list {
+  margin: 14px auto 0;
+  max-width: 340px;
+  text-align: left;
+  border-top: 1px dashed var(--line, #ddd);
+  padding-top: 10px;
+}
+
+.income-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.income-up {
+  color: var(--up);
+  font-weight: 600;
+}
+
+.income-down {
+  color: var(--down);
+  font-weight: 600;
+}
+
+.milestone-line {
+  margin: 12px 0 0;
+  font-size: 13.5px;
+  color: var(--accent);
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+}
+
+.money-trend {
+  margin: 14px auto 0;
+  max-width: 340px;
+  color: var(--accent);
+}
+
+.money-trend-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted, #999);
+  margin-top: 2px;
+}
+
 .settle-grid > div {
   display: flex;
   flex-direction: column;

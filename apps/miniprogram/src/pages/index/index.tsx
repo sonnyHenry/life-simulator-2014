@@ -329,12 +329,51 @@ function OutcomeScreen(props: { view: Extract<ViewModel, { kind: 'OUTCOME' }> })
   );
 }
 
+/** 历年金钱趋势:用 View 高度百分比画竖条序列(小程序端不引 SVG/canvas) */
+function MoneyTrendBars(props: { trend: { year: number; money: number }[] }) {
+  const { trend } = props;
+  if (trend.length < 2) return null;
+  const max = Math.max(...trend.map(p => p.money), 1);
+  const last = trend[trend.length - 1]!;
+  return (
+    <View className="money-trend">
+      <View className="money-trend-bars">
+        {trend.map(p => (
+          <View
+            key={p.year}
+            className="money-trend-bar"
+            style={{ height: `${Math.max(6, Math.round((p.money / max) * 100))}%` }}
+          />
+        ))}
+      </View>
+      <View className="money-trend-axis">
+        <Text className="muted small">{trend[0]!.year}</Text>
+        <Text className="muted small">{last.year}</Text>
+      </View>
+    </View>
+  );
+}
+
 function SettlementScreen(props: { view: Extract<ViewModel, { kind: 'SETTLEMENT' }> }) {
   const act = useGame(s => s.act);
-  const { stats } = props.view;
+  const { stats, incomes, milestone, moneyTrend } = props.view;
   return (
     <Card className="center">
       <Text className="kicker">{props.view.year} 年 · 年末</Text>
+      {incomes.length > 0 && (
+        <View className="income-list">
+          {incomes.map(item => (
+            <View key={item.label} className="income-row">
+              <Text>{item.label}</Text>
+              <Text className={item.amount > 0 ? 'income-up' : 'income-down'}>
+                {item.amount > 0 ? '+' : '-'}¥{fmtMoney(Math.abs(item.amount))}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+      {milestone && <Text className="milestone-line block">✦ {milestone}</Text>}
+      <MoneyTrendBars trend={moneyTrend} />
       <View className="settle-grid">
         <View className="settle-cell">
           <Text className="settle-num">{stats.knowledge}</Text>
