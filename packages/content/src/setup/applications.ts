@@ -1,7 +1,7 @@
 import type { ApplicationOption } from '@life-sim/core';
 
 // 志愿批次:录取概率由引擎按(分数-批次线)动态计算,报高于分数的批次会有滑档风险。
-// 专业名必须与 CROSSROAD 分流(major.includes '计算机'/'软件'/'师范'/'金融'/'临床医学')和事件 visibleIf 保持一致。
+// 专业名必须与 CROSSROAD 分流(major.includes '计算机'/'师范'/'金融'/'临床医学')和事件 visibleIf 保持一致。
 export const applications: ApplicationOption[] = [
   {
     id: 'app_985',
@@ -16,10 +16,10 @@ export const applications: ApplicationOption[] = [
     failEffects: [{ stats: { mindset: -10 } }, { setFlag: 'slipped_from_985' }],
     majors: [
       { id: 'cs', name: '计算机科学与技术', trackFlag: 'cs' },
-      { id: 'se', name: '软件工程', trackFlag: 'cs' },
       { id: 'mba', name: '工商管理', trackFlag: 'management' },
       { id: 'fin', name: '金融学', trackFlag: 'finance' },
       { id: 'med', name: '临床医学', trackFlag: 'medicine' },
+      { id: 'psy', name: '心理学', trackFlag: 'psychology' },
     ],
   },
   {
@@ -33,11 +33,12 @@ export const applications: ApplicationOption[] = [
     ],
     failEffects: [{ stats: { mindset: -8 } }, { setFlag: 'slipped_from_211' }],
     majors: [
-      { id: 'se', name: '软件工程', trackFlag: 'cs' },
+      { id: 'cs', name: '计算机科学与技术', trackFlag: 'cs' },
       { id: 'edu', name: '师范类', trackFlag: 'education' },
       { id: 'mba', name: '工商管理', trackFlag: 'management' },
       { id: 'fin', name: '金融学', trackFlag: 'finance' },
       { id: 'med', name: '临床医学', trackFlag: 'medicine' },
+      { id: 'psy', name: '心理学', trackFlag: 'psychology' },
     ],
   },
   {
@@ -56,6 +57,7 @@ export const applications: ApplicationOption[] = [
       { id: 'mba', name: '工商管理', trackFlag: 'management' },
       { id: 'fin', name: '金融学', trackFlag: 'finance' },
       { id: 'med', name: '临床医学', trackFlag: 'medicine' },
+      { id: 'psy', name: '心理学', trackFlag: 'psychology' },
     ],
   },
   {

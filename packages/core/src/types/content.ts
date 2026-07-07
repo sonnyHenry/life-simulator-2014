@@ -106,7 +106,7 @@ export interface ApplicationMajor {
   id: string;
   /** 专业名,需与 CROSSROAD 分流和事件 visibleIf 里的 major 字符串一致 */
   name: string;
-  /** 写入 flags.major_track 的值:cs / education / cs_applied / management / finance / medicine */
+  /** 写入 flags.major_track 的值:cs / education / cs_applied / management / finance / medicine / psychology */
   trackFlag: string;
 }
 

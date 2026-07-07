@@ -30,9 +30,11 @@ jobs:
           pnpm typecheck
           pnpm test
           pnpm validate
-          # n=300 对 118 事件 + 19 结局(含 <1% 命中率的长尾内容)抽样方差过大,
-          # 任何 RNG 流偏移都会随机漏掉 1-2 个窄门控事件;n=1000 起才稳定全覆盖
-          pnpm simulate -n 1000 --check
+          # 长尾内容抽样方差:固定种子下,新增内容会整体位移 RNG 流,命中率 ~0.1%
+          # 的展示性稀有结局(end_early_retire / end_cashflow_break)在小样本下会被
+          # Poisson 波动漏采。历史上 n 从 300→1000,第二十七轮新增 14 事件 + 心理学线
+          # 后 n=1000 又不再稳定命中这两个结局,提到 n=10000(λ≈8-11)才是可靠信号。
+          pnpm simulate -n 10000 --check
       - name: Build web
         run: pnpm --filter @life-sim/web build
         env:

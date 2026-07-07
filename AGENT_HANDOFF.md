@@ -512,12 +512,22 @@
 - **调平结果**(n=1000 随机 bot):兜底 26%→21%(更多玩家落进叙事结局,正面解读"后期平淡");均分 49(与 M5-15 校准线一致);心态 p50 30→48,年度曲线后期从纯衰减变为 2024 后回升——新收官事件普遍带温情 payoff,这是有意的:玩家反馈的"不爽"很大程度上就是后期只有衰减没有回报。提前结局 6.0%。
 - 验证:typecheck / test 22 / validate 0err0warn / simulate n=1000 --check 通过(118/118、19 结局全可达)/ web build / miniprogram build:weapp 全过。
 
+### M5 第二十七轮(心理学职业线 + 删软件工程 + 各专业专业课事件)
+
+由 Claude Code(Opus 4.8)完成,内容版本 0.16.0 → 0.17.0,事件 118 → 139,结局 19 → 20,分三个内容 commit + 收尾。三项内容需求:补第 5 条精做职业线(心理学)、删重复专业(软件工程)、给每个专业补大学阶段专业课事件。
+
+- **①删除重复专业"软件工程"(id se)**:与"计算机科学与技术"同 trackFlag cs、同一条职业线,纯重复选项。`applications.ts`:app_985 删 se;app_211 把 se **原位替换**为 cs(不能只删——否则 211 批次失去 CS 入口且旧存档 replay fallback 会从 cs track 变成 education track)。`engine.ts` CROSSROAD recommendedFor 两处移除'软件工程'、handleCrossroad 的 `includes('计算机')||includes('软件')` 简化为只留计算机。`work.ts` ev_postgrad_exit cs 选项 visibleIf 移除 `{major:'软件工程'}`。
+- **②心理学职业线(全链路)**:专业入口(app_985/211/一本三批次加心理学,trackFlag psychology,不进二本/专科符合开设现实)→ validate KNOWN_TRACK_FLAGS + types 文档加 psychology → 求职分流(handleCrossroad 心理→career_psychology + first_job_track;考研/考公 recommendedFor 加心理学)→ 考研出口(ev_postgrad_exit psy 选项,强/弱 outcome)→ 事件线(新建 `career-psychology.ts`,7 个里程碑:2018 三岔口 / 2019 考证乱象 / 2020 疫情热线(major,与 pandemic 弧联动、2020 暂停键对心理学 major 排除)/ 2021 双减青少年潮 / 2023 需求爆发(major)/ 2024 行业整顿 / 2026 十二年收官,子状态 psy_school/counselor/industry/private_practice)→ 收入(inc_psy_private/school/industry/counselor,generic_job 排除心理学)→ 结局 end_psychology_listener(career_psychology + 子状态 + mindset≥20,priority 112)。simulate CAREER_LABELS 加"心理"。
+- **③各专业专业课事件**:新建 `college-majors.ts`,7 个 trackFlag × 2 个专业课事件(14 个),触发用 `{flag:'major_track', equals:<track>}`,每玩家只入池本专业 2 个。年份**刻意错开 2014-2017、每年只 3-4 个 track**——踩过的坑:14 个都是 `mandatory` 会在 `pickRoundEvents` 里优先占 college 池 slot(scheduler.ts:26-28 mandatory 不受 eventSlots 限制),第一版把 6 个"event 1"全放 2015,导致 2015 每条 track 都有 mandatory,把通用事件 `ev_invest_stock_2015`(2015 单年)和 `ev_college_club_campaign`(2015-2016)挤到覆盖率 0。把 3 个挪到 2014、1 个挪到 2017 后每年 track 数降到 ≤4,覆盖率回满。
+- **CI/验证档位提到 n=10000**:`deploy.yml` simulate n=1000 → **n=10000**。根因同二十六轮那条(300→1000)的延续:命中率 ~0.1% 的展示性稀有结局 `end_early_retire`/`end_cashflow_break` 在固定种子下会被 RNG 流位移 + Poisson 波动漏采。本轮加 14 事件 + 心理学结局后,n=1000 又不再稳定命中这两个(基线 task② 时各 3 局,加内容后 n=1000 掉到 0,n=3000 仍漏 cashflow,n=5000 起 4-5 局、n=10000 达 8-11 局才是可靠信号)。这两个结局是**有意的稀有 showpiece**(灾难性 / 财务自由),不通过灌水提高命中率,而是提大样本。
+- 验证:typecheck / test 22 / validate 0err0warn / **simulate -n 10000 --check 通过**(139/139 全覆盖、20 结局全可达、提前结局 3.8%、职业线含心理 47/5000≈0.9%)/ web build / minigame build 全过。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.16.0'
+version: '0.17.0'
 title: '2014：我的十二年'
 ```
 
@@ -528,6 +538,7 @@ pnpm typecheck
 pnpm test
 pnpm validate
 pnpm simulate -n 200
+pnpm simulate -n 10000 --check   # 结局可达性门禁档位(CI 同档,见下方长尾结局说明)
 pnpm simulate -n 1 -v --seed 43
 pnpm --filter @life-sim/web build
 pnpm --filter @life-sim/miniprogram typecheck
@@ -538,33 +549,31 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第二十六轮):
+最近一次完整验证通过(M5 第二十七轮):
 
 - `pnpm typecheck`
 - `pnpm test`(22 通过)
 - `pnpm validate`
-- `pnpm simulate -n 1000 --check`(CI 实跑档位,本轮起从 n=300 提到 n=1000)
-- `pnpm --filter @life-sim/web build` / `pnpm --filter @life-sim/miniprogram build:weapp`
+- `pnpm simulate -n 10000 --check`(CI 实跑档位,本轮起从 n=1000 提到 n=10000)
+- `pnpm --filter @life-sim/web build` / `pnpm --filter @life-sim/minigame build`
 
 最近一次 `pnpm validate`:
 
 ```text
-事件 118, 结局 19, NPC 5, 题目 37, 收入规则 20
+事件 139, 结局 20, NPC 5, 题目 37, 收入规则 24
 完成: 0 errors, 0 warnings
 ```
 
-最近一次 `pnpm simulate -n 1000 --check`(与 `.github/workflows/deploy.yml` 一致的档位):
+最近一次 `pnpm simulate -n 10000 --check`(与 `.github/workflows/deploy.yml` 一致的档位):
 
 ```text
-事件覆盖: 118/118
-金钱分位: p10=¥140930 p50=¥247731 p90=¥437200
-心态分位: p10=22 p50=48 p90=87
-提前结局占比: 6.0%
-兜底(平凡之路): 21.1%
+事件覆盖: 139/139
+提前结局占比: 3.8%
+end_cashflow_break 11 局 / end_early_retire 8 局(长尾稀有结局,靠大样本稳定命中)
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
-**注意:n=300 档位已不再可靠**——118 事件+19 结局中存在 <1% 命中率的长尾内容(end_early_retire、ev_drama_stock_options 等),任何 RNG 流偏移(改题数、加事件都会偏移)都会让 n=300 固定种子随机漏 1-2 项。CI 已改用 n=1000,本地日常验证也请用 n=1000。
+**注意:n=1000/n=300 档位已不再可靠**——139 事件 + 20 结局中存在命中率 ~0.1% 的展示性稀有结局(end_early_retire、end_cashflow_break),固定种子下任何 RNG 流偏移(改题数、加事件、加职业线都会偏移)都会让小样本随机漏采:n=1000 曾稳定命中,第二十七轮加 14 事件 + 心理学线后 n=1000 掉到 0、n=3000 仍漏、n=5000 起 4-5 局、n=10000 达 8-11 局。CI 与本地可达性验证一律用 n=10000。
 
 最近一次 `pnpm simulate -n 500 --compare`(M5 第二十六轮全部内容落地后):
 

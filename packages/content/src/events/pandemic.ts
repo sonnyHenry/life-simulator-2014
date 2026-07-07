@@ -2,7 +2,8 @@ import type { Condition, GameEvent } from '@life-sim/core';
 
 // "已经在上班"的身份门控,与 work.ts / random.ts 保持一致。
 // 读研玩家的疫情弧由 work.ts 的《封校的春天》承担;临床医学玩家有自己的
-// 《出征》(career-medicine.ts),这里全部排除,避免同年双 major 事件叠加。
+// 《出征》(career-medicine.ts),心理学玩家有自己的《热线的那一端》
+// (career-psychology.ts),2020 暂停键对两者排除,避免同年双 major 事件叠加。
 const working: Condition = {
   all: [
     {
@@ -30,7 +31,7 @@ export const pandemicEvents: GameEvent[] = [
     mandatory: true,
     order: -10,
     trigger: {
-      all: [working, { not: { major: '临床医学' } }, { year: { from: 2020, to: 2020 } }],
+      all: [working, { not: { major: '临床医学' } }, { not: { major: '心理学' } }, { year: { from: 2020, to: 2020 } }],
     },
     text: '2020年1月，你拖着行李箱回老家过年。年夜饭桌上，长辈们还在劝你多吃点，手机里的新闻已经一条比一条短促：武汉封城、口罩售罄、返程航班取消。大年初二，公司群里弹出通知：延迟复工，等候安排。你原定初六的车票躺在钱包里，突然不知道该退还是该留。窗外的县城安静得出奇，没有拜年的鞭炮，只有大喇叭在循环播放"不串门、不聚集"。你第一次意识到，有些改变来的时候不打招呼，一来就是很多年。',
     choices: [

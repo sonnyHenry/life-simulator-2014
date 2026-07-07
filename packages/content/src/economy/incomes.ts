@@ -135,6 +135,50 @@ export const incomes: IncomeRule[] = [
     healthDelta: 2,
   },
   {
+    // 心理学线:个人执业 > 学校编制/企业用研 > 机构咨询(前期清贫是这条线的底色)
+    id: 'inc_psy_private',
+    label: '个人执业咨询收入',
+    when: { all: [{ flag: 'career_psychology' }, { flag: 'psy_private_practice' }] },
+    amount: 66000,
+    mindsetDelta: -2,
+    healthDelta: -5,
+  },
+  {
+    id: 'inc_psy_school',
+    label: '学校心理教师工资',
+    when: {
+      all: [{ flag: 'career_psychology' }, { flag: 'psy_school' }, { not: { flag: 'psy_private_practice' } }],
+    },
+    amount: 30000,
+    mindsetDelta: -1,
+    healthDelta: -1,
+  },
+  {
+    id: 'inc_psy_industry',
+    label: 'HR/用户研究工资',
+    when: {
+      all: [{ flag: 'career_psychology' }, { flag: 'psy_industry' }, { not: { flag: 'psy_private_practice' } }],
+    },
+    amount: 36000,
+    mindsetDelta: -3,
+    healthDelta: -2,
+  },
+  {
+    id: 'inc_psy_counselor',
+    label: '咨询机构收入',
+    when: {
+      all: [
+        { flag: 'career_psychology' },
+        { not: { flag: 'psy_school' } },
+        { not: { flag: 'psy_industry' } },
+        { not: { flag: 'psy_private_practice' } },
+      ],
+    },
+    amount: 22000,
+    mindsetDelta: -2,
+    healthDelta: -2,
+  },
+  {
     id: 'inc_postgrad_stipend',
     label: '研究生补助与兼职',
     when: { all: [{ flag: 'postgrad' }, { not: { flag: 'postgrad_done' } }] },
@@ -194,6 +238,7 @@ export const incomes: IncomeRule[] = [
         { not: { flag: 'career_gov' } },
         { not: { flag: 'career_finance' } },
         { not: { flag: 'career_medicine' } },
+        { not: { flag: 'career_psychology' } },
       ],
     },
     amount: 25000,

@@ -55,6 +55,7 @@ const CAREER_LABELS: Record<string, string> = {
   local: '县城/本地',
   finance: '金融',
   medicine: '医学',
+  psychology: '心理',
 };
 const STRATEGY_LABELS: Record<Strategy, string> = {
   random: '随机',
