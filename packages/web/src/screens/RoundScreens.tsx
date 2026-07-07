@@ -121,6 +121,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
       await downloadShareImage({
         title: props.view.shareCard.title,
         tagline: props.view.shareCard.tagline,
+        text: props.view.text,
         tone: props.view.shareCard.tone,
         years: props.view.shareCard.years,
         seed: props.view.shareCard.seed,
