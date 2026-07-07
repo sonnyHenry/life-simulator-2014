@@ -236,6 +236,125 @@ export const careerFinanceEvents: GameEvent[] = [
     ],
   },
   {
+    // 2022 分支切换点:降本增效/裁员季,可在前台与中后台之间转档
+    id: 'ev_fin_downsize_2022',
+    pools: ['work'],
+    category: 'career',
+    title: '降本增效那一年',
+    text: '2022年,行业的空气一天比一天紧。晨会不再聊规模,聊的是"人效"和"优化";隔壁组一夜之间空了两排工位,HR 的脚步声成了整层楼最让人心跳漏拍的背景音。递延奖金、冻结招聘、合并部门,一封封邮件把每个人的位置重新称了一遍重量。你盯着自己工牌上的部门名,第一次认真想:这张牌桌上,我到底想坐哪个位置。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_finance' }, { year: { from: 2022, to: 2022 } }] },
+    choices: [
+      {
+        id: 'front_stay',
+        text: '死守前台,业绩就是你的免裁金牌',
+        visibleIf: { flag: 'finance_front_office' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把能见的客户都见了一遍,把手里的项目盯得死死的。裁员名单公布那天,你的名字不在上面——因为你手上的单子还在产钱。留下来的代价是你把自己也"降本增效"了:睡得更少,应酬更多,体检报告上多了两个箭头。',
+            effects: [{ stats: { money: 12000, network: 4, mindset: -4, health: -6 } }],
+          },
+          {
+            weight: 1,
+            text: '你拼了命,但你所在的条线整体被砍,再好的个人业绩也架不住"战略收缩"四个字。你没进裁员名单,却被调去一个边缘岗位,前台的光环一夜黯淡。你留在了牌桌上,只是椅子被换到了角落。',
+            effects: [{ stats: { mindset: -8, network: 2, money: 3000 } }],
+          },
+        ],
+      },
+      {
+        id: 'front_to_back',
+        text: '主动退到中后台,用收入换一份安稳',
+        visibleIf: { flag: 'finance_front_office' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你申请转去了风控/合规这样的中后台岗位。奖金和话语权都缩了水,但你不用再把命押在市场情绪上。第一次准点下班回家吃饭那晚,你有点恍惚——原来"体面"不只有前台那一种活法,睡个整觉也是。',
+            effects: [
+              { setFlag: 'finance_front_office', value: false },
+              { stats: { money: -4000, health: 6, mindset: 4 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'back_up',
+        text: '趁人员动荡,抓住空出来的前台机会',
+        visibleIf: { not: { flag: 'finance_front_office' } },
+        outcomes: [
+          {
+            weight: 1,
+            condition: { stat: 'network', op: '>=', value: 18 },
+            text: '前台走了人,缺口就是机会。你靠这些年在中后台攒下的业务理解和人脉,争到了一个前台岗位。收入台阶一下子抬高,但你也第一天就尝到了那份"体面"的昂贵:业绩指标像秒表一样挂在头顶,滴答作响。',
+            effects: [
+              { setFlag: 'finance_back_office', value: false },
+              { setFlag: 'finance_front_office' },
+              { stats: { money: 14000, network: 4, mindset: -3, health: -5 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你想往前台挪,可动荡时期没人敢给新人开口子,几次内部竞聘都卡在"暂缓招聘"。你退回中后台,把这份不甘心暂时收起来:先把手里的流程和风控做到无可替代,机会总会再来。',
+            effects: [{ stats: { knowledge: 4, mindset: -3, money: 2000 } }],
+          },
+        ],
+      },
+      {
+        id: 'back_stay',
+        text: '稳守中后台,做那个不可或缺的人',
+        visibleIf: { not: { flag: 'finance_front_office' } },
+        outcomes: [
+          {
+            weight: 1,
+            text: '风浪最大的时候,你所在的中后台反而成了压舱石:清算不能停,合规不能松,风控更是天天被点名。你没有前台那样的高光,却也没上任何一版裁员名单。这一年你终于确认,自己当初选的这条"不性感"的路,抗周期。',
+            effects: [{ stats: { mindset: 3, knowledge: 4, health: 1, money: 3000 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2023:AI 进办公室 + 弱市,金融线的技术冲击
+    id: 'ev_fin_ai_2023',
+    pools: ['work'],
+    category: 'career',
+    title: '会说话的模型',
+    text: '2023年,ChatGPT 把 AI 从新闻标题推到了你的工位上。研究所连夜开会讨论"大模型会不会取代初级分析师",实习生已经开始用它写初稿、跑摘要;而另一边,市场持续低迷,路演台下坐着的客户越来越少,愿意掏钱的更少。技术的浪和行情的冰同时拍过来,你得想清楚:自己那点手艺,哪部分会被替代,哪部分不会。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_finance' }, { year: { from: 2023, to: 2023 } }] },
+    choices: [
+      {
+        id: 'front',
+        text: '把 AI 变成前台的新武器',
+        visibleIf: { flag: 'finance_front_office' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你不跟 AI 较劲,而是让它替你啃财报、搭模型、写初稿,把省下的时间全花在机器做不了的事上——陪客户吃饭、读人心、在关键时刻拍板。年底你发现,能被模型取代的是"分析",不能被取代的是"信任",而你恰好靠后者吃饭。',
+            effects: [{ stats: { knowledge: 6, network: 4, mindset: 2, money: 5000 } }],
+          },
+        ],
+      },
+      {
+        id: 'back',
+        text: '在中后台,用 AI 重做那些重复流程',
+        visibleIf: { not: { flag: 'finance_front_office' } },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你带头把估值底稿、合规检查里最重复的部分交给脚本和大模型,一个人干出了过去小半个组的活。领导在会上表扬你"有工程思维",你却清楚地意识到:同样的效率提升,反过来也意味着这个岗位以后需要的人更少了。',
+            effects: [{ stats: { knowledge: 7, mindset: -3, money: 4000, health: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '你学得慢了半拍,新来的年轻人用 AI 把你熟练多年的活儿几小时就跑完。那种"经验贬值"的感觉第一次这么具体地落在你身上。你利用晚上恶补工具,一边追一边安慰自己:焦虑不解决问题,学会才行。',
+            effects: [{ stats: { knowledge: 5, mindset: -6, health: -3 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     // 2024 收官前奏:限薪/降本与出海,金融线 2022-2026 断更补齐(M5 handoff 遗留项)
     id: 'ev_fin_pay_cut_2024',
     pools: ['work'],
@@ -291,6 +410,83 @@ export const careerFinanceEvents: GameEvent[] = [
               { stats: { money: 8000, mindset: 5, health: 3, network: -3 } },
               { setFlag: 'fin_left_industry' },
             ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2025:三十五岁+的行业天花板与转型焦虑
+    id: 'ev_fin_ceiling_2025',
+    pools: ['work'],
+    category: 'career',
+    title: '牌桌的天花板',
+    text: '2025年,你在这行已经站到了一个尴尬的位置:再往上是有限的几把交椅,往下是源源不断、更便宜也更敢拼的年轻人。房贷的月供、孩子或父母的开销、体检单上的提醒,一起把"求稳"两个字的分量压得更实。酒局上有人半醉着说:"我们这代金融人,吃到了最后一波红利,也撞上了第一堵墙。"',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_finance' }, { year: { from: 2025, to: 2025 } }] },
+    choices: [
+      {
+        id: 'overseas',
+        text: '把出海那摊事做成自己的第二曲线',
+        visibleIf: { flag: 'fin_went_overseas' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '这两年攒下的海外资源开始结果:一个跨境项目落地,你成了公司里少数"能出海、敢落地"的人。天花板还在,但你在旁边给自己凿了扇窗。时差和奔波依旧,只是这次你清楚自己在为什么熬。',
+            effects: [{ stats: { money: 12000, network: 5, mindset: 3, health: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        text: '在实业里,继续用金融的脑子做事',
+        visibleIf: { flag: 'fin_left_industry' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '离开金融口进实业的第二年,你已经不再怀念净值和路演。你帮公司谈下一轮融资,董事长在庆功宴上敬你一杯"专业"。没有了那份高薪的心跳,你换来的是能睡整觉、能陪家人的日子——这笔账,过了三十五岁才算得清。',
+            effects: [{ stats: { money: 8000, mindset: 6, health: 3, network: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'front',
+        text: '守住前台的位置,和年轻人赛跑',
+        visibleIf: {
+          all: [
+            { flag: 'finance_front_office' },
+            { not: { flag: 'fin_went_overseas' } },
+            { not: { flag: 'fin_left_industry' } },
+          ],
+        },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把资历变成了年轻人给不了的东西:一张能随时打通的关系网,一套穿越过牛熊的判断。你带团队、扛大单,用"稳"对冲"快"。天花板顶在头上,但你把自己活成了公司离不开的那颗螺丝钉。',
+            effects: [{ stats: { money: 15000, network: 5, mindset: 1, health: -5 } }],
+          },
+          {
+            weight: 1,
+            text: '你还想拼,身体却开始不答应:一次路演途中心悸送医,医生让你"减少应酬"。躺在病床上你第一次认真算了笔账——原来命才是本金,业绩只是利息。出院后你没辞职,但学会了对一些饭局说"不"。',
+            effects: [{ stats: { mindset: -5, health: -8, money: 6000 } }],
+          },
+        ],
+      },
+      {
+        id: 'back',
+        text: '在中后台,把"不可替代"熬成护城河',
+        visibleIf: {
+          all: [
+            { not: { flag: 'finance_front_office' } },
+            { not: { flag: 'fin_went_overseas' } },
+            { not: { flag: 'fin_left_industry' } },
+          ],
+        },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有惊心动魄的业绩曲线,只有一年年攒下的对流程、规则和风险的理解。年轻人来了又走,系统换了一茬又一茬,而那些真正复杂、出不得错的活儿,最后还是压到你桌上。这份"没人愿意学、也没人学得快"的手艺,成了你对抗天花板的方式。',
+            effects: [{ stats: { knowledge: 5, mindset: 3, money: 5000, health: -2 } }],
           },
         ],
       },
