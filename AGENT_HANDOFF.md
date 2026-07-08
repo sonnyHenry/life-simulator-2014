@@ -522,12 +522,23 @@
 - **CI/验证档位提到 n=10000**:`deploy.yml` simulate n=1000 → **n=10000**。根因同二十六轮那条(300→1000)的延续:命中率 ~0.1% 的展示性稀有结局 `end_early_retire`/`end_cashflow_break` 在固定种子下会被 RNG 流位移 + Poisson 波动漏采。本轮加 14 事件 + 心理学结局后,n=1000 又不再稳定命中这两个(基线 task② 时各 3 局,加内容后 n=1000 掉到 0,n=3000 仍漏 cashflow,n=5000 起 4-5 局、n=10000 达 8-11 局才是可靠信号)。这两个结局是**有意的稀有 showpiece**(灾难性 / 财务自由),不通过灌水提高命中率,而是提大样本。
 - 验证:typecheck / test 22 / validate 0err0warn / **simulate -n 10000 --check 通过**(139/139 全覆盖、20 结局全可达、提前结局 3.8%、职业线含心理 47/5000≈0.9%)/ web build / minigame build 全过。
 
+### M5 第二十八轮(去掉高考地点 + 玩家性别选择 + 恋爱线性别适配)
+
+由 Claude Code(Opus 4.8)完成,内容版本 0.17.0 → 0.18.0。玩家反馈三连:去掉开局「你在哪里参加高考?」、开局改选男/女、后续事件(主要恋爱线)按性别调整称呼。
+
+- **去掉省份/scoreShift 机制**:省份选择原来唯一作用是给录取分加 `scoreShift`(±25/+35/+15/0),不影响任何剧情。彻底删除:`setup/provinces.ts`、`ProvinceOption` 类型、`ContentPack.provinces`、`Profile.province`、SETUP viewmodel 的 `provinces` 字段。`admissionScore()` 简化为直接返回高考分。**门禁未受影响**——移除 scoreShift(bot 原平均吃到约 +6 分)后 `simulate -n 10000 --check` 仍全绿,无需调 `applications.ts` 的 minScore。
+- **性别用 flag `player_gender`('male'|'female')存储**:比给 Profile/DSL 加字段省事——DSL 的 `{ flag }` 天然可分支,引擎 view 层直接读 `state.flags`。`CHOOSE_SETUP` 动作把 `provinceId` 换成 `gender`;`handle()` SETUP 分支写 `state.flags.player_gender`(容错默认 male,旧 actionLog 回放 gender 缺失不抛错)。新增 `Gender` 类型(`stats.ts`)。
+- **文案占位符 `{{ta}}`**:引擎无文本插值,新增纯函数 `renderText(text, state)`——把 `{{ta}}` 替换成恋人第三人称(与玩家相反:女玩家→'他',其余含未设置→'她',与历史默认一致保证向后兼容)。在 `view()` 唯一文案出口套用(EVENT / OUTCOME / BRIEF / ENDING / choice 文本),三个前端自动受益,不动 state/RNG、不影响存档回放。
+- **恋爱线性别化(仅 `first_love` 线)**:把这条线里指代恋人的第三人称统一改成 `{{ta}}`——`college.ts`(表白/那年冬天/异地)、`drama.ts`(杀猪盘余波)、`work.ts`(领证/婚后春节/2024朋友圈,原本写死「她」「她爸」)。领证事件「一家婚纱店」改中性「一家婚纱摄影店」。已中性的 `伴侣/恋人/你们`、以及与恋爱无关的固定性别 NPC(室友/发小/卷王「他」)不动。
+- **三个前端 SETUP 屏**:web `FlowScreens.tsx`、minigame `game.ts`(`setupProvinceId`→`setupGender`)、miniprogram `index.tsx`——「你在哪里参加高考?」→「你是男生还是女生?」,选项硬编码男生/女生(viewmodel 下发 `genders`),派发 `{ gender, track }`。
+- 验证:typecheck 全过 / test 22 通过(fixture 去 provinces、10 处 CHOOSE_SETUP 改 gender)/ validate 0err0warn / **simulate -n 10000 --check 通过**(139/139 全覆盖、提前结局 4.3%)/ 专项脚本确认男玩家恋人称「她」、女玩家称「他」、无残留 `{{ta}}`。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.17.0'
+version: '0.18.0'
 title: '2014：我的十二年'
 ```
 
@@ -549,7 +560,7 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第二十七轮):
+最近一次完整验证通过(M5 第二十八轮):
 
 - `pnpm typecheck`
 - `pnpm test`(22 通过)
@@ -568,8 +579,8 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ```text
 事件覆盖: 139/139
-提前结局占比: 3.8%
-end_cashflow_break 11 局 / end_early_retire 8 局(长尾稀有结局,靠大样本稳定命中)
+提前结局占比: 4.3%
+end_cashflow_break 32 局 / end_early_retire 7 局(长尾稀有结局,靠大样本稳定命中)
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 

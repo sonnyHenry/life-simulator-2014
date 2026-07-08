@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { View, Text } from '@tarojs/components';
 import { useShareAppMessage } from '@tarojs/taro';
-import type { StatDeltas, Track, ViewModel } from '@life-sim/core';
+import type { Gender, StatDeltas, Track, ViewModel } from '@life-sim/core';
 import { useGame } from '../../store';
+
+const GENDER_LABELS: Record<Gender, string> = { male: '男生', female: '女生' };
 import './index.scss';
 
 function fmtMoney(value: number): string {
@@ -129,20 +131,20 @@ function BackgroundDrawScreen(props: { view: Extract<ViewModel, { kind: 'BACKGRO
 
 function SetupScreen(props: { view: Extract<ViewModel, { kind: 'SETUP' }> }) {
   const act = useGame(s => s.act);
-  const [provinceId, setProvinceId] = useState<string | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
   const [track, setTrack] = useState<Track | null>(null);
   return (
     <Card>
       <Text className="h2">2014 年 6 月,高考报名表</Text>
-      <Text className="section-label">你在哪里参加高考?</Text>
+      <Text className="section-label">你是男生还是女生?</Text>
       <View className="pill-group">
-        {props.view.provinces.map(p => (
+        {props.view.genders.map(g => (
           <Text
-            key={p.id}
-            className={`pill ${provinceId === p.id ? 'selected' : ''}`}
-            onClick={() => setProvinceId(p.id)}
+            key={g}
+            className={`pill ${gender === g ? 'selected' : ''}`}
+            onClick={() => setGender(g)}
           >
-            {p.label}
+            {GENDER_LABELS[g]}
           </Text>
         ))}
       </View>
@@ -159,9 +161,9 @@ function SetupScreen(props: { view: Extract<ViewModel, { kind: 'SETUP' }> }) {
         ))}
       </View>
       <View
-        className={`continue-btn ${!provinceId || !track ? 'disabled-btn' : ''}`}
+        className={`continue-btn ${!gender || !track ? 'disabled-btn' : ''}`}
         onClick={() => {
-          if (provinceId && track) act({ type: 'CHOOSE_SETUP', provinceId, track });
+          if (gender && track) act({ type: 'CHOOSE_SETUP', gender, track });
         }}
       >
         <Text>走进考场</Text>

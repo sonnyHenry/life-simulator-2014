@@ -13,4 +13,6 @@ export type StatDeltas = Partial<Stats>;
 
 export type Track = '文' | '理';
 
+export type Gender = 'male' | 'female';
+
 export type Flags = Record<string, boolean | number | string>;

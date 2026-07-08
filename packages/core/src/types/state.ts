@@ -16,7 +16,6 @@ export type ScreenId =
 
 export interface Profile {
   background: string | null;
-  province: string | null;
   track: Track | null;
   examScore: number | null;
   university: string | null;

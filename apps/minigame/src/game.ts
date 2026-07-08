@@ -2,6 +2,7 @@ import {
   createEngine,
   randomSeed,
   type GameState,
+  type Gender,
   type PlayerAction,
   type StatDeltas,
   type StatKey,
@@ -10,6 +11,8 @@ import {
   type ViewModel,
 } from '@life-sim/core';
 import { contentPack } from '@life-sim/content';
+
+const GENDER_LABELS: Record<Gender, string> = { male: '男生', female: '女生' };
 import {
   bindTouchHandlers,
   clearSave,
@@ -85,7 +88,7 @@ class LifeSimMiniGame {
   private dpr = 1;
   private scrollY = 0;
   private maxScroll = 0;
-  private setupProvinceId: string | null = null;
+  private setupGender: Gender | null = null;
   private setupTrack: Track | null = null;
   private selectedApplicationId: string | null = null;
   private touchStart: { x: number; y: number; scrollY: number } | null = null;
@@ -150,7 +153,7 @@ class LifeSimMiniGame {
     if (screenChanged || options?.resetScroll) {
       this.scrollY = 0;
       if (nextView.kind !== 'SETUP') {
-        this.setupProvinceId = null;
+        this.setupGender = null;
         this.setupTrack = null;
       }
       if (nextView.kind !== 'APPLICATION') {
@@ -414,15 +417,15 @@ class LifeSimMiniGame {
     const panel = this.beginPanel(top);
     let y = panel.y + 26;
     y = this.drawHeading('2014 年 6 月,高考报名表', panel, y);
-    y = this.drawSectionLabel('你在哪里参加高考?', panel, y);
+    y = this.drawSectionLabel('你是男生还是女生?', panel, y);
     y = this.drawOptionGrid(
-      view.provinces.map(p => ({ id: p.id, label: p.label })),
-      this.setupProvinceId,
+      view.genders.map(g => ({ id: g, label: GENDER_LABELS[g] })),
+      this.setupGender,
       panel.contentX,
       y,
       panel.contentWidth,
       id => {
-        this.setupProvinceId = id;
+        this.setupGender = id as Gender;
         this.render();
       },
     ) + 10;
@@ -438,7 +441,7 @@ class LifeSimMiniGame {
         this.render();
       },
     ) + 12;
-    const disabled = !this.setupProvinceId || !this.setupTrack;
+    const disabled = !this.setupGender || !this.setupTrack;
     y = this.drawButton(
       '走进考场',
       disabled ? '先完成上面的选择' : '',
@@ -446,10 +449,10 @@ class LifeSimMiniGame {
       y,
       panel.contentWidth,
       () => {
-        if (this.setupProvinceId && this.setupTrack) {
+        if (this.setupGender && this.setupTrack) {
           this.act({
             type: 'CHOOSE_SETUP',
-            provinceId: this.setupProvinceId,
+            gender: this.setupGender,
             track: this.setupTrack,
           });
         }

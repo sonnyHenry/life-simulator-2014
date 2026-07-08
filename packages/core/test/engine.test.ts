@@ -93,7 +93,6 @@ function miniPack(): ContentPack {
       { id: 'q2', track: 'both', subject: '语文', text: '选对的', options: ['对', '错'], answerIndex: 0 },
       { id: 'q3', track: '理', subject: '物理', text: 'g≈?', options: ['9.8', '3.7'], answerIndex: 0 },
     ],
-    provinces: [{ id: 'p1', label: '某省', scoreShift: 0 }],
     backgrounds: [{ id: 'bg1', label: '普通家庭', text: '普通', initialMoney: 5000 }],
     applications: [
       { id: 'app1', label: '保底大学', university: '某大学', minScore: 0, majors: [{ id: 'm1', name: '某专业', trackFlag: 'management' }] },
@@ -117,7 +116,7 @@ function autoPlay(pack: ContentPack, seed: number): GameState {
         action = { type: 'START' };
         break;
       case 'SETUP':
-        action = { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' };
+        action = { type: 'CHOOSE_SETUP', gender: 'male', track: '理' };
         break;
       case 'EXAM':
         action = { type: 'ANSWER', optionIndex: 0 };
@@ -167,7 +166,7 @@ describe('M2 flow support', () => {
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     while (engine.view(state).kind === 'EXAM') {
       state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 1 });
     }
@@ -206,7 +205,7 @@ describe('M2 flow support', () => {
     let state = engine.start(3);
     state = engine.dispatch(state, { type: 'START' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     while (engine.view(state).kind === 'EXAM') {
       state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 1 });
     }
@@ -235,7 +234,7 @@ describe('career crossroad branches', () => {
     let state = engine.start(seed);
     state = engine.dispatch(state, { type: 'START' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
     state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
@@ -325,7 +324,7 @@ describe('same-round consequence (afterRounds: 0)', () => {
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     while (engine.view(state).kind === 'EXAM') {
       state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 0 });
     }
@@ -355,7 +354,7 @@ describe('save replay & migration', () => {
     };
     doAct({ type: 'START' });
     doAct({ type: 'CONTINUE' });
-    doAct({ type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    doAct({ type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     doAct({ type: 'SKIP_EXAM' });
 
     const save = createSaveFile('1.0.0', state, log);
@@ -399,7 +398,7 @@ describe('exam skip', () => {
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     expect(engine.view(state).kind).toBe('EXAM');
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     const view = engine.view(state);
@@ -422,7 +421,7 @@ describe('income & scoring', () => {
     state = engine.dispatch(state, { type: 'START' });
     state.stats.money = 12345;
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
     state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
@@ -442,7 +441,7 @@ describe('income & scoring', () => {
     state = engine.dispatch(state, { type: 'START' });
     state.stats.money = 12345;
     state = engine.dispatch(state, { type: 'CONTINUE' });
-    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' });
+    state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
     state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
@@ -476,7 +475,7 @@ describe('income & scoring', () => {
           action = { type: 'START' };
           break;
         case 'SETUP':
-          action = { type: 'CHOOSE_SETUP', provinceId: 'p1', track: '理' };
+          action = { type: 'CHOOSE_SETUP', gender: 'male', track: '理' };
           break;
         case 'EXAM':
           action = { type: 'SKIP_EXAM' };

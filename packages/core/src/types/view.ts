@@ -1,5 +1,5 @@
-import type { BackgroundCard, ProvinceOption } from './content';
-import type { StatDeltas, Stats, Track } from './stats';
+import type { BackgroundCard } from './content';
+import type { Gender, StatDeltas, Stats, Track } from './stats';
 
 export interface PublicExamQuestion {
   id: string;
@@ -11,7 +11,7 @@ export interface PublicExamQuestion {
 export type ViewModel =
   | { kind: 'TITLE'; title: string }
   | { kind: 'BACKGROUND_DRAW'; card: BackgroundCard }
-  | { kind: 'SETUP'; provinces: ProvinceOption[]; tracks: Track[] }
+  | { kind: 'SETUP'; genders: Gender[]; tracks: Track[] }
   | { kind: 'EXAM'; index: number; total: number; question: PublicExamQuestion }
   | { kind: 'EXAM_RESULT'; score: number; correct: number; total: number }
   | {
@@ -80,7 +80,7 @@ export type ViewModel =
 export type PlayerAction =
   | { type: 'START' }
   | { type: 'CONTINUE' }
-  | { type: 'CHOOSE_SETUP'; provinceId: string; track: Track }
+  | { type: 'CHOOSE_SETUP'; gender: Gender; track: Track }
   | { type: 'ANSWER'; optionIndex: number }
   | { type: 'SKIP_EXAM' }
   | { type: 'APPLY'; optionId: string; majorId?: string }

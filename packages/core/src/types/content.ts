@@ -88,12 +88,6 @@ export interface ExamQuestion {
   difficulty?: 1 | 2 | 3 | 4 | 5;
 }
 
-export interface ProvinceOption {
-  id: string;
-  label: string;
-  scoreShift: number;
-}
-
 export interface BackgroundCard {
   id: string;
   label: string;
@@ -167,7 +161,6 @@ export interface ContentPack {
   incomes: IncomeRule[];
   endings: EndingDef[];
   examBank: ExamQuestion[];
-  provinces: ProvinceOption[];
   backgrounds: BackgroundCard[];
   applications: ApplicationOption[];
   npcs: NpcDef[];

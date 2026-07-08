@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import type { Track, ViewModel } from '@life-sim/core';
+import type { Gender, Track, ViewModel } from '@life-sim/core';
+
+const GENDER_LABELS: Record<Gender, string> = { male: '男生', female: '女生' };
 import { useGame } from '../store';
 import { Card, ChoiceButton, ContinueButton } from '../components/ui';
 
@@ -51,20 +53,20 @@ export function BackgroundDrawScreen(props: {
 
 export function SetupScreen(props: { view: Extract<ViewModel, { kind: 'SETUP' }> }) {
   const act = useGame(s => s.act);
-  const [provinceId, setProvinceId] = useState<string | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
   const [track, setTrack] = useState<Track | null>(null);
   return (
     <Card>
       <h2>2014 年 6 月,高考报名表</h2>
-      <p className="section-label">你在哪里参加高考?</p>
+      <p className="section-label">你是男生还是女生?</p>
       <div className="pill-group">
-        {props.view.provinces.map(p => (
+        {props.view.genders.map(g => (
           <button
-            key={p.id}
-            className={`pill ${provinceId === p.id ? 'selected' : ''}`}
-            onClick={() => setProvinceId(p.id)}
+            key={g}
+            className={`pill ${gender === g ? 'selected' : ''}`}
+            onClick={() => setGender(g)}
           >
-            {p.label}
+            {GENDER_LABELS[g]}
           </button>
         ))}
       </div>
@@ -82,10 +84,10 @@ export function SetupScreen(props: { view: Extract<ViewModel, { kind: 'SETUP' }>
       </div>
       <button
         className="continue-btn confirm-btn"
-        disabled={!provinceId || !track}
+        disabled={!gender || !track}
         onClick={() => {
-          if (provinceId && track) {
-            act({ type: 'CHOOSE_SETUP', provinceId, track });
+          if (gender && track) {
+            act({ type: 'CHOOSE_SETUP', gender, track });
           }
         }}
       >

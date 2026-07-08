@@ -127,7 +127,7 @@ function botAction(
     case 'SETUP':
       return {
         type: 'CHOOSE_SETUP',
-        provinceId: bot.pick(view.provinces).id,
+        gender: bot.pick(view.genders),
         track: bot.pick(view.tracks),
       };
     case 'EXAM':

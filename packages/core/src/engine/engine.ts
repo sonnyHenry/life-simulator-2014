@@ -65,8 +65,15 @@ export function createEngine(pack: ContentPack): Engine {
   }
 
   function admissionScore(state: GameState): number {
-    const province = pack.provinces.find(p => p.id === state.profile.province);
-    return (state.profile.examScore ?? 0) + (province?.scoreShift ?? 0);
+    return state.profile.examScore ?? 0;
+  }
+
+  // 面向玩家的文案占位符替换:{{ta}} = 恋人第三人称(与玩家性别相反)。
+  // 女玩家 → 恋人是男性 → '他';其余(男玩家/未设置的旧存档)→ '她'。
+  // 纯函数,不读写 state/RNG,仅在 view() 投影文案时调用,不影响存档回放。
+  function renderText(text: string, state: GameState): string {
+    const partner = state.flags.player_gender === 'female' ? '他' : '她';
+    return text.replace(/\{\{ta\}\}/g, partner);
   }
 
   // 录取概率按(加成后分数 - 批次线)分段:冲高批次可能滑档
@@ -114,7 +121,6 @@ export function createEngine(pack: ContentPack): Engine {
       stats: { knowledge: 40, money: 0, mindset: 70, network: 10, health: 85 },
       profile: {
         background: null,
-        province: null,
         track: null,
         examScore: null,
         university: null,
@@ -142,7 +148,7 @@ export function createEngine(pack: ContentPack): Engine {
         return { kind: 'BACKGROUND_DRAW', card };
       }
       case 'SETUP':
-        return { kind: 'SETUP', provinces: pack.provinces, tracks: ['文', '理'] };
+        return { kind: 'SETUP', genders: ['male', 'female'], tracks: ['文', '理'] };
       case 'EXAM': {
         const qid = state.examPaper[state.examCursor];
         const q = qid ? questionsById.get(qid) : undefined;
@@ -191,7 +197,7 @@ export function createEngine(pack: ContentPack): Engine {
           kind: 'BRIEF',
           phaseLabel: phase.label,
           year: state.date.year,
-          text: state.currentBrief ?? '',
+          text: renderText(state.currentBrief ?? '', state),
         };
       }
       case 'EVENT': {
@@ -206,15 +212,15 @@ export function createEngine(pack: ContentPack): Engine {
           kind: 'EVENT',
           eventId: ev.id,
           title: ev.title,
-          text: ev.text,
+          text: renderText(ev.text, state),
           major: ev.tier === 'major',
-          choices: visible.map(c => ({ id: c.id, text: c.text })),
+          choices: visible.map(c => ({ id: c.id, text: renderText(c.text, state) })),
         };
       }
       case 'OUTCOME':
         return {
           kind: 'OUTCOME',
-          text: state.pendingOutcome?.text ?? '',
+          text: renderText(state.pendingOutcome?.text ?? '', state),
           deltas: state.pendingOutcome?.deltas ?? {},
         };
       case 'SETTLEMENT':
@@ -235,7 +241,7 @@ export function createEngine(pack: ContentPack): Engine {
           kind: 'ENDING',
           endingId: ending.id,
           title: ending.title,
-          text: ending.text,
+          text: renderText(ending.text, state),
           stats: state.stats,
           score,
           grade,
@@ -651,10 +657,8 @@ export function createEngine(pack: ContentPack): Engine {
         return;
       case 'SETUP': {
         if (action.type !== 'CHOOSE_SETUP') invalid(state, action);
-        if (!pack.provinces.some(p => p.id === action.provinceId)) {
-          throw new Error(`Unknown province: ${action.provinceId}`);
-        }
-        state.profile.province = action.provinceId;
+        // 容错默认 male:旧 actionLog 回放时 gender 可能缺失,不抛错
+        state.flags.player_gender = action.gender === 'female' ? 'female' : 'male';
         state.profile.track = action.track;
         nextFlowStep(state, rng);
         return;
