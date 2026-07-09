@@ -224,6 +224,13 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            condition: { flag: 'trait_risk_taker' },
+            text: '你嘴上说围观，手指在开户页面上悬了整整一个五月。六月股灾，你看着室友的账户和自己没点下去的那个按钮，第一次意识到：你不是不想赌，你只是这次刚好穷。这个认知比两千块的学费更值钱，也更危险。',
+            effects: [{ stats: { knowledge: 3, mindset: -1 } }],
+          },
+          {
+            weight: 1,
+            condition: { not: { flag: 'trait_risk_taker' } },
             text: '你看着室友的表情从五月的意气风发变成六月的沉默寡言。那个夏天你没赚一分钱，但白捡了一门风险教育课——学费是别人交的。',
             effects: [{ stats: { knowledge: 2, mindset: 1 } }],
           },
@@ -1049,6 +1056,28 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'd',
+        text: '老毛病犯了：重仓一把，赚了就收手',
+        visibleIf: { flag: 'trait_risk_taker' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '“赚了就收手”这五个字，你在 2015 年说过，2020 年说过，这次也说了。行情确实来了，你也确实浮盈了——然后你想“再等等”。等来的是回调。三十多岁的你和十九岁的你在同一个地方摔倒，唯一的进步是这次你没跟任何人说。',
+            outcomeTag: 'failure',
+            effects: [
+              { moneyCost: { rate: 0.3, max: 80000, roundTo: 1000, reason: 'investment' } },
+              { stats: { mindset: -8, health: -3 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你重仓进了黄金，三个月后涨幅到了心理价位，你手一抖——真的清仓了。收手之后行情又涨了一截，你居然不难受。胆大的人学会止盈的那天，才算真正从赌徒毕业。',
+            outcomeTag: 'success',
+            effects: [{ stats: { money: 70000, mindset: 3 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1584,6 +1613,23 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你说最近太忙。亲戚回了个“理解”，后面跟着三个意味深长的句号。',
             effects: [{ stats: { mindset: -1 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '一个人吃饭多没意思，干脆组个局',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把这顿饭升级成了六个人的局：对方带了两个朋友，你叫了两个同事。饭吃得热闹，感情的事没成，但散场时所有人都加了微信。一周后，对方的朋友给你介绍了一单合作。亲戚很困惑：“让你去处对象，你怎么处回来一桌人脉？”',
+            effects: [{ stats: { network: 6, mindset: 3 } }],
+          },
+          {
+            weight: 1,
+            text: '局是组起来了，但对方显然期待的是一对一的认真交流，全程有点冷场。事后亲戚转达了反馈：“挺好一孩子，就是不太稳重。”你接受这个评价——热闹是你的舒适区，但不是所有人的。',
+            effects: [{ stats: { network: 2, mindset: -2 } }],
           },
         ],
       },

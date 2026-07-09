@@ -105,6 +105,23 @@ export const collegeEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'c',
+        text: '上号，但说好赢一把就下，回来接着刷题',
+        visibleIf: { flag: 'trait_grinder' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '第一把就赢了，你说到做到，摘耳机下号。室友喊“再来一把”，你已经翻开了高数。凌晨十二点半，你合上笔记，游戏和绩点你都没丢——只是觉都少睡了。',
+            effects: [{ stats: { knowledge: 3, mindset: 4, health: -3 } }, { setFlag: 'dorm_bond' }],
+          },
+          {
+            weight: 1,
+            text: '第一把输了。“输了这把怎么能走？”你也是这么觉得的。回过神来已经凌晨两点，课本停在翻开的那一页。卷王也是人，人就会上头。',
+            effects: [{ stats: { mindset: 3, knowledge: -3, health: -3 } }, { setFlag: 'dorm_bond' }],
+          },
+        ],
+      },
+      {
         id: 'b',
         text: '戴上耳机去图书馆',
         outcomes: [
@@ -209,6 +226,23 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '你选上了，然后迎新晚会音响出了事故，你作为负责人在群里道歉到半夜。那学期你学会的第一课不是领导力，是背锅时如何保持表情管理。',
             effects: [{ stats: { network: 4, mindset: -5, knowledge: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '不背竞选词了，上台直接即兴发挥',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 3,
+            text: '你上台先讲了个自己的糗事，全场笑完，你顺势把想做的三件事讲得清清楚楚。票数出来，断层第一。学妹们说你“天生该吃这碗饭”，你心想：这碗饭我从小学班会吃到现在。',
+            effects: [{ stats: { network: 10, mindset: 4, knowledge: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '即兴发挥有个前提：现场得接得住。那天音响出问题，你的段子没人听清，气氛一度尴尬。你落选了，但散场时好几个人来加你微信——“你刚刚那个梗其实挺好笑的”。',
+            effects: [{ stats: { network: 5, mindset: -3 } }],
           },
         ],
       },
@@ -483,6 +517,35 @@ export const collegeEvents: GameEvent[] = [
             effects: [
               { stats: { mindset: -8 } },
               { npcFavor: 'first_love', delta: -8 },
+              { npcStage: 'first_love', stage: 'missed' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '下楼——那些没说出口的话，你其实都读懂了',
+        visibleIf: { flag: 'trait_sensitive' },
+        outcomes: [
+          {
+            weight: 3,
+            text: '你注意过{{ta}}所有细微的时刻：值班表上悄悄换到和你同一天、消息回得越来越快、上次活动散场时那句没说完的“其实我……”。所以今晚你下了楼，走到第三圈，你说：“我们别绕圈子了，好不好？”{{ta}}愣了一下，然后笑了：“我以为你要装傻装到毕业。”操场的灯十二点准时熄了，黑暗里{{ta}}牵住了你的手。心思细的人错过很多睡眠，但今晚，没有错过这个。',
+            outcomeTag: 'success',
+            effects: [
+              { stats: { mindset: 10 } },
+              { setFlag: 'in_love' },
+              { npcFavor: 'first_love', delta: 25 },
+              { npcStage: 'first_love', stage: 'together' },
+              { schedule: { eventId: 'ev_love_winter', afterRounds: 0 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你读懂了很多信号，但没算到操场今晚有夜跑打卡活动。人声鼎沸里，那句话你说了一半就咽了回去。{{ta}}等了一会儿，说“回去吧，明天还有课”。后来你们谁都没再提这个晚上。心思细腻的另一面是：连错过，你都感受得格外清楚。',
+            outcomeTag: 'failure',
+            effects: [
+              { stats: { mindset: -3 } },
+              { npcFavor: 'first_love', delta: -2 },
               { npcStage: 'first_love', stage: 'missed' },
             ],
           },

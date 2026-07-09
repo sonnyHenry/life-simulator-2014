@@ -546,12 +546,24 @@
 - **三个前端 SETUP 屏**:web `FlowScreens.tsx`、minigame `game.ts`(`setupProvinceId`→`setupGender`)、miniprogram `index.tsx`——「你在哪里参加高考?」→「你是男生还是女生?」,选项硬编码男生/女生(viewmodel 下发 `genders`),派发 `{ gender, track }`。
 - 验证(与第二十八轮职业线合并后的完整代码):typecheck 全过 / test 22 通过(fixture 去 provinces、10 处 CHOOSE_SETUP 改 gender)/ validate 0err0warn(147 事件)/ **simulate -n 10000 --check 通过**(147/147 全覆盖、20 结局全可达、提前结局 4.5%)/ web build / minigame build 全过 / 专项脚本确认男玩家恋人称「她」、女玩家称「他」、无残留 `{{ta}}`。
 
+### M5 第三十轮(导演式事件选择器 + 玩家特质系统)
+
+由 Claude Code(Fable 5)完成,内容版本 0.19.0 → 0.20.0。背景:用户提出"事件写死,玩几次就腻"的重玩性问题,讨论了类似游戏的做法(参数化模板 / 特质组合 / 导演系统 / 涌现式触发 / LLM 生成)后,确定本轮落地**导演式选择器(纯引擎,零内容成本)+ 特质系统(复用全部现有事件)**;"LLM 离线生成 + 现有 n=10000 门禁把关"的内容扩产管线留作后续方向,实时 LLM 生成因破坏确定性验证被明确排除。
+
+- **导演式选择器**(`packages/core/src/systems/scheduler.ts`,RimWorld storyteller 思路):随机槽位从"纯 weight 加权"升级为 `weight × 导演乘数`,乘数由四部分构成——①同年类别去重 ×0.35(今年已排同 category 事件);②近两年冷却 ×0.6(近两年该 category 命中 ≥2 次,读 `state.history`);③心态节奏:mindset≤35 时正情绪事件 ×1.8/负情绪 ×0.55(低谷给喘息),≥75 时反向 ×1.5/×0.75(顺风上压力);④特质 poolBias(见下)。事件"情绪期望"由新导出函数 `eventMindsetValence`(WeakMap 缓存)从 outcome 的名义 mindset 变化自动推导,**不需要给 147 个事件人工打情绪标签**。乘数钳位 [0.15, 4],任何事件不会被压成 0,n=10000 覆盖门禁不受威胁。只影响非 mandatory 随机池抽取;强制/NPC/schedule 事件完全不经过导演。
+- **特质系统**:新类型 `TraitCard { id, label, text, poolBias? }`,`ContentPack.traits`;开局 BACKGROUND_DRAW 随背景 `rng.sample` 抽 2 个,以 `flags[trait_xxx]=true` 存储(不加 Profile 字段,DSL `{ flag }` 天然可分支;旧存档无特质 flag 时 view 层自然为空)。BACKGROUND_DRAW ViewModel 透出 `traits`,三端 UI(web `FlowScreens.tsx` / miniprogram `index.tsx` / minigame `game.ts`)抽卡屏展示。6 张特质卡在 `packages/content/src/setup/traits.ts`:卷王体质(career/campus↑)、松弛感(career↓ mindset/health↑)、天生胆大(invest×1.8/money↑)、恋家(family×1.9/love/relationship↑)、社牛(friendship×1.7/npc/relationship↑)、心思细腻(love/mindset/era↑)。
+- **10 处特质内容分支**(9 个 `visibleIf` 专属选项 + 1 处 outcome 条件分支,6 特质各至少 1 处,大学/工作期都有):感冒请假(chill)、家里电话聊满一小时(homebody)、副业三单全排满(grinder)、开黑赢一把就下(grinder)、社团即兴竞选(social)、相亲组局(social)、表白读懂信号(sensitive,成功率 3:1 高于普通表白但非必成,失败仍走 missed 保证恋爱线状态机不卡死)、杀猪盘"TA 从没发过语音"识破(sensitive)、黄金重仓赌一把(risk_taker)、2015 股灾围观时"手一直痒"的 outcome 分支(risk_taker)。特质选项都带真实变数(多 outcome 或混合正负号),没有违背第十三/十四轮"选项去透明化"的原则。
+- **validate 特质校验**:特质 id 唯一且必须 `trait_` 前缀、label/text 非空、poolBias ∈ (0,5] 且 category 必须真实存在;全内容(事件 trigger/visibleIf/outcome、结局、收入、NPC advanceWhen)里引用的 `trait_*` flag 必须在特质表中;内容禁止 `setFlag` 特质(特质只在开局抽取赋值)。已按第七轮惯例注入坏引用验证能抓到(1 error)后还原。
+- **专项验证**(scratchpad 脚本,未入库):1000 局随机 bot 特质分布均匀(每特质 319-354 局,期望 333);9 个 visibleIf 分支 8 个有真实命中(9-125 次不等);`ev_invest_gold_2024#d` 为 0 是因为该事件本身触发率仅 0.6%(2024 年 invest 池竞争,既有现象非本轮引入),扩大到 2000 局验证"触发+带特质"时分支可达。
+- **对分布的影响**:导演器的低谷喘息使随机局心态 p50 48 → 54、均分 ~52,仍在全部门禁内;金钱分位 p10=¥136k / p50=¥238k / p90=¥431k。四策略对比 随机52 / 卷钱49 / 保心态64 / 卷总分73(开天眼仍拿不到 A 线 76,无必胜解)。存档跨版本重放会因 RNG 流偏移(开局多抽 2 特质)产生不同人生,precedent 同第二十六轮改题数。
+- 验证:typecheck / test 24(+2:特质抽取、valence 推导)/ validate 0err0warn(147 事件、6 特质)/ **simulate -n 10000 --check 通过**(147/147 全覆盖、20 结局全可达、提前结局 3.6%)/ web build / minigame build 全过。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.19.0'
+version: '0.20.0'
 title: '2014：我的十二年'
 ```
 
@@ -573,19 +585,19 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第二十八轮职业线 + 第二十九轮性别系统合并后):
+最近一次完整验证通过(M5 第三十轮导演式选择器 + 特质系统后):
 
 - `pnpm typecheck`
-- `pnpm test`(22 通过)
+- `pnpm test`(24 通过)
 - `pnpm validate`
-- `pnpm simulate -n 10000 --check`(CI 实跑档位,本轮起从 n=1000 提到 n=10000)
+- `pnpm simulate -n 10000 --check`(CI 实跑档位)
 - `pnpm --filter @life-sim/web build` / `pnpm --filter @life-sim/minigame build`
 
 最近一次 `pnpm validate`:
 
 ```text
-校验内容包 base@0.19.0
-事件 147, 结局 20, NPC 5, 题目 37, 收入规则 24
+校验内容包 base@0.20.0
+事件 147, 结局 20, NPC 5, 题目 37, 收入规则 24, 特质 6
 完成: 0 errors, 0 warnings
 ```
 
@@ -593,21 +605,21 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ```text
 事件覆盖: 147/147
-提前结局占比: 4.5%
-end_cashflow_break 32 / end_early_retire 8(长尾稀有结局,靠大样本稳定命中)
-end_medicine_frontline 103 / end_psychology_listener 61 / end_finance_survivor 36(经 2022 分支切换点后仍全部可达)
+提前结局占比: 3.6%
+end_cashflow_break 10 / end_early_retire 12(长尾稀有结局,靠大样本稳定命中)
+金钱分位: p10=¥136300 p50=¥238400 p90=¥430500 · 心态分位: p10=27 p50=54 p90=91
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
 **注意:n=1000/n=300 档位已不再可靠**——139 事件 + 20 结局中存在命中率 ~0.1% 的展示性稀有结局(end_early_retire、end_cashflow_break),固定种子下任何 RNG 流偏移(改题数、加事件、加职业线都会偏移)都会让小样本随机漏采:n=1000 曾稳定命中,第二十七轮加 14 事件 + 心理学线后 n=1000 掉到 0、n=3000 仍漏、n=5000 起 4-5 局、n=10000 达 8-11 局。CI 与本地可达性验证一律用 n=10000。
 
-最近一次 `pnpm simulate -n 500 --compare`(M5 第二十六轮全部内容落地后):
+最近一次 `pnpm simulate -n 500 --compare`(M5 第三十轮导演器 + 特质落地后):
 
 ```text
-随机 49 · 卷钱 47(崩溃率 9.8%) · 保心态 61 · 卷总分 72
+随机 52 · 卷钱 49(崩溃率 9.2%) · 保心态 64 · 卷总分 73
 ```
 
-卷总分(开天眼)bot 72 分仍低于 A 线 82,无必胜解;与 M5-21 的 42/41/62/68 相比整体 +5~7 分,来自本轮温情向收官事件,排序结构未变。
+卷总分(开天眼)bot 73 分仍低于 A 线 76,无必胜解;与 M5-26 的 49/47/61/72 相比整体 +1~3 分,来自导演器的低谷喘息机制,排序结构未变。
 
 ## 当前重要实现点
 
@@ -616,9 +628,13 @@ end_medicine_frontline 103 / end_psychology_listener 61 / end_finance_survivor 3
 - 浏览器存储只在 `packages/web/src/platform/storage.ts`
 - 内容长期影响主要通过 `flags` / `npcStage` / `npcFavor` / `history` 实现
 - NPC 主动推进在 `packages/core/src/systems/scheduler.ts`
+- 随机事件抽取经过导演式选择器(同文件):类别冷却 + 心态节奏 + 特质 poolBias,乘数钳位 [0.15, 4]
+- 玩家特质开局抽 2 个存 `flags.trait_*`,内容用 `visibleIf`/`condition` 做特质分支,特质定义在 `packages/content/src/setup/traits.ts`
 - 志愿和三岔口的特殊流程结果通过 `pendingFlowAdvance` 中转到 `OUTCOME`
 
 ## 已知问题 / 后续建议
+
+- **重玩性路线图(第三十轮确定)**:导演式选择器 + 特质系统已落地;下一步方向是"LLM 离线生成 + n=10000 门禁把关"的内容扩产管线——开发期用 LLM 按 GameEvent schema 批量生成候选事件/特质分支文案,人工过文风后照常跑门禁入库,产物仍是静态可测内容。实时 LLM 生成已明确排除(破坏确定性验证)。特质当前 6 个,扩到 8-10 个时注意 poolBias 叠乘(两特质同 category 相乘)不要把单类权重推过钳位上限 4。
 
 - **职业线密度已五线对齐**:计算机 10、心理 9、医学 9、教育(师范)8、金融 10 个专属事件,全部覆盖到 2026(M5 第二十八轮补完医学 2019/2022/2025、金融 2022/2023/2025、心理 2022/2025 的空缺年份)。内容总量 147 个,已超过设计文档最初设想的约 125 个。其中医学 2022《这一年的白大褂》、金融 2022《降本增效那一年》是"分支切换点"——玩家可在公立/民营、前台/中后台等既有收入档间转档,重玩辨识度主要来源之一。
 - 结局数量当前是 19 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要再次挤高兜底或某个单一结局。

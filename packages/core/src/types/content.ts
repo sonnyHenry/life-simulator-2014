@@ -96,6 +96,21 @@ export interface BackgroundCard {
   flags?: Record<string, boolean | number | string>;
 }
 
+/**
+ * 玩家特质:开局随背景一起随机抽取(每局 2 个),以 `flags[id]=true` 存储。
+ * id 必须以 `trait_` 开头,事件内容可用 `{ flag: 'trait_xxx' }` 做分支。
+ */
+export interface TraitCard {
+  id: string;
+  label: string;
+  text: string;
+  /**
+   * 导演选择器的类别偏好:key 为事件 category,value 为权重乘数(>1 更常见,<1 更稀)。
+   * 只影响非 mandatory 事件的抽取概率,不影响强制/NPC/schedule 事件。
+   */
+  poolBias?: Record<string, number>;
+}
+
 export interface ApplicationMajor {
   id: string;
   /** 专业名,需与 CROSSROAD 分流和事件 visibleIf 里的 major 字符串一致 */
@@ -162,6 +177,7 @@ export interface ContentPack {
   endings: EndingDef[];
   examBank: ExamQuestion[];
   backgrounds: BackgroundCard[];
+  traits: TraitCard[];
   applications: ApplicationOption[];
   npcs: NpcDef[];
   fns: Record<string, ContentFn>;

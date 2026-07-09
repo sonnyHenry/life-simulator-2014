@@ -84,6 +84,55 @@ for (const application of contentPack.applications) {
 }
 checkUnique('background', contentPack.backgrounds.map(b => b.id));
 
+// ---- 特质校验 ----
+checkUnique('trait', contentPack.traits.map(t => t.id));
+const traitIds = new Set(contentPack.traits.map(t => t.id));
+const eventCategories = new Set(
+  contentPack.events.map(e => e.category).filter((c): c is string => Boolean(c)),
+);
+for (const trait of contentPack.traits) {
+  if (!trait.id.startsWith('trait_')) error(`trait id must start with "trait_": ${trait.id}`);
+  if (!trait.label.trim()) error(`trait has empty label: ${trait.id}`);
+  if (!trait.text.trim()) error(`trait has empty text: ${trait.id}`);
+  for (const [category, bias] of Object.entries(trait.poolBias ?? {})) {
+    if (!(bias > 0 && bias <= 5)) {
+      error(`trait ${trait.id} poolBias.${category} out of range (0, 5]: ${bias}`);
+    }
+    if (!eventCategories.has(category)) {
+      error(`trait ${trait.id} poolBias references unknown event category: ${category}`);
+    }
+  }
+}
+// 条件里引用的 trait_ flag 必须真实存在;内容不得 setFlag 特质(特质只在开局抽取时赋值)
+function checkTraitFlagRefs(owner: string, cond: Condition | undefined): void {
+  visitCondition(cond, c => {
+    if ('flag' in c && c.flag.startsWith('trait_') && !traitIds.has(c.flag)) {
+      error(`${owner} references unknown trait flag: ${c.flag}`);
+    }
+  });
+}
+for (const event of contentPack.events) {
+  checkTraitFlagRefs(`event ${event.id} trigger`, event.trigger);
+  for (const choice of event.choices) {
+    checkTraitFlagRefs(`event ${event.id} choice ${choice.id} visibleIf`, choice.visibleIf);
+    for (const outcome of choice.outcomes) {
+      checkTraitFlagRefs(`event ${event.id} choice ${choice.id} outcome`, outcome.condition);
+      for (const effect of outcome.effects) {
+        if ('setFlag' in effect && effect.setFlag.startsWith('trait_')) {
+          error(`event ${event.id} sets trait flag via setFlag (traits are draw-only): ${effect.setFlag}`);
+        }
+      }
+    }
+  }
+}
+for (const ending of contentPack.endings) checkTraitFlagRefs(`ending ${ending.id}`, ending.condition);
+for (const income of contentPack.incomes) checkTraitFlagRefs(`income ${income.id}`, income.when);
+for (const npc of contentPack.npcs) {
+  for (const [stageId, stage] of Object.entries(npc.stages)) {
+    checkTraitFlagRefs(`npc ${npc.id} stage ${stageId}`, stage.advanceWhen);
+  }
+}
+
 for (const track of ['文', '理'] as const) {
   const available = contentPack.examBank.filter(q => q.track === 'both' || q.track === track);
   if (available.length < contentPack.meta.examQuestionCount) {
@@ -371,7 +420,7 @@ const errors = issues.filter(i => i.level === 'error');
 const warnings = issues.filter(i => i.level === 'warn');
 
 console.log(`校验内容包 ${contentPack.meta.id}@${contentPack.meta.version}`);
-console.log(`事件 ${contentPack.events.length}, 结局 ${contentPack.endings.length}, NPC ${contentPack.npcs.length}, 题目 ${contentPack.examBank.length}, 收入规则 ${contentPack.incomes.length}`);
+console.log(`事件 ${contentPack.events.length}, 结局 ${contentPack.endings.length}, NPC ${contentPack.npcs.length}, 题目 ${contentPack.examBank.length}, 收入规则 ${contentPack.incomes.length}, 特质 ${contentPack.traits.length}`);
 for (const issue of issues) {
   console.log(`${issue.level === 'error' ? 'ERROR' : 'WARN'} ${issue.message}`);
 }

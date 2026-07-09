@@ -82,6 +82,18 @@ export const dramaEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'd',
+        text: '你早就觉得不对劲了——TA 从没发过一条语音',
+        visibleIf: { flag: 'trait_sensitive' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '那些细节你其实都注意到了：凌晨三点“刚下班”的秒回、永远拍不到脸的照片、还有每次你提到见面时恰到好处的出差。你没有拆穿，只是回了一句“我最近手头紧”。三天后，那个健身、烘焙、爱夜景的人间理想，把你删了。你把聊天记录从头翻到尾，像看一部自己主演的剧本围读——心思细腻的代价是骗不到你，但也瞒不住你自己：有那么几个晚上，你是真的开心过。',
+            effects: [{ stats: { mindset: -2, knowledge: 4 } }, { setFlag: 'pig_dodged' }],
+          },
+        ],
+      },
+      {
         id: 'c',
         text: '搜一下“杀猪盘”，再决定',
         outcomes: [

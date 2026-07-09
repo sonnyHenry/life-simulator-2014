@@ -407,6 +407,13 @@ class LifeSimMiniGame {
       color: '#3f382f',
     }) + 18;
     y = this.drawCallout(`初始资金 ¥${formatMoney(view.card.initialMoney)}`, panel.contentX, y, panel.contentWidth);
+    for (const trait of view.traits) {
+      y = this.drawWrappedText(`【${trait.label}】${trait.text}`, panel.contentX, y + 12, panel.contentWidth, {
+        size: 14,
+        lineHeight: 22,
+        color: '#8b806d',
+      });
+    }
     y = this.drawButton('接受命运', '', panel.contentX, y + 8, panel.contentWidth, () =>
       this.act({ type: 'CONTINUE' }),
     );

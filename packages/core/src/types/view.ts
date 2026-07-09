@@ -1,4 +1,4 @@
-import type { BackgroundCard } from './content';
+import type { BackgroundCard, TraitCard } from './content';
 import type { Gender, StatDeltas, Stats, Track } from './stats';
 
 export interface PublicExamQuestion {
@@ -10,7 +10,7 @@ export interface PublicExamQuestion {
 
 export type ViewModel =
   | { kind: 'TITLE'; title: string }
-  | { kind: 'BACKGROUND_DRAW'; card: BackgroundCard }
+  | { kind: 'BACKGROUND_DRAW'; card: BackgroundCard; traits: TraitCard[] }
   | { kind: 'SETUP'; genders: Gender[]; tracks: Track[] }
   | { kind: 'EXAM'; index: number; total: number; question: PublicExamQuestion }
   | { kind: 'EXAM_RESULT'; score: number; correct: number; total: number }

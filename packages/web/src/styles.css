@@ -272,6 +272,32 @@ h2 {
   color: var(--accent);
 }
 
+.trait-list {
+  margin-top: 14px;
+}
+
+.trait-card {
+  margin: 8px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+  animation: flipin 0.5s ease both;
+  animation-delay: 0.25s;
+}
+
+.trait-card h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.trait-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .delta-chips {
   display: flex;
   flex-wrap: wrap;

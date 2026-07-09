@@ -18,6 +18,7 @@ export interface Engine {
 const EXAM_BASE_SCORE = 330;
 const EXAM_SCORE_RANGE = 270;
 const EXAM_SKIP_RATE = 0.55;
+const TRAIT_DRAW_COUNT = 2;
 
 const CROSSROAD_OPTIONS = [
   {
@@ -145,7 +146,8 @@ export function createEngine(pack: ContentPack): Engine {
       case 'BACKGROUND_DRAW': {
         const card = pack.backgrounds.find(b => b.id === state.profile.background);
         if (!card) throw new Error('BACKGROUND_DRAW screen without a drawn card');
-        return { kind: 'BACKGROUND_DRAW', card };
+        const traits = pack.traits.filter(t => Boolean(state.flags[t.id]));
+        return { kind: 'BACKGROUND_DRAW', card, traits };
       }
       case 'SETUP':
         return { kind: 'SETUP', genders: ['male', 'female'], tracks: ['文', '理'] };
@@ -306,6 +308,10 @@ export function createEngine(pack: ContentPack): Engine {
         state.profile.background = card.id;
         state.stats.money = card.initialMoney;
         Object.assign(state.flags, card.flags ?? {});
+        // 特质随背景一起抽:每局 2 个,只存 flags(旧存档无特质 flag 时自然为空)
+        for (const trait of rng.sample(pack.traits, TRAIT_DRAW_COUNT)) {
+          state.flags[trait.id] = true;
+        }
         state.screen = 'BACKGROUND_DRAW';
         break;
       }

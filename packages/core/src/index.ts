@@ -6,7 +6,7 @@ export * from './types/view';
 export { Rng, randomSeed } from './rng/rng';
 export { evalCondition, type EvalCtx } from './dsl/evaluate';
 export { applyEffects, type ApplyResult } from './dsl/apply';
-export { pickRoundEvents } from './systems/scheduler';
+export { pickRoundEvents, eventMindsetValence } from './systems/scheduler';
 export { findEnding } from './systems/ending';
 export { createEngine, type Engine } from './engine/engine';
 export {

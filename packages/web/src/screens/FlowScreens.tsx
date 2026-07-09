@@ -37,7 +37,7 @@ export function BackgroundDrawScreen(props: {
   view: Extract<ViewModel, { kind: 'BACKGROUND_DRAW' }>;
 }) {
   const act = useGame(s => s.act);
-  const { card } = props.view;
+  const { card, traits } = props.view;
   return (
     <Card className="center">
       <p className="kicker">你的出身是——</p>
@@ -46,6 +46,17 @@ export function BackgroundDrawScreen(props: {
         <p>{card.text}</p>
         <p className="bg-money">初始资金 ¥{card.initialMoney.toLocaleString()}</p>
       </div>
+      {traits.length > 0 && (
+        <div className="trait-list">
+          <p className="kicker">与生俱来的特质——</p>
+          {traits.map(t => (
+            <div className="trait-card" key={t.id}>
+              <h3>{t.label}</h3>
+              <p>{t.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <ContinueButton onClick={() => act({ type: 'CONTINUE' })} label="接受命运" />
     </Card>
   );

@@ -1,6 +1,7 @@
 import type { ContentPack } from '@life-sim/core';
 import { phases } from './timeline/phases';
 import { backgrounds } from './setup/backgrounds';
+import { traits } from './setup/traits';
 import { applications } from './setup/applications';
 import { examBank } from './exam/questions';
 import { collegeEvents } from './events/college';
@@ -21,7 +22,7 @@ import { incomes } from './economy/incomes';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.19.0',
+    version: '0.20.0',
     title: '2014：我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 7,
@@ -48,6 +49,7 @@ export const contentPack: ContentPack = {
   endings,
   examBank,
   backgrounds,
+  traits,
   applications,
   npcs,
   fns: {},

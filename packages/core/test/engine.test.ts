@@ -4,6 +4,7 @@ import {
   createSaveFile,
   CURRENT_SAVE_VERSION,
   evalCondition,
+  eventMindsetValence,
   migrateSaveFile,
   restoreSave,
   Rng,
@@ -94,6 +95,11 @@ function miniPack(): ContentPack {
       { id: 'q3', track: '理', subject: '物理', text: 'g≈?', options: ['9.8', '3.7'], answerIndex: 0 },
     ],
     backgrounds: [{ id: 'bg1', label: '普通家庭', text: '普通', initialMoney: 5000 }],
+    traits: [
+      { id: 'trait_a', label: '特质A', text: '测试特质A', poolBias: { career: 1.5 } },
+      { id: 'trait_b', label: '特质B', text: '测试特质B' },
+      { id: 'trait_c', label: '特质C', text: '测试特质C' },
+    ],
     applications: [
       { id: 'app1', label: '保底大学', university: '某大学', minScore: 0, majors: [{ id: 'm1', name: '某专业', trackFlag: 'management' }] },
     ],
@@ -509,5 +515,45 @@ describe('income & scoring', () => {
     expect(view.score).toBeGreaterThanOrEqual(0);
     expect(view.score).toBeLessThanOrEqual(100);
     expect(['S', 'A', 'B', 'C', 'D']).toContain(view.grade);
+  });
+});
+
+describe('traits and director', () => {
+  it('draws exactly 2 distinct traits at background draw and exposes them on the view', () => {
+    const engine = createEngine(miniPack());
+    let state = engine.start(7);
+    state = engine.dispatch(state, { type: 'START' });
+    const traitFlags = Object.keys(state.flags).filter(k => k.startsWith('trait_'));
+    expect(traitFlags).toHaveLength(2);
+    expect(new Set(traitFlags).size).toBe(2);
+    const view = engine.view(state);
+    if (view.kind !== 'BACKGROUND_DRAW') throw new Error('expected BACKGROUND_DRAW view');
+    expect(view.traits.map(t => t.id).sort()).toEqual(traitFlags.sort());
+  });
+
+  it('derives event mindset valence from weighted outcome deltas', () => {
+    const ev = {
+      id: 'ev_valence',
+      pools: ['main'],
+      title: 't',
+      text: 't',
+      choices: [
+        {
+          id: 'a',
+          text: 'a',
+          outcomes: [
+            { weight: 3, text: 'good', effects: [{ stats: { mindset: 4 } }] },
+            { weight: 1, text: 'bad', effects: [{ stats: { mindset: -4 } }] },
+          ],
+        },
+        {
+          id: 'b',
+          text: 'b',
+          outcomes: [{ weight: 1, text: 'flat', effects: [{ stats: { money: 100 } }] }],
+        },
+      ],
+    } as const;
+    // choice a: (4*3 + -4*1)/4 = 2, choice b: 0 → 平均 1
+    expect(eventMindsetValence(ev as unknown as Parameters<typeof eventMindsetValence>[0])).toBe(1);
   });
 });

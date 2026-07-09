@@ -40,6 +40,23 @@ export const randomEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'c',
+        text: '请一天假，把生病过成放假',
+        visibleIf: { flag: 'trait_chill' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你煮了粥，睡到自然醒，下午裹着被子看了两部老电影。病好得不算快，但你一点都不慌。有些人生病是中断，你生病是暂停。',
+            effects: [{ stats: { mindset: 4, health: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '假是请了，觉也睡了，但工作消息还是追了过来。你顶着低烧回了一下午消息，暂停键按了个寂寞。',
+            effects: [{ stats: { mindset: -2, health: -1 } }],
+          },
+        ],
+      },
+      {
         id: 'b',
         text: '硬扛，年轻人自愈快',
         outcomes: [
@@ -87,6 +104,18 @@ export const randomEvents: GameEvent[] = [
             weight: 1,
             text: '你说最近有点累。电话那头沉默了一下，然后妈妈说：“累了就歇歇，别硬撑。”这句话没有解决问题，但让问题轻了一点。',
             effects: [{ stats: { mindset: 5 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '干脆聊满一个小时，把家里的事都问一遍',
+        visibleIf: { flag: 'trait_homebody' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '从邻居家的猫聊到亲戚的婚事，从菜价聊到爸爸的血压。挂电话时你看了眼时长：七十三分钟。别人觉得这是浪费时间，你觉得这是充电。',
+            effects: [{ stats: { mindset: 6, network: 1 } }],
           },
         ],
       },
@@ -301,6 +330,23 @@ export const randomEvents: GameEvent[] = [
             weight: 1,
             text: '老师没有承诺暴富，只逼你每周交作品。三个月后，你靠零星接单赚回了学费，还留下几个能继续复用的模板。副业没有改变人生，但让你多了一条能在需要时打开的路。',
             effects: [{ stats: { money: 6000, knowledge: 5, mindset: 1, health: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'd',
+        text: '一次接三个单，把晚上全排满',
+        visibleIf: { flag: 'trait_grinder' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '写稿、剪视频、做课件，你把晚上八点到凌晨一点切成了三段。月底一算，副业收入快赶上半个月工资。只是镜子里的黑眼圈提醒你：这钱是从身体那边挪过来的。',
+            effects: [{ stats: { money: 8000, knowledge: 3, mindset: -3, health: -7 } }],
+          },
+          {
+            weight: 1,
+            text: '三个单子撞了期，你连续熬了四个通宵，交付质量全线下滑，甲方拒付了一单。你第一次发现，卷也是有产能上限的。',
+            effects: [{ stats: { money: 2000, mindset: -6, health: -8 } }],
           },
         ],
       },
