@@ -15,6 +15,7 @@ import { careerMedicineEvents } from './events/career-medicine';
 import { careerCsEvents } from './events/career-cs';
 import { careerEducationEvents } from './events/career-education';
 import { careerPsychologyEvents } from './events/career-psychology';
+import { traitMomentEvents } from './events/trait-moments';
 import { endings } from './endings/endings';
 import { npcs } from './npcs/npcs';
 import { incomes } from './economy/incomes';
@@ -22,7 +23,7 @@ import { incomes } from './economy/incomes';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.20.0',
+    version: '0.21.0',
     title: '2014：我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 7,
@@ -44,6 +45,7 @@ export const contentPack: ContentPack = {
     ...careerCsEvents,
     ...careerEducationEvents,
     ...careerPsychologyEvents,
+    ...traitMomentEvents,
   ],
   incomes,
   endings,

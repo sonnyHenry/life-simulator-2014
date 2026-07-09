@@ -617,7 +617,8 @@ interface TraitCard {
 - **抽取**:开局 `BACKGROUND_DRAW` 流程步里 `rng.sample(pack.traits, 2)`,直接写 `state.flags[trait.id] = true`——不加 `Profile` 字段、不改 GameState schema,旧存档没有特质 flag 时各处自然按"无特质"处理。
 - **展示**:`BACKGROUND_DRAW` ViewModel 透出 `traits: TraitCard[]`(view 层从 flags 反查),三端抽卡屏渲染。
 - **影响事件分布**:`poolBias` 被调度器读取(见 3.4),按 category 调整随机池抽取概率。
-- **影响事件内容**:内容用现成的 DSL 分支——选项 `visibleIf: { flag: 'trait_social' }` 做专属选项,outcome `condition` 做专属结果文案,无需任何新 DSL 能力。
+- **影响事件内容**:内容用现成的 DSL 分支——选项 `visibleIf: { flag: 'trait_social' }` 做专属选项,outcome `condition` 做专属结果文案,无需任何新 DSL 能力;每个特质另有 1 个 `mandatory` 专属事件(`events/trait-moments.ts`,年份窗口 + trait flag 门控,带该特质的玩家该年必触发)。
+- **UI 标签(M5 第三十一轮)**:`view()` 里 `requiredTraitLabel(cond)` 识别选项 `visibleIf` / 事件 `trigger` 中"必然要求某特质"的条件(顶层 flag 或 `all` 分支;`any` 里的备选不算),自动给文案加 `【特质名】` 前缀——特质内容的可感知性不靠内容作者手写,是引擎级保证。
 - **校验**(`validate.ts`):特质 id 唯一且 `trait_` 前缀、label/text 非空、`poolBias` 值 ∈ (0,5] 且 category 必须真实存在于事件库;全内容里引用的 `trait_*` flag 必须在特质表中;内容禁止 `setFlag` 特质(特质只在开局赋值)。
 
 设计约束(见 GAME_DESIGN 二-2):特质专属选项必须带真实变数,不得成为透明优势选项;新增特质时注意两个特质同 category 的 `poolBias` 会连乘,别把单类推过导演乘数上限 4。

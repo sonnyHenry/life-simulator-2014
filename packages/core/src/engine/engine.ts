@@ -1,5 +1,5 @@
 import type { ContentPack, ExamQuestion, PhaseConfig } from '../types/content';
-import type { Effect } from '../types/dsl';
+import type { Condition, Effect } from '../types/dsl';
 import type { GameState } from '../types/state';
 import type { PlayerAction, ViewModel } from '../types/view';
 import type { StatDeltas, StatKey } from '../types/stats';
@@ -75,6 +75,32 @@ export function createEngine(pack: ContentPack): Engine {
   function renderText(text: string, state: GameState): string {
     const partner = state.flags.player_gender === 'female' ? '他' : '她';
     return text.replace(/\{\{ta\}\}/g, partner);
+  }
+
+  const traitLabelById = new Map(pack.traits.map(t => [t.id, t.label]));
+
+  // 特质门控的选项/事件在 UI 上打【特质名】标签,让玩家看见"这是我的特质带来的"。
+  // 只识别"必然要求某特质"的条件(顶层 flag 或 all 分支),any 里的备选不算必需。
+  function requiredTraitLabel(cond: Condition | undefined): string | null {
+    if (!cond) return null;
+    if ('flag' in cond && cond.flag.startsWith('trait_')) {
+      if (cond.equals === undefined || cond.equals === true) {
+        return traitLabelById.get(cond.flag) ?? null;
+      }
+      return null;
+    }
+    if ('all' in cond) {
+      for (const child of cond.all) {
+        const label = requiredTraitLabel(child);
+        if (label) return label;
+      }
+    }
+    return null;
+  }
+
+  function withTraitTag(text: string, cond: Condition | undefined): string {
+    const label = requiredTraitLabel(cond);
+    return label ? `【${label}】${text}` : text;
   }
 
   // 录取概率按(加成后分数 - 批次线)分段:冲高批次可能滑档
@@ -213,10 +239,13 @@ export function createEngine(pack: ContentPack): Engine {
         return {
           kind: 'EVENT',
           eventId: ev.id,
-          title: ev.title,
+          title: withTraitTag(ev.title, ev.trigger),
           text: renderText(ev.text, state),
           major: ev.tier === 'major',
-          choices: visible.map(c => ({ id: c.id, text: renderText(c.text, state) })),
+          choices: visible.map(c => ({
+            id: c.id,
+            text: withTraitTag(renderText(c.text, state), c.visibleIf),
+          })),
         };
       }
       case 'OUTCOME':

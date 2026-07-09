@@ -557,3 +557,37 @@ describe('traits and director', () => {
     expect(eventMindsetValence(ev as unknown as Parameters<typeof eventMindsetValence>[0])).toBe(1);
   });
 });
+
+describe('trait tag rendering', () => {
+  it('tags trait-gated events and choices with the trait label', () => {
+    const pack = miniPack();
+    // 只放 2 个特质,抽 2 必然全中,断言不依赖随机
+    pack.traits = [
+      { id: 'trait_a', label: '特质A', text: 'A' },
+      { id: 'trait_b', label: '特质B', text: 'B' },
+    ];
+    pack.events[0]!.trigger = { all: [{ flag: 'trait_a' }] };
+    pack.events[0]!.choices[1]!.visibleIf = { flag: 'trait_b' };
+    const engine = createEngine(pack);
+    let state = engine.start(5);
+    let guard = 0;
+    while (guard++ < 100) {
+      const view = engine.view(state);
+      if (view.kind === 'EVENT') {
+        expect(view.title).toBe('【特质A】事件A');
+        expect(view.choices.find(c => c.id === 'y')?.text).toBe('【特质B】选Y');
+        return;
+      }
+      let action: PlayerAction;
+      switch (view.kind) {
+        case 'TITLE': action = { type: 'START' }; break;
+        case 'SETUP': action = { type: 'CHOOSE_SETUP', gender: 'male', track: '理' }; break;
+        case 'EXAM': action = { type: 'ANSWER', optionIndex: 0 }; break;
+        case 'APPLICATION': action = { type: 'APPLY', optionId: 'app1' }; break;
+        default: action = { type: 'CONTINUE' };
+      }
+      state = engine.dispatch(state, action);
+    }
+    throw new Error('never reached EVENT view');
+  });
+});
