@@ -50,6 +50,45 @@ export const careerMedicineEvents: GameEvent[] = [
     ],
   },
   {
+    // 规培中段(2019):求职路径玩家规培第二年,读研医学线此时仍在校
+    id: 'ev_med_resident_grind_2019',
+    pools: ['work'],
+    category: 'career',
+    title: '规培第二年',
+    text: '2019年,规培进入第二年,新鲜劲儿早被夜班磨没了。你管的床位越来越多,工资条却还是那张薄薄的便签;同届本科去互联网的同学晒着年终奖,你在值班室的行军床上抢一个囫囵觉。凌晨三点,一个家属堵在护士站问"医生你到底行不行",你压着火把病情又讲了第三遍——那一刻你比谁都想弄明白,自己咬牙熬的这三年,到底在攒什么。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'medicine_resident' }, { year: { from: 2019, to: 2019 } }] },
+    choices: [
+      {
+        id: 'grind',
+        text: '把每一台手术、每一次抢救都当成攒手感',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你主动多跟台、多值班,把带教随口讲的每个细节都记进小本子。半年下来,主治开始放手让你上一助,你缝的第一个漂亮切口被夸"不像规培的手"。代价是黑眼圈成了标配,体重掉了六斤——但你知道,手感这东西,只在灯下和血里长。',
+            effects: [{ stats: { knowledge: 8, network: 3, mindset: -3, health: -6 } }],
+          },
+          {
+            weight: 1,
+            text: '你什么都想学,结果什么都轮不到你主导:上台永远拉钩,抢救永远打杂。你把不甘心写进值班日记,也写进第二天更早到岗的脚步里。成长慢,但你没停。',
+            effects: [{ stats: { knowledge: 4, mindset: -5, health: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'balance',
+        text: '先把自己这条命顾好,别在规培里就垮掉',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你开始认真吃饭、按点补觉,推掉了几个"锻炼机会"。同批有人卷得比你狠,进步也比你快,但你熬过了那个不少人失眠、想退培的冬天,完整地站到了第三年。这行太长,活着走完比抢跑更重要。',
+            effects: [{ stats: { health: 6, mindset: 4, knowledge: 2, money: 1000 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_med_pandemic_2020',
     pools: ['work'],
     category: 'career',
@@ -172,6 +211,92 @@ export const careerMedicineEvents: GameEvent[] = [
     ],
   },
   {
+    // 2022 分支切换点:防控最吃紧+年底放开挤兑,可在公立/民营间转档
+    id: 'ev_med_wave_2022',
+    pools: ['work'],
+    category: 'career',
+    tier: 'major',
+    title: '这一年的白大褂',
+    text: '2022年,你所在的城市在静默里数着日子,你在方舱、核酸点和病房之间连轴转,防护服一穿就是一个白班。年底政策几周内转向,门急诊在一夜之间被挤爆,发热门诊的队排到了停车场,同事一个接一个"阳"了还在硬顶。你已经记不清连续上了多少天班,只记得有天下班脱下口罩,镜子里那张勒出深痕的脸,让你认真想了一个问题:这身白大褂,你还想怎么穿下去。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_medicine' }, { year: { from: 2022, to: 2022 } }] },
+    choices: [
+      {
+        id: 'public_stay',
+        text: '留在公立,把这一关扛过去',
+        visibleIf: { flag: 'doctor_public' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你没走。最难的那两个月,你和科室的人互相顶着,谁"阳"了谁歇一天,退烧了又回来。挤兑的高峰过去后,主任在群里发了长长一段话谢大家,你看着看着眼眶发热。编制的工资没涨,但你对"公立医生"这四个字的理解,厚了一层。',
+            effects: [{ stats: { mindset: 6, knowledge: 4, network: 3, health: -8 } }],
+          },
+          {
+            weight: 1,
+            text: '你撑住了工作,却没撑住身体,在最忙的时候重感染倒下,躺了十天。回岗那天科室缺人缺得厉害,你带病顶上,心里第一次冒出"这样值不值"的念头,又很快把它按了下去。',
+            effects: [{ stats: { mindset: -4, knowledge: 2, health: -12 } }],
+          },
+        ],
+      },
+      {
+        id: 'public_to_private',
+        text: '心力交瘁,趁机跳去待遇更好的民营',
+        visibleIf: { flag: 'doctor_public' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '熬过这一年,你把简历投给了一家开价诚意十足的民营医院。离职谈话上主任叹了口气,没多留你。换了地方,排班人性化了,到手翻了近一倍,只是逢年过节亲戚那句"怎么不在公立了",你还得学着不往心里去。你告诉自己:救人的地方,不只有编制那一种。',
+            effects: [
+              { setFlag: 'doctor_public', value: false },
+              { setFlag: 'doctor_private' },
+              { stats: { money: 9000, health: 5, mindset: 1, network: -2 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'private_boom',
+        text: '在民营接住放开后的诊量',
+        visibleIf: { flag: 'doctor_private' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '放开后,民营这边也被挤爆,你连轴转到分不清白天黑夜。奖金确实厚了一截,但你也第一次体会到,市场化的医疗一样会在洪峰前手忙脚乱。忙完那阵,你请了三天假睡到自然醒。',
+            effects: [{ stats: { money: 8000, knowledge: 3, mindset: -2, health: -7 } }],
+          },
+        ],
+      },
+      {
+        id: 'private_to_public',
+        text: '经此一役,更想要一份编制的稳',
+        visibleIf: { flag: 'doctor_private' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '这一年的动荡让你重新掂量"稳定"两个字。恰好原来实习的公立医院在补编制缺口,你放弃了民营的高薪,考回了体制内。到手少了一大块,但看着录用通知上"事业编制"四个字,你妈在电话那头又哭了一次。有些安全感,是要用钱换的。',
+            effects: [
+              { setFlag: 'doctor_private', value: false },
+              { setFlag: 'doctor_public' },
+              { stats: { money: -6000, mindset: 8, health: 2 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'left_watch',
+        text: '作为已经离开临床的人,看着这一切',
+        visibleIf: { flag: 'doctor_left' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你早就离开了临床,这一年却比谁都关注前同事的朋友圈:谁病倒了,谁在硬顶,谁发了那条"太累了"。你给还在一线的老同学寄了一箱药和退烧贴,附言只有四个字"别硬扛"。放下手机你沉默了很久——离开是对的,但那份牵挂,好像一辈子都还给不了医院。',
+            effects: [{ stats: { mindset: -3, network: 3, money: -2000 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_med_dignity_2023',
     pools: ['work'],
     category: 'career',
@@ -273,6 +398,59 @@ export const careerMedicineEvents: GameEvent[] = [
             weight: 1,
             text: '你现在的工作和集采文件打交道比和患者多。前同事在群里吐槽绩效，你一边回"抱抱"，一边把最新政策整理成内部简报——离开临床的人，反而成了前同事们的"政策翻译"。',
             effects: [{ stats: { knowledge: 4, network: 4, money: 3000 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2025:三十岁的天花板,医学线各档位的中年时刻
+    id: 'ev_med_ceiling_2025',
+    pools: ['work'],
+    category: 'career',
+    title: '主治之后',
+    text: '2025年,你三十出头,职业和生活的天花板同时显形:晋升副高要论文、要课题、要排队,而家里父母的体检报告开始出现你不愿细看的箭头。亲戚朋友的健康问题一股脑找上你,你成了整个家族的"私人医生"——门诊之外,还有一个永远在线的免费问诊窗口。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_medicine' }, { year: { from: 2025, to: 2025 } }] },
+    choices: [
+      {
+        id: 'public',
+        text: '在公立体系里,继续爬那道叫职称的坡',
+        visibleIf: { flag: 'doctor_public' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你一边出门诊一边挤时间写论文、报课题,晋升的队伍很长,你排在中间不上不下。但去年你主刀的一个疑难病例被写进了科室教学案例,年轻规培医生开始喊你"老师"。天花板还在头顶,可你脚下的台阶,确实一级级垫高了。',
+            effects: [{ stats: { knowledge: 5, network: 4, mindset: 2, health: -3 } }],
+          },
+          {
+            weight: 1,
+            text: '论文卡在返修,课题没中标,晋升又要等下一轮。你在深夜的办公室改标书,改到怀疑这套评价体系到底认不认真本事。最后你把父母的复查安排进了自己唯一的休息日——那天你既是医生,也是儿女。',
+            effects: [{ stats: { mindset: -6, knowledge: 3, health: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'private',
+        text: '在民营,把经验变成实打实的收入',
+        visibleIf: { flag: 'doctor_private' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '没有职称的紧箍咒,你把精力全放在把病看好、把患者留住上。收入稳稳地涨,你给爸妈换了套更贵的体检套餐,自己也终于敢请年假带家人出去玩一趟。只是偶尔同学聚会聊起"学术",你会有一瞬间的走神——你选的是另一条路,不差,只是不同。',
+            effects: [{ stats: { money: 9000, mindset: 3, network: 2, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        text: '在临床之外,用医学背景过另一种人生',
+        visibleIf: { flag: 'doctor_left' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你早离开了临床,但"学医的"这个标签甩不掉,也不想甩:家族群里的健康问题你随手就答,工作里那点医学底子成了别人没有的优势。三十岁这年你终于确认,当年那个"逃兵"式的决定,其实是把医学换了种方式带在身上。',
+            effects: [{ stats: { mindset: 5, network: 3, money: 3000 } }],
           },
         ],
       },

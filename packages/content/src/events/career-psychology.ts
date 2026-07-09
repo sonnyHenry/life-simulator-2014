@@ -189,6 +189,69 @@ export const careerPsychologyEvents: GameEvent[] = [
     ],
   },
   {
+    // 2022:静默与放开之间的情绪需求;刻意不加 not psy_industry,补上转行支线的空窗
+    id: 'ev_psy_silence_2022',
+    pools: ['work'],
+    category: 'career',
+    title: '沉默里的需求',
+    text: '2022年,城市在静默和放开之间反复,情绪像被闷在锅里。心理求助的需求肉眼可见地涨:失业的、隔离的、毕业即失业的、被困在小小出租屋里的,每个人心里都堵着点什么。这个总被调侃"是不是算命"的专业,在这一年被前所未有地需要,也被前所未有地消耗——你发现,接住别人情绪的人,自己也是肉长的。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_psychology' }, { year: { from: 2022, to: 2022 } }] },
+    choices: [
+      {
+        id: 'school',
+        text: '在封控的校园里,守住学生这条线',
+        visibleIf: { flag: 'psy_school' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '网课把学生关进了屏幕,你的工作从坐等预约变成主动排查:一个个视频回访,盯着那些"最近没怎么发言"的名字。你处理过深夜家长的求助电话,也拦下过一次真正的危机。学期末学校终于给心理岗加了编制预算——用最不愿意看到的方式,你的岗位被看见了。',
+            effects: [{ stats: { mindset: 4, knowledge: 5, network: 3, health: -5 } }],
+          },
+          {
+            weight: 1,
+            text: '需求太多,你一个人扛不过来。有个孩子的问题超出了你能处理的范围,你几经周折才帮他转介到医院,过程里你一遍遍怀疑自己"是不是做得不够"。这一年你学会了一件残酷但重要的事:承认能力的边界,本身也是专业的一部分。',
+            effects: [{ stats: { mindset: -6, knowledge: 4, health: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'clinical',
+        text: '把咨询搬到线上,接住暴涨的来访',
+        visibleIf: { all: [{ not: { flag: 'psy_school' } }, { not: { flag: 'psy_industry' } }] },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你的咨询几乎全搬到了线上,视频框里的来访者比往年多了一倍。隔着屏幕做咨询有它的难处——你看不清对方攥紧的手,但你也第一次服务到那些从前根本走不进咨询室的人。排满的日程既是收入,也是警报:你在帮别人扛,谁来帮你?',
+            effects: [{ stats: { money: 12000, knowledge: 5, mindset: -3, health: -5 } }],
+          },
+          {
+            weight: 1,
+            text: '连轴转了几个月,你自己先出现了耗竭的信号:共情不起来,听着听着走神,下班后一个字都不想说。督导看出来了,让你强制减量、去做自己的个人体验。那段时间你才真正懂了那句老话——"你不能给出你没有的东西。"',
+            effects: [{ stats: { mindset: -8, knowledge: 3, health: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'industry',
+        text: '在公司里,被推到"温和裁员"的沟通桌前',
+        visibleIf: { flag: 'psy_industry' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '降本增效的这一年,HR 部门发现你的心理学背景"正好用得上":谈话怎么开场不激化情绪、怎么让被裁的人"体面"离开,你成了那间小会议室的常客。你安慰过被裁的同事,也在深夜问过自己,当年学"怎么理解人",是不是就为了今天更"高效"地送走人。专业给了你一双眼睛,却没告诉你该往哪看。',
+            effects: [{ stats: { money: 8000, network: 3, mindset: -7 } }],
+          },
+          {
+            weight: 1,
+            text: '你没让自己彻底变成"裁员工具人":在流程之外,你偷偷给几个走的人留了靠谱的转介渠道和一句真心的建议。这点微小的、越界的善意,是你给自己专业良心留的一条底线。事后你把这段写进了一直没停的读书笔记里。',
+            effects: [{ stats: { mindset: 3, network: 4, knowledge: 2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'ev_psy_boom_2023',
     pools: ['work'],
     category: 'career',
@@ -307,6 +370,72 @@ export const careerPsychologyEvents: GameEvent[] = [
             weight: 1,
             text: '你没有跟着同行焦虑"要被 AI 取代了",而是把它拆开来用:让它整理逐字稿、做心理教育素材、给来访者当两次咨询之间的"练习伙伴"。你渐渐确认了一件事:它接得住信息,接不住沉默。而这行最贵的,恰恰是接住沉默的能力。',
             effects: [{ stats: { knowledge: 7, mindset: 3, money: 5000 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 2025:三十岁的助人者,自我照顾与职业续航
+    id: 'ev_psy_ceiling_2025',
+    pools: ['work'],
+    category: 'career',
+    title: '照顾别人的人',
+    text: '2025年,你三十出头,做这行也有些年头了。来访者里同龄人越来越多:房贷、婚育、父母生病、职业倦怠——他们的难题,你自己也在经历。这一年你开始认真面对一个从入行起就被回避的问题:一个整天接住别人情绪的人,自己的电量,该怎么充?督导费、个人体验、进修课,一样都不便宜,而它们恰恰是这份手艺能走多远的关键。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'career_psychology' }, { year: { from: 2025, to: 2025 } }] },
+    choices: [
+      {
+        id: 'private',
+        text: '作为执业者,给自己的成长继续投钱',
+        visibleIf: { flag: 'psy_private_practice' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把收入的一部分固定投进督导和进修,像给刀定期开刃。转介绍的来访排到了两个月后,其中不少是老来访点名"还找你"。你终于敢承认:这行没有天花板,只有你愿不愿意一直做那个"还在学"的人——而这,恰恰是你区别于速成班的地方。',
+            effects: [
+              { moneyCost: { rate: 0.12, min: 4000, max: 20000, roundTo: 1000, reason: 'other' } },
+              { stats: { knowledge: 6, mindset: 5, network: 3 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'school',
+        text: '在学校,把心理课熬成学生真正的港湾',
+        visibleIf: { flag: 'psy_school' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '角落里的咨询室这些年成了不少学生的"安全屋"。你带出了学生心理社团,把危机干预流程做成了全校的标准动作。编制内的工资单依旧平淡,但一个毕业多年的学生特地回来告诉你"当年那几次谈话,把我拉住了"——那一刻你确认,自己守的这条线,值。',
+            effects: [{ stats: { mindset: 7, network: 4, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'counselor',
+        text: '在机构里,权衡还要不要继续熬下去',
+        visibleIf: { all: [{ flag: 'psy_counselor' }, { not: { flag: 'psy_private_practice' } }] },
+        outcomes: [
+          {
+            weight: 1,
+            text: '大头还是归机构和平台,你的时薪涨得很慢,同期入行的人有的挂牌单干,有的干脆转了行。你没走极端:一边继续攒时数和口碑,一边逼自己去做督导、补短板。三十岁这年你想通了——先把自己练成"带不走的资产",单飞不单飞,是水到渠成的事,不是赌气的事。',
+            effects: [
+              { moneyCost: { rate: 0.1, min: 3000, max: 15000, roundTo: 1000, reason: 'other' } },
+              { stats: { knowledge: 5, mindset: 2, network: 3 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'industry',
+        text: '在企业里,让心理学成为你的隐形优势',
+        visibleIf: { all: [{ flag: 'psy_industry' }, { not: { flag: 'psy_private_practice' } }] },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没坐进咨询室,但心理学一直在你身上工作:你做的用户研究更懂人性,带的团队更少内耗,连难缠的跨部门沟通都被你拆解得有条有理。三十岁这年升职加薪,有人问你后不后悔没做咨询,你笑笑:"我一直在做,只是不收咨询费而已。"',
+            effects: [{ stats: { money: 9000, network: 4, mindset: 4 } }],
           },
         ],
       },

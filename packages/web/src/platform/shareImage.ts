@@ -3,6 +3,7 @@ import type { Stats } from '@life-sim/core';
 export interface ShareImageData {
   title: string;
   tagline: string;
+  text: string;
   tone: 'triumph' | 'bitter' | 'warm';
   years: string;
   seed: number;
@@ -19,7 +20,6 @@ const TONE_COLORS: Record<ShareImageData['tone'], { bg: string; border: string; 
 };
 
 const W = 750;
-const H = 1000;
 
 function roundRect(
   ctx: CanvasRenderingContext2D,
@@ -38,6 +38,9 @@ function roundRect(
   ctx.closePath();
 }
 
+// 行首禁排字符:换行时悬挂到上一行行尾,避免标点出现在行首
+const NO_LINE_START = '，。、！？；：）》〉」』”’…—％·,.!?;:)]%';
+
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -49,6 +52,10 @@ function wrapText(
   for (let i = 0; i < text.length; i += 1) {
     const ch = text.charAt(i);
     if (current === '' || ctx.measureText(current + ch).width <= maxWidth) {
+      current += ch;
+      continue;
+    }
+    if (NO_LINE_START.includes(ch)) {
       current += ch;
       continue;
     }
@@ -78,7 +85,6 @@ function wrapText(
 export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = W;
-  canvas.height = H;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('canvas 2d context unavailable');
   const colors = TONE_COLORS[data.tone];
@@ -102,6 +108,22 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
     ctx.fillText(text, x, y);
   };
 
+  // 文本行数可变,先测量换行再确定画布高度
+  ctx.font = font(64, 700);
+  const titleLines = wrapText(ctx, data.title, W - 160, 2);
+  ctx.font = font(34);
+  const tagLines = wrapText(ctx, data.tagline, W - 180, 3);
+  ctx.font = font(28);
+  const textLines = wrapText(ctx, data.text, W - 160, 10);
+
+  const tagY = 180 + titleLines.length * 84 + 24;
+  const textY = tagY + tagLines.length * 52 + 36;
+  const scoreY = textY + textLines.length * 46 + 44;
+  const H = scoreY + 480;
+
+  // 设高度会清空画布并重置绘制状态,之后逐块重设
+  canvas.height = H;
+
   // 背景
   ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, W, H);
@@ -123,7 +145,6 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   ctx.fillStyle = '#2c2a24';
   ctx.textAlign = 'center';
   ctx.font = font(64, 700);
-  const titleLines = wrapText(ctx, data.title, W - 160, 2);
   let y = 180;
   for (const line of titleLines) {
     ctx.fillText(line, W / 2, y);
@@ -133,15 +154,22 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   // tagline
   ctx.fillStyle = colors.accent;
   ctx.font = font(34);
-  const tagLines = wrapText(ctx, data.tagline, W - 180, 3);
-  y += 24;
+  y = tagY;
   for (const line of tagLines) {
     ctx.fillText(line, W / 2, y);
     y += 52;
   }
 
+  // 结局详细描述
+  ctx.fillStyle = '#2c2a24';
+  ctx.font = font(28);
+  y = textY;
+  for (const line of textLines) {
+    ctx.fillText(line, W / 2, y);
+    y += 46;
+  }
+
   // 总分 + 评级
-  const scoreY = 520;
   ctx.fillStyle = colors.accent;
   drawFittedText(`成绩：${data.grade}`, W / 2 - 90, scoreY + 22, 320, 76, 700, 42);
   ctx.fillStyle = '#2c2a24';
@@ -150,11 +178,11 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
 
   // 五项指标用固定两行排布,避免长金额或第五项撞到底部标题。
   const statItems = [
-    { label: '学识', value: String(data.stats.knowledge), x: W * 0.2, y: 690, maxWidth: 170 },
-    { label: '金钱', value: `¥${data.stats.money.toLocaleString()}`, x: W * 0.5, y: 690, maxWidth: 230 },
-    { label: '心态', value: String(data.stats.mindset), x: W * 0.8, y: 690, maxWidth: 170 },
-    { label: '人脉', value: String(data.stats.network), x: W * 0.35, y: 805, maxWidth: 190 },
-    { label: '健康', value: String(data.stats.health), x: W * 0.65, y: 805, maxWidth: 190 },
+    { label: '学识', value: String(data.stats.knowledge), x: W * 0.2, y: scoreY + 170, maxWidth: 170 },
+    { label: '金钱', value: `¥${data.stats.money.toLocaleString()}`, x: W * 0.5, y: scoreY + 170, maxWidth: 230 },
+    { label: '心态', value: String(data.stats.mindset), x: W * 0.8, y: scoreY + 170, maxWidth: 170 },
+    { label: '人脉', value: String(data.stats.network), x: W * 0.35, y: scoreY + 285, maxWidth: 190 },
+    { label: '健康', value: String(data.stats.health), x: W * 0.65, y: scoreY + 285, maxWidth: 190 },
   ];
   statItems.forEach(({ label, value, x: cx, y: cy, maxWidth }) => {
     ctx.fillStyle = '#2c2a24';
