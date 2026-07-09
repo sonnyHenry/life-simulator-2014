@@ -271,6 +271,21 @@ export const randomEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'c',
+        text: '要什么陌生城市,买张回家的票',
+        visibleIf: { flag: 'trait_homebody' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '周五晚上到家,周日下午返程。四十多个小时里你没看攻略、没打卡任何景点,就是睡自己的旧床、吃妈妈做的菜、陪爸爸下了两盘棋。回程车上你想:别人的诗和远方在路上,你的在户口本上。',
+            effects: [
+              { moneyCost: { rate: 0.05, max: 1500, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: 9, health: 2 } },
+            ],
+          },
+        ],
+      },
+      {
         id: 'b',
         text: '算了，以后再说',
         outcomes: [
@@ -388,6 +403,29 @@ export const randomEvents: GameEvent[] = [
             effects: [
               { moneyCost: { rate: 0.05, max: 2000, roundTo: 100, reason: 'family' } },
               { stats: { network: 1, mindset: -3 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '提前一天到,主动请缨当婚礼总调度',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '接亲路线、敬酒顺序、堵门红包、醉倒宾客的打车安排——你把一场婚礼调度得像一场发布会。新人敬酒到你这桌时,新娘说:“今天最该被敬的是你。”那天你的通讯录多了十几个人,都是在混乱现场记住你的。社牛的婚礼没有散客桌。',
+            effects: [
+              { moneyCost: { rate: 0.05, max: 2000, roundTo: 100, reason: 'family' } },
+              { stats: { network: 8, mindset: 4, health: -3 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你调度得太投入,一整天没吃上一口热菜,司仪的活儿也顺手干了一半。晚上复盘,你发现自己全程没跟新郎说上一句超过十秒的话——你参加了婚礼的每个环节,除了“老朋友叙旧”这一项。',
+            effects: [
+              { moneyCost: { rate: 0.05, max: 2000, roundTo: 100, reason: 'family' } },
+              { stats: { network: 4, mindset: -2, health: -3 } },
             ],
           },
         ],

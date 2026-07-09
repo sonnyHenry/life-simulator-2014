@@ -18,7 +18,8 @@ export interface Engine {
 const EXAM_BASE_SCORE = 330;
 const EXAM_SCORE_RANGE = 270;
 const EXAM_SKIP_RATE = 0.55;
-const TRAIT_DRAW_COUNT = 2;
+const TRAIT_OFFER_COUNT = 4;
+const TRAIT_PICK_COUNT = 2;
 
 const CROSSROAD_OPTIONS = [
   {
@@ -172,8 +173,15 @@ export function createEngine(pack: ContentPack): Engine {
       case 'BACKGROUND_DRAW': {
         const card = pack.backgrounds.find(b => b.id === state.profile.background);
         if (!card) throw new Error('BACKGROUND_DRAW screen without a drawn card');
-        const traits = pack.traits.filter(t => Boolean(state.flags[t.id]));
-        return { kind: 'BACKGROUND_DRAW', card, traits };
+        const offer = (state.traitOffer ?? [])
+          .map(id => pack.traits.find(t => t.id === id))
+          .filter((t): t is NonNullable<typeof t> => Boolean(t));
+        return {
+          kind: 'BACKGROUND_DRAW',
+          card,
+          traitOffer: offer,
+          pickCount: Math.min(TRAIT_PICK_COUNT, offer.length),
+        };
       }
       case 'SETUP':
         return { kind: 'SETUP', genders: ['male', 'female'], tracks: ['文', '理'] };
@@ -284,6 +292,7 @@ export function createEngine(pack: ContentPack): Engine {
             tone: ending.shareCard?.tone ?? 'warm',
             seed: state.seed,
             years: '2014-2026',
+            traits: pack.traits.filter(t => Boolean(state.flags[t.id])).map(t => t.label),
           },
         };
       }
@@ -337,10 +346,8 @@ export function createEngine(pack: ContentPack): Engine {
         state.profile.background = card.id;
         state.stats.money = card.initialMoney;
         Object.assign(state.flags, card.flags ?? {});
-        // 特质随背景一起抽:每局 2 个,只存 flags(旧存档无特质 flag 时自然为空)
-        for (const trait of rng.sample(pack.traits, TRAIT_DRAW_COUNT)) {
-          state.flags[trait.id] = true;
-        }
+        // 特质候选随背景一起亮出(抽 4 选 2),玩家用 CHOOSE_TRAITS 提交后才写 flags
+        state.traitOffer = rng.sample(pack.traits, TRAIT_OFFER_COUNT).map(t => t.id);
         state.screen = 'BACKGROUND_DRAW';
         break;
       }
@@ -686,10 +693,29 @@ export function createEngine(pack: ContentPack): Engine {
         if (action.type !== 'START') invalid(state, action);
         enterPhase(state, rng, 0);
         return;
-      case 'BACKGROUND_DRAW':
-        if (action.type !== 'CONTINUE') invalid(state, action);
+      case 'BACKGROUND_DRAW': {
+        if (action.type !== 'CHOOSE_TRAITS') invalid(state, action);
+        const offer = state.traitOffer ?? [];
+        const expected = Math.min(TRAIT_PICK_COUNT, offer.length);
+        const chosen = [...new Set(action.traitIds)];
+        if (action.traitIds.length !== expected || chosen.length !== expected) {
+          throw new Error(`CHOOSE_TRAITS expects ${expected} distinct traits`);
+        }
+        for (const id of chosen) {
+          if (!offer.includes(id)) throw new Error(`CHOOSE_TRAITS trait not in offer: ${id}`);
+        }
+        for (const id of chosen) {
+          state.flags[id] = true;
+          const mods = pack.traits.find(t => t.id === id)?.statMods;
+          for (const [key, delta] of Object.entries(mods ?? {}) as [StatKey, number][]) {
+            const next = state.stats[key] + delta;
+            state.stats[key] = key === 'money' ? Math.max(0, next) : Math.max(0, Math.min(100, next));
+          }
+        }
+        state.traitOffer = [];
         nextFlowStep(state, rng);
         return;
+      }
       case 'SETUP': {
         if (action.type !== 'CHOOSE_SETUP') invalid(state, action);
         // 容错默认 male:旧 actionLog 回放时 gender 可能缺失,不抛错

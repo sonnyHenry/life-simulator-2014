@@ -98,9 +98,14 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
   const seed = useGame(s => s.game.seed);
   const { stats } = props.view;
   const [copied, setCopied] = useState(false);
+  const traitLine =
+    props.view.shareCard.traits.length > 0
+      ? `特质:${props.view.shareCard.traits.join(' × ')}`
+      : null;
   const shareText = [
     `我在《2014：我的十二年》里达成结局：${props.view.title}`,
     props.view.shareCard.tagline,
+    ...(traitLine ? [traitLine] : []),
     `人生总分 ${props.view.score}（成绩：${props.view.grade} 级）`,
     `学识${stats.knowledge} 金钱¥${stats.money.toLocaleString()} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
     `人生编号 #${seed}`,
@@ -125,6 +130,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         tone: props.view.shareCard.tone,
         years: props.view.shareCard.years,
         seed: props.view.shareCard.seed,
+        traits: props.view.shareCard.traits,
         stats,
         score: props.view.score,
         grade: props.view.grade,
@@ -146,6 +152,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         </div>
         <h2>{props.view.shareCard.title}</h2>
         <p>{props.view.shareCard.tagline}</p>
+        {traitLine && <p className="share-traits">{traitLine}</p>}
         <div className="share-score">
           <span className="share-grade">成绩：{props.view.grade}</span>
           <span>人生总分 {props.view.score}</span>

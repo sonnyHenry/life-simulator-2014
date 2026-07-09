@@ -54,6 +54,14 @@ const STAT_ITEMS: { key: StatKey; label: string }[] = [
   { key: 'health', label: '健康' },
 ];
 
+const STAT_MOD_LABELS: Record<string, string> = {
+  knowledge: '学识',
+  money: '金钱',
+  mindset: '心态',
+  network: '人脉',
+  health: '健康',
+};
+
 const OPTION_LETTERS = ['A', 'B', 'C', 'D'];
 
 function clamp(value: number, min: number, max: number): number {
@@ -81,6 +89,8 @@ class LifeSimMiniGame {
   private view!: ViewModel;
   private restored: RestoredGame | null = null;
   private actionLog: PlayerAction[] = [];
+  /** BACKGROUND_DRAW 屏的特质选择(本地 UI 状态,提交后清空) */
+  private traitSelection: string[] = [];
   private signature = '';
   private buttons: HitButton[] = [];
   private width = 375;
@@ -190,6 +200,7 @@ class LifeSimMiniGame {
 
   private startFresh(): void {
     this.actionLog = [];
+    this.traitSelection = [];
     this.restored = null;
     clearSave();
     this.setGame(this.engine.start(randomSeed()), { resetScroll: true });
@@ -308,6 +319,13 @@ class LifeSimMiniGame {
       weight: '700',
       color: '#fff7e8',
     });
+    const traitLabels = contentPack.traits
+      .filter(t => Boolean(this.game.flags[t.id]))
+      .map(t => t.label)
+      .join('·');
+    if (traitLabels) {
+      this.drawText(traitLabels, x + 90, y + 12, { size: 11, color: '#d8c9a5', maxWidth: w - 180 });
+    }
     const compact = [
       `学识 ${this.game.stats.knowledge}`,
       `¥${formatMoney(this.game.stats.money)}`,
@@ -407,15 +425,49 @@ class LifeSimMiniGame {
       color: '#3f382f',
     }) + 18;
     y = this.drawCallout(`初始资金 ¥${formatMoney(view.card.initialMoney)}`, panel.contentX, y, panel.contentWidth);
-    for (const trait of view.traits) {
-      y = this.drawWrappedText(`【${trait.label}】${trait.text}`, panel.contentX, y + 12, panel.contentWidth, {
-        size: 14,
-        lineHeight: 22,
-        color: '#8b806d',
-      });
+    y = this.drawWrappedText(
+      `命运给了你 ${view.traitOffer.length} 张特质卡,选 ${view.pickCount} 张带进这一生——`,
+      panel.contentX,
+      y + 14,
+      panel.contentWidth,
+      { size: 14, lineHeight: 22, color: '#8b806d' },
+    );
+    for (const trait of view.traitOffer) {
+      const picked = this.traitSelection.includes(trait.id);
+      const mods = Object.entries(trait.statMods ?? {})
+        .map(([k, v]) => `${STAT_MOD_LABELS[k] ?? k}${v > 0 ? '+' : '−'}${Math.abs(v)}`)
+        .join(' ');
+      y = this.drawButton(
+        `${picked ? '✓ ' : ''}${trait.label}${mods ? `(${mods})` : ''}`,
+        trait.text,
+        panel.contentX,
+        y + 8,
+        panel.contentWidth,
+        () => {
+          this.traitSelection = picked
+            ? this.traitSelection.filter(id => id !== trait.id)
+            : this.traitSelection.length < view.pickCount
+              ? [...this.traitSelection, trait.id]
+              : this.traitSelection;
+          this.render();
+        },
+        { variant: picked ? 'primary' : 'secondary' },
+      );
     }
-    y = this.drawButton('接受命运', '', panel.contentX, y + 8, panel.contentWidth, () =>
-      this.act({ type: 'CONTINUE' }),
+    const ready = this.traitSelection.length === view.pickCount;
+    y = this.drawButton(
+      ready ? '接受命运' : `再选 ${view.pickCount - this.traitSelection.length} 张特质卡`,
+      '',
+      panel.contentX,
+      y + 8,
+      panel.contentWidth,
+      () => {
+        if (!ready) return;
+        const chosen = [...this.traitSelection];
+        this.traitSelection = [];
+        this.act({ type: 'CHOOSE_TRAITS', traitIds: chosen });
+      },
+      { disabled: !ready },
     );
     return y + 28;
   }
@@ -700,7 +752,8 @@ class LifeSimMiniGame {
     y: number,
     width: number,
   ): number {
-    const cardHeight = 178;
+    const hasTraits = view.shareCard.traits.length > 0;
+    const cardHeight = hasTraits ? 198 : 178;
     const toneColor =
       view.shareCard.tone === 'triumph'
         ? '#2e6b57'
@@ -729,6 +782,14 @@ class LifeSimMiniGame {
       lineHeight: 21,
       color: '#e8dcc2',
     }) + 12;
+    if (hasTraits) {
+      this.drawText(`特质:${view.shareCard.traits.join(' × ')}`, x + 16, cy, {
+        size: 12,
+        color: '#d8c9a5',
+        maxWidth: width - 32,
+      });
+      cy += 20;
+    }
     this.drawText(`成绩 ${view.grade} · 人生总分 ${view.score}`, x + 16, cy, {
       size: 15,
       weight: '700',
@@ -1055,6 +1116,7 @@ class LifeSimMiniGame {
     return [
       `我在《${contentPack.meta.title}》里达成结局: ${view.title}`,
       view.shareCard.tagline,
+      ...(view.shareCard.traits.length > 0 ? [`特质:${view.shareCard.traits.join(' × ')}`] : []),
       `人生总分 ${view.score}(${view.grade} 级)`,
       `学识${stats.knowledge} 金钱¥${formatMoney(stats.money)} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
       `人生编号 #${view.shareCard.seed}`,

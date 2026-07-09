@@ -33,11 +33,35 @@ export function TitleScreen(props: { view: Extract<ViewModel, { kind: 'TITLE' }>
   );
 }
 
+const STAT_LABELS: Record<string, string> = {
+  knowledge: '学识',
+  money: '金钱',
+  mindset: '心态',
+  network: '人脉',
+  health: '健康',
+};
+
+export function formatStatMods(mods: Record<string, number> | undefined): string {
+  return Object.entries(mods ?? {})
+    .map(([key, v]) => `${STAT_LABELS[key] ?? key} ${v > 0 ? '+' : '−'}${Math.abs(v)}`)
+    .join(' · ');
+}
+
 export function BackgroundDrawScreen(props: {
   view: Extract<ViewModel, { kind: 'BACKGROUND_DRAW' }>;
 }) {
   const act = useGame(s => s.act);
-  const { card, traits } = props.view;
+  const { card, traitOffer, pickCount } = props.view;
+  const [selected, setSelected] = useState<string[]>([]);
+  const toggle = (id: string) => {
+    setSelected(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : prev.length < pickCount
+          ? [...prev, id]
+          : prev,
+    );
+  };
   return (
     <Card className="center">
       <p className="kicker">你的出身是——</p>
@@ -46,18 +70,34 @@ export function BackgroundDrawScreen(props: {
         <p>{card.text}</p>
         <p className="bg-money">初始资金 ¥{card.initialMoney.toLocaleString()}</p>
       </div>
-      {traits.length > 0 && (
+      {traitOffer.length > 0 && (
         <div className="trait-list">
-          <p className="kicker">与生俱来的特质——</p>
-          {traits.map(t => (
-            <div className="trait-card" key={t.id}>
+          <p className="kicker">
+            命运给了你 {traitOffer.length} 张特质卡,选 {pickCount} 张带进这一生——
+          </p>
+          {traitOffer.map(t => (
+            <button
+              type="button"
+              className={`trait-card selectable ${selected.includes(t.id) ? 'selected' : ''}`}
+              key={t.id}
+              onClick={() => toggle(t.id)}
+            >
               <h3>{t.label}</h3>
               <p>{t.text}</p>
-            </div>
+              {t.statMods && <p className="trait-mods">{formatStatMods(t.statMods)}</p>}
+            </button>
           ))}
         </div>
       )}
-      <ContinueButton onClick={() => act({ type: 'CONTINUE' })} label="接受命运" />
+      <button
+        className="continue-btn"
+        disabled={selected.length !== pickCount}
+        onClick={() => act({ type: 'CHOOSE_TRAITS', traitIds: selected })}
+      >
+        {selected.length === pickCount
+          ? '接受命运'
+          : `再选 ${pickCount - selected.length} 张特质卡`}
+      </button>
     </Card>
   );
 }

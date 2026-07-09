@@ -1,5 +1,5 @@
 import type { Condition, Effect } from './dsl';
-import type { Track } from './stats';
+import type { StatKey, Track } from './stats';
 
 export interface GameDate {
   year: number;
@@ -97,7 +97,7 @@ export interface BackgroundCard {
 }
 
 /**
- * 玩家特质:开局随背景一起随机抽取(每局 2 个),以 `flags[id]=true` 存储。
+ * 玩家特质:开局随背景亮出 4 张候选(traitOffer),玩家选 2 张,以 `flags[id]=true` 存储。
  * id 必须以 `trait_` 开头,事件内容可用 `{ flag: 'trait_xxx' }` 做分支。
  */
 export interface TraitCard {
@@ -109,6 +109,8 @@ export interface TraitCard {
    * 只影响非 mandatory 事件的抽取概率,不影响强制/NPC/schedule 事件。
    */
   poolBias?: Record<string, number>;
+  /** 选中该特质时的开局数值加成(有得有失,选卡屏直接展示) */
+  statMods?: Partial<Record<StatKey, number>>;
 }
 
 export interface ApplicationMajor {

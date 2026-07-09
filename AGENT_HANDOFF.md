@@ -567,12 +567,25 @@
 - 验证:typecheck / test 25 / validate 0err0warn(153 事件)/ **simulate -n 10000 --check 通过**(153/153 全覆盖、20 结局全可达、提前结局 3.1%)/ web + minigame build。分布影响:特质事件普遍带温情 payoff,随机局心态 p50 54 → 63,金钱分位基本不变,全部门禁内。
 - 体感强化后的下一步(未做):特质常驻展示(StatsBar/结算屏/分享卡)、特质专属结局、以及第三十轮 handoff 记录的"LLM 离线生成"内容扩产管线。
 
+### M5 第三十二轮(特质构筑:抽4选2 + 全程体感)
+
+由 Codex 完成,内容版本 0.21.0 → 0.22.0。背景:用户实测第三十一轮后反馈"能感到一点差异,但不够"。本轮把特质从"开局被动随机标签"改成"玩家主动构筑 + 全程可见 + 终局收束"。
+
+- **开局抽 4 选 2**:`GameState` 新增可选 `traitOffer?: string[]`;`TraitCard` 新增 `statMods?: Partial<Record<StatKey, number>>`;`BACKGROUND_DRAW` ViewModel 从 `{ traits }` 改为 `{ card, traitOffer, pickCount }`;`PlayerAction` 新增 `{ type:'CHOOSE_TRAITS', traitIds }`。`enterFlowStep(BACKGROUND_DRAW)` 只写候选 `rng.sample(pack.traits, 4)`、不再直接写特质 flags。`dispatch(BACKGROUND_DRAW)` 只接受 CHOOSE_TRAITS,校验数量/去重/offer 内合法后写 `flags[trait]=true`,应用 statMods,清空 offer,进入 SETUP。旧 actionLog 里 BACKGROUND_DRAW 的 CONTINUE 会和第二十六轮题数变更一样重放失败,走既有新开局降级。
+- **三端抽卡 UI**:web `FlowScreens.tsx`、小程序 `index.tsx`、小游戏 `game.ts` 都改为 4 张特质候选可点选,选满 2 张才能"接受命运";卡面展示 `statMods`。小游戏本地维护 `traitSelection`,提交后清空。
+- **开局数值差异**:`traits.ts` 6 张卡都有小幅有得有失的 statMods:卷王 学识+8/健康-5,松弛 心态+10/学识-4,胆大 心态+6/学识-3,恋家 心态+8/人脉-4,社牛 人脉+12/学识-5,细腻 学识+5/人脉+3/心态-6。引擎对 0-100 属性钳位,money 只做非负钳位;validate 限制 statMods key 合法、非零且 |value|≤20。
+- **特质分支密度**:在 college/work/random/drama/career-cs/pandemic 等高频池扩充特质选项/结果,第三十轮原 10 处 + 本轮新增约 23 处,总计约 33 处。新增分支继续遵守"真实变数":多 outcome 或混合正负 stats,不透明占优,每个 outcome 至少有非零数值影响。专项脚本 300 局统计:特质专属事件 2.00/局、特质选项 3.74/局,总触点 5.74/局(第三十一轮仅专属事件固定 2.00)。
+- **6 个特质专属结局**:`end_trait_grinder`《燃烧过的人》、`end_trait_chill`《慢慢来的人》、`end_trait_risk`《还坐在牌桌上的人》、`end_trait_homebody`《离家不远的人》、`end_trait_social`《朋友遍地的人》、`end_trait_sensitive`《把日子过成日记的人》。priority 151-156,排在职业/叙事结局之后、兜底之前,目标是分流原本落「平凡之路」的玩家,不抢职业线叙事结局。n=10000 随机局 6 个特质结局合计约 21.3%,单个最高 5.5%,兜底降到 4.7%。
+- **常驻展示与分享**:web StatsBar、小程序顶栏、小游戏顶栏都从 `contentPack.traits + game.flags` 反查已选特质常驻展示。ENDING shareCard ViewModel 增加 `traits: string[]`;web 结局页、复制文案、Canvas 分享图,以及小程序/小游戏分享卡和分享文案都显示「特质:胆大 × 恋家」。
+- **工具/测试**:`simulate.ts` 的 bot 在 BACKGROUND_DRAW 随机选满 `pickCount`;verbose 日志打印家境和已选特质。`engine.test.ts` 全部旧 BACKGROUND_DRAW CONTINUE 改 CHOOSE_TRAITS,新增 offer 4 选 2/miniPack 3 选 2、非法选择、statMods 应用断言。`validate.ts` 增加 statMods 校验。
+- 验证:typecheck / test 25 / validate 0err0warn(153 事件、26 结局、6 特质)/ **simulate -n 10000 --check 通过**(153/153 全覆盖、26 结局全可达、提前结局 3.3%,兜底 4.7%)/ compare 500:随机55、卷钱52、保心态65、卷总分74(仍低于 A 线,无必胜解)/ web build + minigame build + miniprogram build:weapp 全过。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.21.0'
+version: '0.22.0'
 title: '2014：我的十二年'
 ```
 
@@ -594,7 +607,7 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第三十一轮特质体感强化后):
+最近一次完整验证通过(M5 第三十二轮特质构筑后):
 
 - `pnpm typecheck`
 - `pnpm test`(25 通过)
@@ -605,8 +618,8 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次 `pnpm validate`:
 
 ```text
-校验内容包 base@0.21.0
-事件 153, 结局 20, NPC 5, 题目 37, 收入规则 24, 特质 6
+校验内容包 base@0.22.0
+事件 153, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6
 完成: 0 errors, 0 warnings
 ```
 
@@ -614,20 +627,21 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ```text
 事件覆盖: 153/153
-提前结局占比: 3.1%
-金钱分位: p10=¥139100 p50=¥241500 p90=¥434300 · 心态分位: p10=30 p50=63 p90=95
+26 结局全可达;特质结局合计约 21.3%,兜底 4.7%
+提前结局占比: 3.3%
+金钱分位: p10=¥140400 p50=¥243900 p90=¥439200 · 心态分位: p10=32 p50=68 p90=95
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
 **注意:n=1000/n=300 档位已不再可靠**——139 事件 + 20 结局中存在命中率 ~0.1% 的展示性稀有结局(end_early_retire、end_cashflow_break),固定种子下任何 RNG 流偏移(改题数、加事件、加职业线都会偏移)都会让小样本随机漏采:n=1000 曾稳定命中,第二十七轮加 14 事件 + 心理学线后 n=1000 掉到 0、n=3000 仍漏、n=5000 起 4-5 局、n=10000 达 8-11 局。CI 与本地可达性验证一律用 n=10000。
 
-最近一次 `pnpm simulate -n 500 --compare`(M5 第三十轮导演器 + 特质落地后):
+最近一次 `pnpm simulate -n 500 --compare`(M5 第三十二轮特质构筑后):
 
 ```text
-随机 52 · 卷钱 49(崩溃率 9.2%) · 保心态 64 · 卷总分 73
+随机 55 · 卷钱 52(崩溃率 7.6%) · 保心态 65 · 卷总分 74
 ```
 
-卷总分(开天眼)bot 73 分仍低于 A 线 76,无必胜解;与 M5-26 的 49/47/61/72 相比整体 +1~3 分,来自导演器的低谷喘息机制,排序结构未变。
+卷总分(开天眼)bot 74 分仍低于 A 线 76,无必胜解;statMods 和特质结局没有把策略 bot 推成必胜解。
 
 ## 当前重要实现点
 
@@ -637,15 +651,15 @@ pnpm --filter @life-sim/miniprogram build:weapp
 - 内容长期影响主要通过 `flags` / `npcStage` / `npcFavor` / `history` 实现
 - NPC 主动推进在 `packages/core/src/systems/scheduler.ts`
 - 随机事件抽取经过导演式选择器(同文件):类别冷却 + 心态节奏 + 特质 poolBias,乘数钳位 [0.15, 4]
-- 玩家特质开局抽 2 个存 `flags.trait_*`,内容用 `visibleIf`/`condition` 做特质分支,特质定义在 `packages/content/src/setup/traits.ts`
+- 玩家特质开局抽 4 选 2:候选存在 `state.traitOffer`,确认后写 `flags.trait_*` 并应用 `statMods`;内容用 `visibleIf`/`condition` 做特质分支,特质定义在 `packages/content/src/setup/traits.ts`
 - 志愿和三岔口的特殊流程结果通过 `pendingFlowAdvance` 中转到 `OUTCOME`
 
 ## 已知问题 / 后续建议
 
-- **重玩性路线图(第三十轮确定)**:导演式选择器 + 特质系统已落地;下一步方向是"LLM 离线生成 + n=10000 门禁把关"的内容扩产管线——开发期用 LLM 按 GameEvent schema 批量生成候选事件/特质分支文案,人工过文风后照常跑门禁入库,产物仍是静态可测内容。实时 LLM 生成已明确排除(破坏确定性验证)。特质当前 6 个,扩到 8-10 个时注意 poolBias 叠乘(两特质同 category 相乘)不要把单类权重推过钳位上限 4。
+- **重玩性路线图(第三十轮确定)**:导演式选择器 + 特质系统已落地,第三十二轮已把特质做成抽 4 选 2 构筑、常驻 UI、专属结局和高频触点。后续方向是"LLM 离线生成 + n=10000 门禁把关"的内容扩产管线——开发期用 LLM 按 GameEvent schema 批量生成候选事件/特质分支文案,人工过文风后照常跑门禁入库,产物仍是静态可测内容。实时 LLM 生成已明确排除(破坏确定性验证)。特质当前 6 个,扩到 8-10 个时注意 poolBias 叠乘(两特质同 category 相乘)不要把单类权重推过导演乘数上限 4,同时每张新卡最好配 statMods、专属事件和专属结局,否则体感会掉回"标签化"。
 
 - **职业线密度已五线对齐**:计算机 10、心理 9、医学 9、教育(师范)8、金融 10 个专属事件,全部覆盖到 2026(M5 第二十八轮补完医学 2019/2022/2025、金融 2022/2023/2025、心理 2022/2025 的空缺年份)。内容总量 147 个,已超过设计文档最初设想的约 125 个。其中医学 2022《这一年的白大褂》、金融 2022《降本增效那一年》是"分支切换点"——玩家可在公立/民营、前台/中后台等既有收入档间转档,重玩辨识度主要来源之一。
-- 结局数量当前是 19 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要再次挤高兜底或某个单一结局。
+- 结局数量当前是 26 个,已超过 12-15 个 MVP 目标区间;后续新增结局要注意分布不要挤压既有叙事结局或制造单个结局过高。
 - 金融线样本量偏小(1000 局随机 bot 仅 11 局落在金融职业线,因为「金融学」只在 985/211/一本三档、且这三档专业选项本身较多),`end_finance_survivor`(牛熊过客)命中率目前 0.2%-0.7%——M5 第二十五轮已把它的 mindset 门槛从 ≥25 降到 ≥5(修复了 n=300 时完全摸不到的问题),但样本量本身偏小的问题还在,如果后续想让这条线更常被玩到,可以考虑扩大专业投放档次或提高该批次里金融学被随机选中的权重。
 - 临床医学专业选"考公"分支时会有已知的次要叙事错位(仍会触发 2020 出征事件但拿不到 career_medicine),详见 M5 第二十二轮小节,不影响任何门禁,暂不计划修复。
 - 分享图 Canvas 渲染已通过类型检查和构建,但还没有在真实浏览器里点过"保存分享图",上线前建议人工玩一局到结局验证一次。

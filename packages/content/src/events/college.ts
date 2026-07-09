@@ -161,6 +161,23 @@ export const collegeEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'c',
+        text: '先找拿过奖的学长学姐,把评委的口味摸清楚',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '两顿食堂饭换来三条关键情报:评委爱听“成长故事”、PPT 别超十页、去年有人讲哭了全场。你把材料改成了一个有起伏的故事。答辩那天,评委频频点头。奖学金到手,你还顺便认识了两个以后帮过你大忙的学长。',
+            effects: [{ stats: { money: 5000, network: 6, mindset: 4, knowledge: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '情报都对,但今年评委换人了。新老师最烦“讲故事”,当场打断:“说重点,你的绩点和成果。”你临场救回来一点,但名单上没有你。散场后学长请你喝了瓶汽水:“兄弟,情报也有保质期。”',
+            effects: [{ stats: { network: 3, mindset: -4 } }],
+          },
+        ],
+      },
+      {
         id: 'b',
         text: '算了，不折腾',
         outcomes: [
@@ -189,6 +206,23 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '一学期下来，你赚了三千块，也重新做了一遍高中数学。家长很满意，只是每次晚上九点半坐末班公交回学校的时候，你会有点想家。',
             effects: [{ stats: { money: 3000, mindset: -2, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '接。再让学长多介绍一单,周末排满',
+        visibleIf: { flag: 'trait_grinder' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '周六上午一单,周日下午一单,一学期下来你赚了六千多,高中数学讲得比当年自己考试时还熟。代价是整整一个学期没有完整的周末,室友的球局你一次都没赶上。钱包和朋友圈,你选了钱包。',
+            effects: [{ stats: { money: 6500, knowledge: 3, mindset: -3, health: -4, network: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '两个单子撑了两个月,第二家的孩子成绩没起色,家长客气地把你换掉了。你才明白家教也是服务业:拼的不只是会不会,还有你已经被榨干的耐心。剩下那单你教完了,但你开始怀疑“把自己排满”是不是唯一的活法。',
+            effects: [{ stats: { money: 3500, mindset: -5, health: -3 } }],
           },
         ],
       },
@@ -289,6 +323,23 @@ export const collegeEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: '先弄清楚:你难受的到底是这门课,还是这个专业',
+        visibleIf: { flag: 'trait_sensitive' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '别人在骂课难,你在深夜里诚实地问自己:如果这门课很简单,你会喜欢这个专业吗?答案让你睡不着。你去蹭了两节别的系的课,翻了转专业的政策,最后没有转——但你从此知道自己在哪里、为什么留下。同样是留下,想明白的留下和被动的留下,是两种大学。',
+            effects: [{ stats: { knowledge: 4, mindset: 5 } }],
+          },
+          {
+            weight: 1,
+            text: '想得太深的代价是,那两周你陷进了“选错人生”的漩涡,连简单的作业都不想碰。最后把你捞出来的是室友一句糙话:“想那么多,先把这章看完再难受。”有道理。细腻的人容易把一门课的挫败感,放大成整个人生的判决书。',
+            effects: [{ stats: { mindset: -6, knowledge: 2 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -307,6 +358,23 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '你第一次坐进写字楼工位，第一次发现 Excel 和邮件也能让人筋疲力尽。实习证明很薄，但它让简历不再空白。',
             effects: [{ stats: { money: 2500, network: 5, mindset: -2, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '先在校友群里吼一嗓子,看有没有人内推',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '还真有。一个毕业三年的学姐把你的简历直接递给了她主管,你跳过了海投,进了一家比原目标好一档的公司实习。入职那天学姐请你吃饭:“当年也是别人这么拉我一把。”你记下了这句话,和这种把人脉用来传递的方式。',
+            effects: [{ stats: { money: 3500, network: 8, mindset: 2, health: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '群里很热闹,加油的表情包收了一堆,内推一个没有。最后你还是老老实实海投,只是多花了两周。你悟了:人脉不是好友数量,是你能为别人做过什么。这一课,值两周。',
+            effects: [{ stats: { money: 2000, network: 2, mindset: -3 } }],
           },
         ],
       },
@@ -345,6 +413,23 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '你写得最早，也被毙得最早。开题会上老师一句“选题太空”，两个月的框架推倒重来。好处是你还有时间；坏处是，你亲眼看着拖到最后的同学直接绕过了这一劫——他们的选题老师根本没来得及细看。',
             effects: [{ stats: { knowledge: 3, mindset: -4 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '不焦虑。每天固定写四百字,写完就去过日子',
+        visibleIf: { flag: 'trait_chill' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '全组都在熬夜赶工的季节,你像个异类:每天下午写四百字,写完打球、吃饭、睡觉。答辩前一周,你的论文自然长到了两万字,查重一次过。同学问你秘诀,你说“没有秘诀,就是不攒着”。焦虑不会让论文变快,这是你用一个安稳的春天证明的事。',
+            effects: [{ stats: { knowledge: 5, mindset: 5, health: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '节奏是好节奏,但你低估了实验数据翻车的杀伤力:四月中数据推倒重来,你那套“每天四百字”的从容瞬间不够用了。最后两周你也加入了熬夜大军,好在前面攒的底子厚,惊险交卷。松弛是好东西,但它需要给意外留缓冲。',
+            effects: [{ stats: { knowledge: 4, mindset: -3, health: -3 } }],
           },
         ],
       },
@@ -401,6 +486,23 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '你一晚上没让冷场超过十秒。散场时班长搂着你的脖子说：“幸好有你，不然今晚得哭成什么样。”多年后群里回忆起散伙饭，大家记得的不是眼泪，是那晚笑到拍桌子的样子——这也是一种收尾，不比眼泪差。',
             effects: [{ stats: { mindset: 3, network: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '把这些年没人好意思说的话,整理成一封长信',
+        visibleIf: { flag: 'trait_sensitive' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把四年的荒唐事、亏欠和感谢写成一封长信,饭后发进群里。群里先是沉默,然后一个个开始接话:有人道歉,有人补刀,有人发了几张从没公开过的旧照片。那晚之后群还是会慢慢安静,但安静之前,你们认真告别过。',
+            effects: [{ stats: { network: 5, mindset: 5, health: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '你写得太认真,像把一顿散伙饭写成了毕业论文。有人看哭了,也有人尴尬地回了个表情包。你有点受伤,后来又想明白:不是每个人都愿意在离别那天被迫深情。细腻的人要学会,有些话说到七分就够。',
+            effects: [{ stats: { network: 2, mindset: -4, knowledge: 1 } }],
           },
         ],
       },
@@ -675,6 +777,23 @@ export const collegeEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'd',
+        text: '建个新生互助群,顺手把全楼的人都拉进来',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你从“谁有热水卡”聊到“哪家店便宜”,三天把群拉到两百多人。后来军训借针线、拼车去市区、二手课本流转,都先在你这个群里转一圈。大学第一周,你还没搞懂专业课,先搞懂了人和人怎么连起来。',
+            effects: [{ stats: { network: 7, mindset: 3, health: -2 } }],
+          },
+          {
+            weight: 1,
+            text: '群是热闹起来了,也吵起来了。广告、表情包、约饭、吐槽教官,手机震到凌晨两点。你第一次体会到当群主的代价:人脉不是通讯录数字,是你要替一群人的噪音负责。',
+            effects: [{ stats: { network: 4, mindset: -3, health: -2 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -734,6 +853,23 @@ export const collegeEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'd',
+        text: '风口来了就试一把:做校园跑腿和代取快递',
+        visibleIf: { flag: 'trait_risk_taker' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你在宿舍楼下贴了二维码,一单两块钱,代取快递、代买夜宵、代排打印队。两个月后你赚到第一笔像样的零花钱,也发现小生意最难的不是点子,是半夜十一点还要下楼接电话。',
+            effects: [{ stats: { money: 2500, network: 5, mindset: 2, health: -5 } }],
+          },
+          {
+            weight: 1,
+            text: '订单来得比你想象中乱:有人临时取消,有人嫌慢差评,还有人让你顺便带一箱水上六楼。你赚了几百块,赔上几次作业 deadline。胆子让你开了张,但账本告诉你:不是每个风口都值得亲自站上去。',
+            effects: [{ stats: { money: 700, knowledge: -3, mindset: -4, health: -3 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -781,6 +917,23 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '你没有交押金，依旧挤着永远不准点的公交。室友吐槽你落伍，你倒觉得，至少这笔押金的钱，安安稳稳留在了自己兜里。',
             effects: [{ stats: { money: 200, mindset: 1, health: -1 } }],
+          },
+        ],
+      },
+      {
+        id: 'd',
+        text: '不抢车,每天提前十分钟出门慢慢走',
+        visibleIf: { flag: 'trait_chill' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '别人围着校门口的车堆扫码,你把耳机一戴,沿着树荫慢慢走去教学楼。十分钟不够改变人生,但够你把早八从一场冲刺变成一段散步。你发现大学里最稀缺的资源不是单车,是不用赶的路。',
+            effects: [{ stats: { mindset: 4, health: 4, network: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '慢慢走的代价是,有几次你真迟到了。老师点名时你刚好从后门溜进来,全班回头看。你在心里给“松弛”补了一条备注:提前十分钟可以,提前两分钟不叫松弛,叫侥幸。',
+            effects: [{ stats: { mindset: -2, health: 2, knowledge: -1 } }],
           },
         ],
       },

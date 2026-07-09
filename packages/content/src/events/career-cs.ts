@@ -101,6 +101,23 @@ export const careerCsEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'd',
+        text: '顶可以,但把“顶”的定义谈清楚:要么调休,要么加钱',
+        visibleIf: { flag: 'trait_chill' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你没有硬刚,也没有硬扛,只是在一对一里平静地问组长:“关键期到什么时候?过了之后调休怎么算?”组长愣了一下,居然真的给了个日期。大小周照常,但你成了组里唯一一个知道终点在哪的人——跑马拉松和跑到死,区别就在这。',
+            effects: [{ stats: { money: 10000, mindset: -4, health: -8 } }],
+          },
+          {
+            weight: 1,
+            text: '组长的回答是“公司有难处,大家都在顶”。你心里那杆秤当场就平了:既然说不清终点,那就自己定。你照常加班,但周日雷打不动关机半天。绩效不算亮眼,不过这一年组里陆续有人进了医院,你没有。',
+            effects: [{ stats: { money: 6000, mindset: 2, health: -6 } }],
+          },
+        ],
+      },
+      {
         id: 'c',
         text: '只接一个周末短单，合同和交付边界写清楚',
         outcomes: [

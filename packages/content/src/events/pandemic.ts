@@ -84,6 +84,31 @@ export const pandemicEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'd',
+        text: '既然回不去,就把这个假期当成偷来的团圆',
+        visibleIf: { flag: 'trait_homebody' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '别人在焦虑复工,你在院子里陪爸爸腌腊肉、跟妈妈学了三道家常菜。工作照常远程,但下班就是饭桌。这是你工作以后第一次在家待满两个月——用的是全世界最糟糕的理由,过的却是你想了很多年的日子。返城那天你妈没哭,你在高速上哭了一小段。',
+            effects: [
+              { stats: { mindset: 8, health: 3, network: -3 } },
+              { setFlag: 'pandemic_wfh' },
+              { schedule: { eventId: 'ev_pandemic_2021_normalize', afterRounds: 1 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '团圆到第六周,温情开始被现实磨损:爸妈的作息和你的会议冲突,你的“再待几天”和领导的“何时返岗”也开始冲突。第七周你订了返程票。走的时候后备箱照样塞满,只是你懂了:恋家的人也需要和家保持一点距离,想念才有地方住。',
+            effects: [
+              { stats: { mindset: 2, network: -4 } },
+              { setFlag: 'pandemic_wfh' },
+              { schedule: { eventId: 'ev_pandemic_2021_normalize', afterRounds: 1 } },
+            ],
+          },
+        ],
+      },
+      {
         id: 'c',
         text: '报名社区志愿者，帮着测温、登记、送菜',
         outcomes: [
@@ -181,6 +206,23 @@ export const pandemicEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'd',
+        text: '把不确定性变成计划表:证书、作品集、备选简历一起推进',
+        visibleIf: { flag: 'trait_grinder' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '别人说“等稳定了再说”,你把稳定这件事从计划里删掉了。白天照常扫码上班,晚上刷课、改简历、整理作品集。年底你手里多了一个证书和一份能随时投出去的简历,只是日历上连续三个月没有一个真正空白的周末。',
+            effects: [{ stats: { knowledge: 7, mindset: -3, health: -5, network: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你把计划排得太满,满到任何一次临时核酸、封控通知、线上会议都能把它撞歪。三个月后,课程开了三门,证书报了两个,真正完成的只有一半。你第一次意识到:卷王也需要冗余,不只是硬盘需要。',
+            effects: [{ stats: { knowledge: 4, mindset: -5, health: -3 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -225,6 +267,23 @@ export const pandemicEvents: GameEvent[] = [
             condition: { not: { flag: 'pandemic_volunteer' } },
             text: '你在业主群里发了句"家里有多的退烧药，需要的邻居说一声"，五分钟收到十几条回复。你把药拆成单板挨家送，隔着门听到一声声"谢谢"。后来你自己阳了，门把手上出现了别人回赠的水果。你想，三年了，大家都在学着把日子过成互相搭把手的样子。',
             effects: [{ stats: { network: 7, mindset: 5, health: -6 } }],
+          },
+        ],
+      },
+      {
+        id: 'd',
+        text: '阳康之后,把三年没聚齐的人全约出来',
+        visibleIf: { flag: 'trait_social' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你在群里发起“阳康重聚局”,报名接龙排到了二十多人,最后订了个能拼三桌的馆子。三年没见的人坐在一起,聊谁被封在公司、谁在方舱唱歌、谁的婚礼推迟了三次。散场时老班长拍你肩膀:“还得是你,不然这群人这辈子凑不齐。”有些群三年没人说话,不是散了,是在等一个开口的人。',
+            effects: [{ stats: { network: 9, mindset: 7, money: -1500 } }],
+          },
+          {
+            weight: 1,
+            text: '局是攒起来了,但一半人临时“又阳了”“家里有事”,三桌缩成一桌。到场的人喝得很尽兴,你却盯着那些空座位有点出神。饭后你把没来的人挨个私聊了一遍——热闹你可以组织,但重逢这件事,急不来。',
+            effects: [{ stats: { network: 4, mindset: -2, money: -1000 } }],
           },
         ],
       },

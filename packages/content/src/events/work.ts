@@ -502,6 +502,18 @@ export const workEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'd',
+        text: '你注意到一个细节:他只晒利息,从没晒过本金赎回',
+        visibleIf: { flag: 'trait_sensitive' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你问了他一句:“你试过把本金取出来吗?”他愣了一下,说“取那个干嘛,利息这么高”。就是这个愣神让你决定不投。半年后平台暴雷,他在工位上打了一下午电话。你没说“早就觉得不对”,只是陪他下楼抽了根烟。有些直觉说不出道理,但它救过你的钱包。',
+            effects: [{ stats: { knowledge: 3, mindset: 2 } }, { setFlag: 'dodged_p2p' }],
+          },
+        ],
+      },
+      {
         id: 'c',
         text: '投五万上“新手加息标”，锁一年',
         outcomes: [
@@ -973,6 +985,26 @@ export const workEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'c',
+        text: '这不是风险,这是机会——但这次按纪律来,分三批,只用闲钱',
+        visibleIf: { flag: 'trait_risk_taker' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你给自己立了规矩:三批入场,每批间隔一个月,动用的钱亏光也不影响生活。前两批接住了下跌,第三批等来了反弹。收益没有梭哈的想象空间大,但这是你第一次在市场里同时用到胆子和刹车。赌性没变,变的是你终于给它装了安全带。',
+            effects: [{ stats: { money: 25000, knowledge: 4, mindset: 3 } }],
+          },
+          {
+            weight: 1,
+            text: '纪律执行到第二批,市场继续跌,你的手比脑子快——第三批提前进场了,还加了量。反弹最终没等到你的成本线。亏得不算致命(毕竟前两批真的是闲钱),但你不得不承认:纪律这东西,写下来容易,跌到位的时候难。',
+            effects: [
+              { moneyCost: { rate: 0.15, max: 30000, roundTo: 1000, reason: 'investment' } },
+              { stats: { mindset: -6 } },
+            ],
+          },
+        ],
+      },
+      {
         id: 'b',
         text: '逢低补仓，摊薄成本',
         outcomes: [
@@ -1132,6 +1164,26 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'd',
+        text: '风口哪有一个一个追的?短剧和出海各押一注',
+        visibleIf: { flag: 'trait_risk_taker' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '两注都下了,像在赌场同时押大小。短剧那注三个月归零;出海那注不亏不赚,钱卡在账期里,每天在群里看朋友发货柜照片。年底一算,分散下注没有分散风险,只是把一份焦虑拆成了两份。你把这条写进了自己的赌徒手册:看不懂的东西,买两个不等于懂了。',
+            effects: [
+              { moneyCost: { rate: 0.18, max: 25000, roundTo: 1000, reason: 'investment' } },
+              { stats: { mindset: -6, knowledge: 3 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '短剧那注水花都没有,出海那注却意外踩中了一波补货潮,回款连本带利,把短剧的亏损盖住还有富余。朋友夸你“布局有眼光”,你笑着收下,心里门儿清:这叫东边不亮西边亮,不叫眼光。但胆大的人早就接受了——人生里很多“眼光”,拆开看都是运气的包装纸。',
+            effects: [{ stats: { money: 30000, mindset: 4 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1225,6 +1277,23 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'c',
+        text: 'owner 意识是吧?那把隔壁组那个没人敢接的项目也给我',
+        visibleIf: { flag: 'trait_grinder' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你主动请缨接下了那个烫手项目,三个月里同时跑两条线,周报写得比组长的还长。项目上线那天,大领导在群里点名表扬,绩效和涨薪都有了着落。只是庆功宴上你点了杯温水——胃是今年第二次疼了,你没跟任何人说。',
+            effects: [{ stats: { money: 15000, knowledge: 4, network: 5, mindset: -4, health: -9 } }],
+          },
+          {
+            weight: 1,
+            text: '两个项目撞了排期,你哪边都不想放,结果哪边都磕磕绊绊。原本的项目延期两周,新接的项目被收回去给了别人。领导找你谈话,这次的关键词从“owner 意识”换成了“聚焦”。卷王最难学的一课:野心要配上产能,不然叫贪多。',
+            effects: [{ stats: { knowledge: 3, mindset: -7, health: -6 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1278,6 +1347,18 @@ export const workEvents: GameEvent[] = [
           },
         ],
       },
+      {
+        id: 'd',
+        text: '给家里换台大电视,再包两个红包',
+        visibleIf: { flag: 'trait_homebody' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '电视是你在网上下单直接寄回家的,红包是过年当面给的。你妈嘴上说“乱花钱”,转头就在亲戚群里发了新电视的照片。年终奖数字不大,但它第一次让你体会到一种新的身份:不再只是被家里养的人,也是能反过来照顾家里的人。',
+            effects: [{ stats: { money: 6000, mindset: 8, network: 1 } }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1301,6 +1382,23 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '边界是守住了，但那几个月的新项目，都悄悄流向了消息秒回的同事。年底看绩效，你守住的作息被折算成了一个不咸不淡的评级。',
             effects: [{ stats: { mindset: 2, money: -4000 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '通勤省下的两小时,拿来偷偷学点新东西',
+        visibleIf: { flag: 'trait_grinder' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '别人在会议间隙摸鱼,你在会议间隙刷课。一年下来,你多学了一门技能,考了一个证。同事都说远程让人废掉,你心想:废不废看人——通勤这两小时,是 2020 年发给所有人的,只是大多数人没拆封。',
+            effects: [{ stats: { knowledge: 7, mindset: -2, health: -3 } }],
+          },
+          {
+            weight: 1,
+            text: '课买了,证报了,但客厅实在不是自习室:外卖门铃、工作消息、沙发的引力……三个月后你盘点进度,视频只看了五分之一。你第一次承认,卷需要环境,而家的环境天生是用来生活的。',
+            effects: [{ stats: { knowledge: 2, mindset: -4, money: -2000 } }],
           },
         ],
       },
@@ -1668,6 +1766,23 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你把问题往后推了推。成年人不是不知道问题在那儿，只是有时候真的需要先把今天过完。',
             effects: [{ stats: { mindset: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'c',
+        text: '把这种说不清的情绪写下来,一条一条看清它',
+        visibleIf: { flag: 'trait_sensitive' },
+        outcomes: [
+          {
+            weight: 2,
+            text: '你在备忘录里写了很长一段,写完发现所谓“三十岁焦虑”拆开来其实就三件事:怕身体垮、怕钱不够、怕自己不再有选择。三件事,两件可以现在开始做,一件想了也没用。把模糊的恐惧翻译成具体的清单,是你这种人独有的自救方式。',
+            effects: [{ stats: { knowledge: 4, mindset: 6 } }],
+          },
+          {
+            weight: 1,
+            text: '写着写着,你从三十岁写到了十八岁,从存款写到了那些没走的路。凌晨一点,备忘录三千字,焦虑不减反增。心思细的人做情绪整理,有时像给毛衣抽线头——一抽就是一整件。',
+            effects: [{ stats: { mindset: -4, knowledge: 2 } }],
           },
         ],
       },

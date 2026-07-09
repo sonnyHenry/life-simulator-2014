@@ -9,9 +9,20 @@ import {
   restoreSave,
   Rng,
   type ContentPack,
+  type Engine,
   type GameState,
   type PlayerAction,
 } from '../src/index';
+
+/** 在 BACKGROUND_DRAW 屏按 offer 顺序选满 pickCount 个特质 */
+function pickTraits(engine: Engine, state: GameState): PlayerAction {
+  const view = engine.view(state);
+  if (view.kind !== 'BACKGROUND_DRAW') throw new Error('expected BACKGROUND_DRAW view');
+  return {
+    type: 'CHOOSE_TRAITS',
+    traitIds: view.traitOffer.slice(0, view.pickCount).map(t => t.id),
+  };
+}
 
 function miniPack(): ContentPack {
   return {
@@ -96,7 +107,7 @@ function miniPack(): ContentPack {
     ],
     backgrounds: [{ id: 'bg1', label: '普通家庭', text: '普通', initialMoney: 5000 }],
     traits: [
-      { id: 'trait_a', label: '特质A', text: '测试特质A', poolBias: { career: 1.5 } },
+      { id: 'trait_a', label: '特质A', text: '测试特质A', poolBias: { career: 1.5 }, statMods: { knowledge: 5 } },
       { id: 'trait_b', label: '特质B', text: '测试特质B' },
       { id: 'trait_c', label: '特质C', text: '测试特质C' },
     ],
@@ -120,6 +131,9 @@ function autoPlay(pack: ContentPack, seed: number): GameState {
     switch (view.kind) {
       case 'TITLE':
         action = { type: 'START' };
+        break;
+      case 'BACKGROUND_DRAW':
+        action = pickTraits(engine, state);
         break;
       case 'SETUP':
         action = { type: 'CHOOSE_SETUP', gender: 'male', track: '理' };
@@ -171,7 +185,7 @@ describe('M2 flow support', () => {
     const engine = createEngine(pack);
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     while (engine.view(state).kind === 'EXAM') {
       state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 1 });
@@ -210,7 +224,7 @@ describe('M2 flow support', () => {
     const engine = createEngine(pack);
     let state = engine.start(3);
     state = engine.dispatch(state, { type: 'START' });
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     while (engine.view(state).kind === 'EXAM') {
       state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 1 });
@@ -239,7 +253,7 @@ describe('career crossroad branches', () => {
     const engine = createEngine(pack);
     let state = engine.start(seed);
     state = engine.dispatch(state, { type: 'START' });
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
@@ -329,7 +343,7 @@ describe('same-round consequence (afterRounds: 0)', () => {
     const engine = createEngine(pack);
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     while (engine.view(state).kind === 'EXAM') {
       state = engine.dispatch(state, { type: 'ANSWER', optionIndex: 0 });
@@ -359,7 +373,7 @@ describe('save replay & migration', () => {
       state = engine.dispatch(state, action);
     };
     doAct({ type: 'START' });
-    doAct({ type: 'CONTINUE' });
+    doAct(pickTraits(engine, state));
     doAct({ type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     doAct({ type: 'SKIP_EXAM' });
 
@@ -403,7 +417,7 @@ describe('exam skip', () => {
     const engine = createEngine(pack);
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     expect(engine.view(state).kind).toBe('EXAM');
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
@@ -426,7 +440,7 @@ describe('income & scoring', () => {
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
     state.stats.money = 12345;
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
@@ -446,7 +460,7 @@ describe('income & scoring', () => {
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
     state.stats.money = 12345;
-    state = engine.dispatch(state, { type: 'CONTINUE' });
+    state = engine.dispatch(state, pickTraits(engine, state));
     state = engine.dispatch(state, { type: 'CHOOSE_SETUP', gender: 'male', track: '理' });
     state = engine.dispatch(state, { type: 'SKIP_EXAM' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
@@ -479,6 +493,9 @@ describe('income & scoring', () => {
       switch (view.kind) {
         case 'TITLE':
           action = { type: 'START' };
+          break;
+        case 'BACKGROUND_DRAW':
+          action = pickTraits(engine, state);
           break;
         case 'SETUP':
           action = { type: 'CHOOSE_SETUP', gender: 'male', track: '理' };
@@ -519,16 +536,51 @@ describe('income & scoring', () => {
 });
 
 describe('traits and director', () => {
-  it('draws exactly 2 distinct traits at background draw and exposes them on the view', () => {
+  it('offers trait candidates and applies statMods on CHOOSE_TRAITS', () => {
     const engine = createEngine(miniPack());
     let state = engine.start(7);
     state = engine.dispatch(state, { type: 'START' });
-    const traitFlags = Object.keys(state.flags).filter(k => k.startsWith('trait_'));
-    expect(traitFlags).toHaveLength(2);
-    expect(new Set(traitFlags).size).toBe(2);
+    // 抽卡阶段:只有候选,还没有特质 flag
+    expect(Object.keys(state.flags).some(k => k.startsWith('trait_'))).toBe(false);
     const view = engine.view(state);
     if (view.kind !== 'BACKGROUND_DRAW') throw new Error('expected BACKGROUND_DRAW view');
-    expect(view.traits.map(t => t.id).sort()).toEqual(traitFlags.sort());
+    // miniPack 只有 3 张特质:offer = min(4, 3),pick = 2
+    expect(view.traitOffer).toHaveLength(3);
+    expect(view.pickCount).toBe(2);
+
+    // 非法选择:数量不对 / 不在 offer 内
+    expect(() =>
+      engine.dispatch(state, { type: 'CHOOSE_TRAITS', traitIds: [view.traitOffer[0]!.id] }),
+    ).toThrow();
+    expect(() =>
+      engine.dispatch(state, {
+        type: 'CHOOSE_TRAITS',
+        traitIds: [view.traitOffer[0]!.id, view.traitOffer[0]!.id],
+      }),
+    ).toThrow();
+    expect(() =>
+      engine.dispatch(state, {
+        type: 'CHOOSE_TRAITS',
+        traitIds: view.traitOffer.map(t => t.id),
+      }),
+    ).toThrow();
+    expect(() =>
+      engine.dispatch(state, { type: 'CHOOSE_TRAITS', traitIds: ['trait_nope', 'trait_nah'] }),
+    ).toThrow();
+
+    // 合法选择:写入 flags + 应用 statMods
+    const chosen = view.traitOffer.slice(0, 2).map(t => t.id);
+    const knowledgeBefore = state.stats.knowledge;
+    const modSum = view.traitOffer
+      .slice(0, 2)
+      .reduce((sum, t) => sum + (t.statMods?.knowledge ?? 0), 0);
+    state = engine.dispatch(state, { type: 'CHOOSE_TRAITS', traitIds: chosen });
+    for (const id of chosen) expect(state.flags[id]).toBe(true);
+    expect(state.stats.knowledge).toBe(
+      Math.max(0, Math.min(100, knowledgeBefore + modSum)),
+    );
+    expect(state.traitOffer).toEqual([]);
+    expect(engine.view(state).kind).toBe('SETUP');
   });
 
   it('derives event mindset valence from weighted outcome deltas', () => {
@@ -581,6 +633,7 @@ describe('trait tag rendering', () => {
       let action: PlayerAction;
       switch (view.kind) {
         case 'TITLE': action = { type: 'START' }; break;
+        case 'BACKGROUND_DRAW': action = pickTraits(engine, state); break;
         case 'SETUP': action = { type: 'CHOOSE_SETUP', gender: 'male', track: '理' }; break;
         case 'EXAM': action = { type: 'ANSWER', optionIndex: 0 }; break;
         case 'APPLICATION': action = { type: 'APPLY', optionId: 'app1' }; break;

@@ -10,7 +10,13 @@ export interface PublicExamQuestion {
 
 export type ViewModel =
   | { kind: 'TITLE'; title: string }
-  | { kind: 'BACKGROUND_DRAW'; card: BackgroundCard; traits: TraitCard[] }
+  | {
+      kind: 'BACKGROUND_DRAW';
+      card: BackgroundCard;
+      /** 特质候选卡(抽 4 选 2),玩家通过 CHOOSE_TRAITS 提交选择 */
+      traitOffer: TraitCard[];
+      pickCount: number;
+    }
   | { kind: 'SETUP'; genders: Gender[]; tracks: Track[] }
   | { kind: 'EXAM'; index: number; total: number; question: PublicExamQuestion }
   | { kind: 'EXAM_RESULT'; score: number; correct: number; total: number }
@@ -74,12 +80,15 @@ export type ViewModel =
         tone: 'triumph' | 'bitter' | 'warm';
         seed: number;
         years: string;
+        /** 本局选择的特质 label(如 ['天生胆大','恋家']),旧存档可能为空 */
+        traits: string[];
       };
     };
 
 export type PlayerAction =
   | { type: 'START' }
   | { type: 'CONTINUE' }
+  | { type: 'CHOOSE_TRAITS'; traitIds: string[] }
   | { type: 'CHOOSE_SETUP'; gender: Gender; track: Track }
   | { type: 'ANSWER'; optionIndex: number }
   | { type: 'SKIP_EXAM' }

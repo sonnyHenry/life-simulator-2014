@@ -77,6 +77,8 @@ export interface GameState {
   forcedEndingId: string | null;
   pendingJumpPhaseId: string | null;
   examPaper: string[];
+  /** 开局特质候选(抽 4 选 2);选完清空。旧存档无此字段按空处理 */
+  traitOffer?: string[];
   examCursor: number;
   examCorrect: number;
   examEarnedPoints: number;

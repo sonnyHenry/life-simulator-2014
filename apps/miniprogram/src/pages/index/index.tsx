@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { View, Text } from '@tarojs/components';
 import { useShareAppMessage } from '@tarojs/taro';
 import type { Gender, StatDeltas, Track, ViewModel } from '@life-sim/core';
+import { contentPack } from '@life-sim/content';
 import { useGame } from '../../store';
 
 const GENDER_LABELS: Record<Gender, string> = { male: '男生', female: '女生' };
@@ -26,11 +27,16 @@ function ChoiceButton(props: { onClick: () => void; children: ReactNode; sub?: s
   );
 }
 
-function ContinueButton(props: { onClick: () => void; label?: string; secondary?: boolean }) {
+function ContinueButton(props: {
+  onClick: () => void;
+  label?: string;
+  secondary?: boolean;
+  disabled?: boolean;
+}) {
   return (
     <View
-      className={`continue-btn ${props.secondary ? 'secondary-btn' : ''}`}
-      hoverClass="btn-hover"
+      className={`continue-btn ${props.secondary ? 'secondary-btn' : ''} ${props.disabled ? 'btn-disabled' : ''}`}
+      hoverClass={props.disabled ? 'none' : 'btn-hover'}
       onClick={props.onClick}
     >
       <Text>{props.label ?? '继续'}</Text>
@@ -74,9 +80,13 @@ function StatsBar() {
   const view = useGame(s => s.view);
   if (view.kind === 'TITLE') return null;
   const { knowledge, money, mindset, network, health } = game.stats;
+  const traits = contentPack.traits.filter(t => Boolean(game.flags[t.id]));
   return (
     <View className="stats-bar">
       <Text className="stats-year">{game.date.year} 年</Text>
+      {traits.length > 0 && (
+        <Text className="stats-traits">{traits.map(t => t.label).join('·')}</Text>
+      )}
       <Text className="stat">学识 {knowledge}</Text>
       <Text className="stat">¥{fmtMoney(money)}</Text>
       <Text className="stat">心态 {mindset}</Text>
@@ -84,6 +94,20 @@ function StatsBar() {
       <Text className="stat">健康 {health}</Text>
     </View>
   );
+}
+
+const STAT_MOD_LABELS: Record<string, string> = {
+  knowledge: '学识',
+  money: '金钱',
+  mindset: '心态',
+  network: '人脉',
+  health: '健康',
+};
+
+function fmtStatMods(mods: Record<string, number> | undefined): string {
+  return Object.entries(mods ?? {})
+    .map(([k, v]) => `${STAT_MOD_LABELS[k] ?? k} ${v > 0 ? '+' : '−'}${Math.abs(v)}`)
+    .join(' · ');
 }
 
 // ---------- 流程界面 ----------
@@ -115,7 +139,17 @@ function TitleScreen() {
 
 function BackgroundDrawScreen(props: { view: Extract<ViewModel, { kind: 'BACKGROUND_DRAW' }> }) {
   const act = useGame(s => s.act);
-  const { card, traits } = props.view;
+  const { card, traitOffer, pickCount } = props.view;
+  const [selected, setSelected] = useState<string[]>([]);
+  const toggle = (id: string) => {
+    setSelected(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : prev.length < pickCount
+          ? [...prev, id]
+          : prev,
+    );
+  };
   return (
     <Card className="center">
       <Text className="kicker">你的出身是——</Text>
@@ -124,18 +158,36 @@ function BackgroundDrawScreen(props: { view: Extract<ViewModel, { kind: 'BACKGRO
         <Text className="block">{card.text}</Text>
         <Text className="bg-money">初始资金 ¥{fmtMoney(card.initialMoney)}</Text>
       </View>
-      {traits.length > 0 && (
+      {traitOffer.length > 0 && (
         <View className="trait-list">
-          <Text className="kicker">与生俱来的特质——</Text>
-          {traits.map(t => (
-            <View className="trait-card" key={t.id}>
-              <Text className="trait-title">{t.label}</Text>
+          <Text className="kicker">
+            命运给了你 {traitOffer.length} 张特质卡,选 {pickCount} 张带进这一生——
+          </Text>
+          {traitOffer.map(t => (
+            <View
+              className={`trait-card ${selected.includes(t.id) ? 'trait-selected' : ''}`}
+              key={t.id}
+              onClick={() => toggle(t.id)}
+            >
+              <Text className="trait-title">
+                {t.label}
+                {selected.includes(t.id) ? ' ✓' : ''}
+              </Text>
               <Text className="block">{t.text}</Text>
+              {t.statMods && <Text className="trait-mods block">{fmtStatMods(t.statMods)}</Text>}
             </View>
           ))}
         </View>
       )}
-      <ContinueButton onClick={() => act({ type: 'CONTINUE' })} label="接受命运" />
+      <ContinueButton
+        disabled={selected.length !== pickCount}
+        onClick={() => {
+          if (selected.length === pickCount) act({ type: 'CHOOSE_TRAITS', traitIds: selected });
+        }}
+        label={
+          selected.length === pickCount ? '接受命运' : `再选 ${pickCount - selected.length} 张特质卡`
+        }
+      />
     </Card>
   );
 }
@@ -430,6 +482,11 @@ function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' }> }) {
         </View>
         <Text className="share-title">{props.view.shareCard.title}</Text>
         <Text className="share-tagline block">{props.view.shareCard.tagline}</Text>
+        {props.view.shareCard.traits.length > 0 && (
+          <Text className="share-traits block">
+            特质:{props.view.shareCard.traits.join(' × ')}
+          </Text>
+        )}
         <View className="share-score">
           <Text className="share-grade">成绩：{props.view.grade}</Text>
           <Text>人生总分 {props.view.score}</Text>

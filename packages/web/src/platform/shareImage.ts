@@ -11,6 +11,8 @@ export interface ShareImageData {
   score: number;
   grade: string;
   gameTitle: string;
+  /** 本局特质 label,空数组时不渲染该行 */
+  traits?: string[];
 }
 
 const TONE_COLORS: Record<ShareImageData['tone'], { bg: string; border: string; accent: string }> = {
@@ -140,6 +142,10 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   ctx.fillText(data.years, 64, 72);
   ctx.textAlign = 'right';
   ctx.fillText(`人生编号 #${data.seed}`, W - 64, 72);
+  if (data.traits && data.traits.length > 0) {
+    ctx.textAlign = 'center';
+    ctx.fillText(`特质:${data.traits.join(' × ')}`, W / 2, 110);
+  }
 
   // 结局标题
   ctx.fillStyle = '#2c2a24';

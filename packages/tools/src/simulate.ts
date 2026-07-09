@@ -119,6 +119,11 @@ function botAction(
     case 'TITLE':
       return { type: 'START' };
     case 'BACKGROUND_DRAW':
+      // 随机选满 pickCount 个特质(策略 bot 不做特质期望计算)
+      return {
+        type: 'CHOOSE_TRAITS',
+        traitIds: bot.sample(view.traitOffer, view.pickCount).map(t => t.id),
+      };
     case 'EXAM_RESULT':
     case 'BRIEF':
     case 'OUTCOME':
@@ -215,9 +220,17 @@ function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: bool
     }
     const action = botAction(view, bot, strategy, state);
     switch (view.kind) {
-      case 'BACKGROUND_DRAW':
-        log(`\n🎴 家境:${view.card.label} (初始资金 ¥${view.card.initialMoney})`);
+      case 'BACKGROUND_DRAW': {
+        const picked =
+          action.type === 'CHOOSE_TRAITS'
+            ? view.traitOffer
+                .filter(t => action.traitIds.includes(t.id))
+                .map(t => t.label)
+                .join(' × ')
+            : '';
+        log(`\n🎴 家境:${view.card.label} (初始资金 ¥${view.card.initialMoney}) · 特质:${picked}`);
         break;
+      }
       case 'EXAM_RESULT':
         log(`\n📝 高考出分:${view.score} 分 (答对 ${view.correct}/${view.total})`);
         break;

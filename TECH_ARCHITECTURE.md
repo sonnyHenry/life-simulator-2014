@@ -158,7 +158,7 @@ type ScreenId =
 ```mermaid
 flowchart LR
     TITLE -->|START| BACKGROUND_DRAW
-    BACKGROUND_DRAW -->|CONTINUE 抽到家境卡+2特质| SETUP
+    BACKGROUND_DRAW -->|CHOOSE_TRAITS 抽4选2并应用 statMods| SETUP
     SETUP -->|CHOOSE_SETUP 选性别+文理| EXAM
     EXAM -->|答完/SKIP_EXAM| EXAM_RESULT
     EXAM_RESULT -->|CONTINUE| APPLICATION
@@ -206,6 +206,7 @@ interface GameState {
   forcedEndingId: string | null; // 被某个 effect(triggerEnding)强制指定的结局
   pendingJumpPhaseId: string | null; // 被某个 effect(jumpToPhase)指定要跳去的阶段(如"复读"跳回高考)
   examPaper: string[]; examCursor: number; examCorrect: number; examEarnedPoints: number; // 高考答题过程
+  traitOffer?: string[];          // BACKGROUND_DRAW 屏的特质候选 id,玩家 CHOOSE_TRAITS 后清空
   stats: Stats;                  // { knowledge, money, mindset, network, health }
   profile: Profile;              // 家境/省份/文理/分数/大学/专业/职业
   flags: Record<string, boolean | number | string>;  // 万能扩展槽,见下
@@ -564,7 +565,7 @@ interface ContentPack {
   endings: EndingDef[];
   examBank: ExamQuestion[];
   backgrounds: BackgroundCard[];// 家境抽卡
-  traits: TraitCard[];          // 玩家特质卡(开局抽 2,见 4.7)
+  traits: TraitCard[];          // 玩家特质卡(开局抽4选2,见 4.7)
   applications: ApplicationOption[];  // 志愿批次(985/211/一本/…)
   npcs: NpcDef[];
   fns: Record<string, ContentFn>;
@@ -609,17 +610,20 @@ interface TraitCard {
   label: string;   // 展示名:天生胆大
   text: string;    // 抽卡屏上的一句话人设
   poolBias?: Record<string, number>;  // 导演选择器的类别偏好:{ invest: 1.8, money: 1.3 }
+  statMods?: Partial<Record<StatKey, number>>; // 开局选择后立即应用的小幅数值修正
 }
 ```
 
-运行机制(刻意做到**零新状态字段**):
+运行机制:
 
-- **抽取**:开局 `BACKGROUND_DRAW` 流程步里 `rng.sample(pack.traits, 2)`,直接写 `state.flags[trait.id] = true`——不加 `Profile` 字段、不改 GameState schema,旧存档没有特质 flag 时各处自然按"无特质"处理。
-- **展示**:`BACKGROUND_DRAW` ViewModel 透出 `traits: TraitCard[]`(view 层从 flags 反查),三端抽卡屏渲染。
+- **抽 4 选 2**:开局 `BACKGROUND_DRAW` 流程步里 `rng.sample(pack.traits, 4)` 写入 `state.traitOffer`;此时还不写 `flags`。玩家提交 `{ type:'CHOOSE_TRAITS', traitIds }` 后,引擎校验数量、去重和候选合法性,再写 `state.flags[trait.id] = true`、应用 `statMods`、清空 `traitOffer` 并进入 SETUP。miniPack/测试包特质少于 4 时候选数为 `min(4, traits.length)`,选择数仍按实际候选钳到最多 2。
+- **展示**:`BACKGROUND_DRAW` ViewModel 透出 `{ card, traitOffer: TraitCard[], pickCount }`,三端抽卡屏渲染可选卡;StatsBar/小程序/小游戏顶栏从 flags 反查已选特质常驻展示。
 - **影响事件分布**:`poolBias` 被调度器读取(见 3.4),按 category 调整随机池抽取概率。
-- **影响事件内容**:内容用现成的 DSL 分支——选项 `visibleIf: { flag: 'trait_social' }` 做专属选项,outcome `condition` 做专属结果文案,无需任何新 DSL 能力;每个特质另有 1 个 `mandatory` 专属事件(`events/trait-moments.ts`,年份窗口 + trait flag 门控,带该特质的玩家该年必触发)。
+- **影响开局数值**:`statMods` 在 CHOOSE_TRAITS 时立即应用;`knowledge/mindset/network/health` 钳到 0-100,`money` 只做非负钳位。当前 6 张卡有得有失,避免一眼最优。
+- **影响事件内容**:内容用现成的 DSL 分支——选项 `visibleIf: { flag: 'trait_social' }` 做专属选项,outcome `condition` 做专属结果文案,无需任何新 DSL 能力;每个特质另有 1 个 `mandatory` 专属事件(`events/trait-moments.ts`,年份窗口 + trait flag 门控,带该特质的玩家该年必触发)。M5 第三十二轮后特质分支约 33 处。
+- **影响终局表达**:6 个特质专属结局排在职业/叙事结局之后、兜底之前,只收原本会落入「平凡之路」的玩家;ENDING shareCard viewmodel 额外带 `traits: string[]`,web/小程序/小游戏分享文案与分享图同步展示。
 - **UI 标签(M5 第三十一轮)**:`view()` 里 `requiredTraitLabel(cond)` 识别选项 `visibleIf` / 事件 `trigger` 中"必然要求某特质"的条件(顶层 flag 或 `all` 分支;`any` 里的备选不算),自动给文案加 `【特质名】` 前缀——特质内容的可感知性不靠内容作者手写,是引擎级保证。
-- **校验**(`validate.ts`):特质 id 唯一且 `trait_` 前缀、label/text 非空、`poolBias` 值 ∈ (0,5] 且 category 必须真实存在于事件库;全内容里引用的 `trait_*` flag 必须在特质表中;内容禁止 `setFlag` 特质(特质只在开局赋值)。
+- **校验**(`validate.ts`):特质 id 唯一且 `trait_` 前缀、label/text 非空、`poolBias` 值 ∈ (0,5] 且 category 必须真实存在于事件库;`statMods` key 必须是合法 StatKey,值域为非 0 且绝对值 ≤20;全内容里引用的 `trait_*` flag 必须在特质表中;内容禁止 `setFlag` 特质(特质只在开局选择赋值)。
 
 设计约束(见 GAME_DESIGN 二-2):特质专属选项必须带真实变数,不得成为透明优势选项;新增特质时注意两个特质同 category 的 `poolBias` 会连乘,别把单类推过导演乘数上限 4。
 
@@ -697,7 +701,7 @@ React 18 + Vite + TypeScript + Zustand(仅做 UI 状态壳,真状态在 GameStat
 - 引用完整性:事件引用的 flag/npc/eventId/fn 必须存在;`schedule` 指向的事件必须存在
 - ID 全局唯一;每个池至少 N 个事件(防止某阶段抽空)
 - **结局可达性静态检查**:condition 恒假(如 `{chance: 0}`、互斥条件)直接报错——从根上杜绝 vc-simulator 的 `() => false` 死结局
-- **特质校验**(M5 第三十轮):特质 id 唯一 + `trait_` 前缀、`poolBias` 取值范围与 category 真实性;内容里引用的 `trait_*` flag 必须存在于特质表;禁止内容 `setFlag` 特质
+- **特质校验**(M5 第三十/三十二轮):特质 id 唯一 + `trait_` 前缀、`poolBias` 取值范围与 category 真实性、`statMods` 键和值域;内容里引用的 `trait_*` flag 必须存在于特质表;禁止内容 `setFlag` 特质
 
 ### 7.2 批量模拟 `pnpm simulate -n 10000`
 
@@ -726,7 +730,7 @@ React 18 + Vite + TypeScript + Zustand(仅做 UI 状态壳,真状态在 GameStat
 | 加一条职业线 | `setCareer`+`career_xx` flag + `career-xx` 事件池 + `incomes.ts` 收入规则 + 相关结局 | 内容 |
 | 延长到 2030 | timeline 追加 phases + 新年份 era 事件 + 调整 `isFinal` | 内容 |
 | 加结局 | `EndingDef` 一条,注意 priority 排位 → simulate 看到达率 | 内容 |
-| 加一个特质 | `traits.ts` 加 `TraitCard` + 给若干事件挂 `visibleIf: {flag:'trait_xx'}` 专属选项 → `validate` → `simulate` | 内容 |
+| 加一个特质 | `traits.ts` 加 `TraitCard`(含 poolBias/statMods) + 给若干事件挂 `visibleIf: {flag:'trait_xx'}` 专属选项 + 可选专属结局 → `validate` → `simulate` | 内容 |
 | 调事件出现节奏 | 改 `scheduler.ts` 导演系数(类别冷却/心态阈值/钳位),跑 `simulate -n 10000 --check` 守覆盖 | 引擎 |
 | 加数值维度 | `stats` 加字段 + 存档迁移 + DSL 自动支持 | 引擎(小改)+ 内容 |
 | 移植小程序 | Taro 壳 + WxStorageAdapter + screens 适配 | 平台层(新增) |

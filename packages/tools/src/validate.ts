@@ -8,6 +8,7 @@ interface Issue {
 
 const issues: Issue[] = [];
 const MAX_FIXED_MONEY_DEBIT = 10000;
+const BOUNDED_STATS = new Set(['knowledge', 'mindset', 'network', 'health']);
 
 function error(message: string): void {
   issues.push({ level: 'error', message });
@@ -100,6 +101,14 @@ for (const trait of contentPack.traits) {
     }
     if (!eventCategories.has(category)) {
       error(`trait ${trait.id} poolBias references unknown event category: ${category}`);
+    }
+  }
+  for (const [key, mod] of Object.entries(trait.statMods ?? {})) {
+    if (!BOUNDED_STATS.has(key) && key !== 'money') {
+      error(`trait ${trait.id} statMods has unknown stat: ${key}`);
+    }
+    if (typeof mod !== 'number' || mod === 0 || Math.abs(mod) > 20) {
+      error(`trait ${trait.id} statMods.${key} out of range ±20 (nonzero): ${mod}`);
     }
   }
 }
@@ -266,8 +275,6 @@ const gameYearMin = Math.min(
 const finalPhase = contentPack.timeline.find(p => p.kind === 'rounds' && p.isFinal);
 const gameYearMax =
   finalPhase && finalPhase.kind === 'rounds' ? finalPhase.date.year + finalPhase.rounds - 1 : 2026;
-
-const BOUNDED_STATS = new Set(['knowledge', 'mindset', 'network', 'health']);
 
 function statBoundsImpossible(stat: string, op: string, value: number): boolean {
   if (!BOUNDED_STATS.has(stat)) return false;
