@@ -54,7 +54,7 @@ flowchart LR
         SAVE[存档+版本迁移]
     end
     subgraph 内容层 content
-        PACK[ContentPack<br/>timeline·events·npcs·careers·endings·exam·backgrounds]
+        PACK[ContentPack<br/>timeline·events·incomes·npcs·endings·exam·backgrounds·traits]
     end
     WEB --> ENGINE
     MP --> ENGINE
@@ -85,7 +85,7 @@ life-simulator-2014/
 │   │       ├── careers/
 │   │       ├── endings/
 │   │       ├── exam/          # 题库(按省份档/文理标注)
-│   │       ├── backgrounds/   # 家境卡
+│   │       ├── setup/         # 家境卡 backgrounds.ts · 特质卡 traits.ts · 志愿批次 applications.ts
 │   │       └── fns/           # 命名自定义函数注册表(DSL 的逃生舱)
 │   ├── web/                   # @life-sim/web React 前端
 │   │   └── src/
@@ -158,8 +158,8 @@ type ScreenId =
 ```mermaid
 flowchart LR
     TITLE -->|START| BACKGROUND_DRAW
-    BACKGROUND_DRAW -->|CONTINUE 抽到家境卡| SETUP
-    SETUP -->|CHOOSE_SETUP 选省份+文理| EXAM
+    BACKGROUND_DRAW -->|CONTINUE 抽到家境卡+2特质| SETUP
+    SETUP -->|CHOOSE_SETUP 选性别+文理| EXAM
     EXAM -->|答完/SKIP_EXAM| EXAM_RESULT
     EXAM_RESULT -->|CONTINUE| APPLICATION
     APPLICATION -->|APPLY 报志愿| O1(OUTCOME)
@@ -258,13 +258,25 @@ flowchart TD
     B --> C["② 强制时代节点<br/>(mandatory: true 且 trigger 满足)<br/>如 2021 双减·师范线"]
     C --> D["③ NPC 阶段推进事件<br/>(每个 NPC 的 stages[当前stage].advanceWhen 满足)"]
     D --> E{"④ 候选池还没填满 eventSlots?"}
-    E -- 是 --> F["从本阶段 pools 里筛出:<br/>trigger 满足 · 没触发过(once) · 没被选过<br/>按 weight 加权随机抽一个"]
+    E -- 是 --> F["从本阶段 pools 里筛出:<br/>trigger 满足 · 没触发过(once) · 没被选过<br/>按 weight × 导演乘数 加权随机抽一个"]
     F --> E
     E -- 否 --> G["按 order 字段稳定排序<br/>(默认 0,值越小越靠前)"]
     G --> H[得到本轮事件 id 队列 eventQueue]
 ```
 
-①②③ **不占用 `eventSlots` 的名额,是额外保证入队**的——如果强制时代节点或 NPC 剧情节点被 `eventSlots` 挤掉,会导致强制剧情永久卡死或漏掉,所以代码里(`scheduler.ts:26-40`)专门把这两类和"常规随机池填充"分开处理。只有第④步"常规池"才受 `eventSlots` 限制。
+①②③ **不占用 `eventSlots` 的名额,是额外保证入队**的——如果强制时代节点或 NPC 剧情节点被 `eventSlots` 挤掉,会导致强制剧情永久卡死或漏掉,所以代码里专门把这两类和"常规随机池填充"分开处理。只有第④步"常规池"才受 `eventSlots` 限制。
+
+**导演式选择器(M5 第三十轮,只作用于第④步)**:随机池抽取的实际权重是 `(ev.weight ?? 1) × directorMultiplier(...)`,导演乘数由四部分连乘:
+
+| 系数 | 条件 | 乘数 |
+|---|---|---|
+| 同年类别去重 | 本轮已排入同 `category` 事件 | ×0.35 |
+| 近两年类别冷却 | `state.history` 里近两年该 category 命中 ≥2 次 | ×0.6 |
+| 心态节奏(低谷给喘息) | `mindset ≤ 35` 且事件情绪期望 >0.5 / <-0.5 | ×1.8 / ×0.55 |
+| 心态节奏(顺风上压力) | `mindset ≥ 75` 且情绪期望 <-0.5 / >0.5 | ×1.5 / ×0.75 |
+| 特质类别偏好 | 玩家特质的 `poolBias[category]`(见 4.7) | 按配置连乘 |
+
+事件的"情绪期望"由 `eventMindsetValence(ev)`(同文件导出,WeakMap 缓存)自动推导:对每个选项按 outcome 权重求名义 mindset 变化的加权平均,再对所有选项取平均——**不需要给事件人工打情绪标签**。最终乘数钳位在 `[0.15, 4]`,保证没有事件被压成 0 权重,`simulate -n 10000 --check` 的全事件覆盖/全结局可达门禁不受威胁。导演不碰 ①②③(强制/NPC/schedule 事件),因果链的确定性不变。
 
 ### 3.5 玩家选一个选项之后发生了什么(`resolveChoice`,`engine.ts:525-549`)
 
@@ -551,8 +563,8 @@ interface ContentPack {
   incomes: IncomeRule[];        // 见 4.6,职业线的年度被动收入
   endings: EndingDef[];
   examBank: ExamQuestion[];
-  provinces: ProvinceOption[];  // 高考省份档位(分数线加减)
   backgrounds: BackgroundCard[];// 家境抽卡
+  traits: TraitCard[];          // 玩家特质卡(开局抽 2,见 4.7)
   applications: ApplicationOption[];  // 志愿批次(985/211/一本/…)
   npcs: NpcDef[];
   fns: Record<string, ContentFn>;
@@ -560,7 +572,7 @@ interface ContentPack {
 const engine = createEngine(contentPack);   // 引擎实例化时注入
 ```
 
-> 和 v1.0 设计稿的差异:当前**没有** `careers: CareerDef[]` 这个字段——职业线不是一个独立的数据结构,而是靠 `flags`(`career_cs`/`first_job_track` 之类)+ 对应的 `career-xx` 事件池 + `incomes.ts` 里按 flag 匹配的收入规则拼出来的。`mergePacks` 多 DLC 合并目前也**尚未实现**,现在是单一 `ContentPack`(见 `packages/content/src/index.ts`)。
+> 和 v1.0 设计稿的差异:当前**没有** `careers: CareerDef[]` 这个字段——职业线不是一个独立的数据结构,而是靠 `flags`(`career_cs`/`first_job_track` 之类)+ 对应的 `career-xx` 事件池 + `incomes.ts` 里按 flag 匹配的收入规则拼出来的。早期的 `provinces: ProvinceOption[]`(省份分数线加减)已在 M5 第二十九轮整体移除。`mergePacks` 多 DLC 合并目前也**尚未实现**,现在是单一 `ContentPack`(见 `packages/content/src/index.ts`)。
 
 ### 4.6 年度被动收入 IncomeRule(`packages/content/src/economy/incomes.ts`)
 
@@ -588,6 +600,27 @@ interface IncomeRule {
 ```
 
 每年结算时,**所有** `when` 成立的规则都会生效(不是只选一条),所以"大厂工资"和"空窗期消耗"分别对应两种互斥的 flag 组合,同一年不会同时触发。这是"职业线"在数值上的真正落地方式——事件文案负责剧情起伏,`incomes.ts` 负责每年稳定的现金流。
+
+### 4.7 玩家特质 TraitCard(`packages/content/src/setup/traits.ts`,M5 第三十轮)
+
+```ts
+interface TraitCard {
+  id: string;      // 必须 trait_ 前缀(validate 强制),如 trait_risk_taker
+  label: string;   // 展示名:天生胆大
+  text: string;    // 抽卡屏上的一句话人设
+  poolBias?: Record<string, number>;  // 导演选择器的类别偏好:{ invest: 1.8, money: 1.3 }
+}
+```
+
+运行机制(刻意做到**零新状态字段**):
+
+- **抽取**:开局 `BACKGROUND_DRAW` 流程步里 `rng.sample(pack.traits, 2)`,直接写 `state.flags[trait.id] = true`——不加 `Profile` 字段、不改 GameState schema,旧存档没有特质 flag 时各处自然按"无特质"处理。
+- **展示**:`BACKGROUND_DRAW` ViewModel 透出 `traits: TraitCard[]`(view 层从 flags 反查),三端抽卡屏渲染。
+- **影响事件分布**:`poolBias` 被调度器读取(见 3.4),按 category 调整随机池抽取概率。
+- **影响事件内容**:内容用现成的 DSL 分支——选项 `visibleIf: { flag: 'trait_social' }` 做专属选项,outcome `condition` 做专属结果文案,无需任何新 DSL 能力。
+- **校验**(`validate.ts`):特质 id 唯一且 `trait_` 前缀、label/text 非空、`poolBias` 值 ∈ (0,5] 且 category 必须真实存在于事件库;全内容里引用的 `trait_*` flag 必须在特质表中;内容禁止 `setFlag` 特质(特质只在开局赋值)。
+
+设计约束(见 GAME_DESIGN 二-2):特质专属选项必须带真实变数,不得成为透明优势选项;新增特质时注意两个特质同 category 的 `poolBias` 会连乘,别把单类推过导演乘数上限 4。
 
 ---
 
@@ -663,6 +696,7 @@ React 18 + Vite + TypeScript + Zustand(仅做 UI 状态壳,真状态在 GameStat
 - 引用完整性:事件引用的 flag/npc/eventId/fn 必须存在;`schedule` 指向的事件必须存在
 - ID 全局唯一;每个池至少 N 个事件(防止某阶段抽空)
 - **结局可达性静态检查**:condition 恒假(如 `{chance: 0}`、互斥条件)直接报错——从根上杜绝 vc-simulator 的 `() => false` 死结局
+- **特质校验**(M5 第三十轮):特质 id 唯一 + `trait_` 前缀、`poolBias` 取值范围与 category 真实性;内容里引用的 `trait_*` flag 必须存在于特质表;禁止内容 `setFlag` 特质
 
 ### 7.2 批量模拟 `pnpm simulate -n 10000`
 
@@ -691,6 +725,8 @@ React 18 + Vite + TypeScript + Zustand(仅做 UI 状态壳,真状态在 GameStat
 | 加一条职业线 | `setCareer`+`career_xx` flag + `career-xx` 事件池 + `incomes.ts` 收入规则 + 相关结局 | 内容 |
 | 延长到 2030 | timeline 追加 phases + 新年份 era 事件 + 调整 `isFinal` | 内容 |
 | 加结局 | `EndingDef` 一条,注意 priority 排位 → simulate 看到达率 | 内容 |
+| 加一个特质 | `traits.ts` 加 `TraitCard` + 给若干事件挂 `visibleIf: {flag:'trait_xx'}` 专属选项 → `validate` → `simulate` | 内容 |
+| 调事件出现节奏 | 改 `scheduler.ts` 导演系数(类别冷却/心态阈值/钳位),跑 `simulate -n 10000 --check` 守覆盖 | 引擎 |
 | 加数值维度 | `stats` 加字段 + 存档迁移 + DSL 自动支持 | 引擎(小改)+ 内容 |
 | 移植小程序 | Taro 壳 + WxStorageAdapter + screens 适配 | 平台层(新增) |
 | 出 DLC 剧情包 | 独立 ContentPack(`mergePacks` 尚未实现,目前只能单一 pack) | 内容 + 引擎(待补) |
