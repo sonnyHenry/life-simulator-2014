@@ -8,8 +8,9 @@ import {
   type ViewModel,
 } from '@life-sim/core';
 import { contentPack } from '@life-sim/content';
+import { pathToFileURL } from 'node:url';
 
-type Strategy = 'random' | 'money' | 'mindset' | 'score';
+export type Strategy = 'random' | 'money' | 'mindset' | 'score';
 
 interface CliArgs {
   runs: number;
@@ -182,13 +183,15 @@ function botAction(
   }
 }
 
-interface RunResult {
+export interface RunResult {
   endingId: string;
   endingTitle: string;
   endingScore: number;
   finalState: GameState;
   mindsetByYear: Array<[number, number]>;
   steps: number;
+  presentationHits: string[];
+  contextLineHits: string[];
 }
 
 function fmtDeltas(deltas: Record<string, number | undefined>): string {
@@ -198,10 +201,12 @@ function fmtDeltas(deltas: Record<string, number | undefined>): string {
   return parts.length > 0 ? `  [${parts.join(', ')}]` : '';
 }
 
-function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: boolean): RunResult {
+export function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: boolean): RunResult {
   let state = engine.start(seed);
   const bot = new Rng(botSeed);
   const mindsetByYear: Array<[number, number]> = [];
+  const presentationHits: string[] = [];
+  const contextLineHits: string[] = [];
   let steps = 0;
   const log = (line: string) => {
     if (verbose) console.log(line);
@@ -223,6 +228,8 @@ function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: bool
         finalState: state,
         mindsetByYear,
         steps,
+        presentationHits,
+        contextLineHits,
       };
     }
     const action = botAction(view, bot, strategy, state);
@@ -273,6 +280,20 @@ function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: bool
         break;
       case 'EVENT':
         if (action.type === 'CHOOSE') {
+          const event = eventsById.get(view.eventId);
+          if (event) {
+            // 与 engine.view 使用相同初始 RNG 与求值顺序，记录玩家本次真正看到的条件文案。
+            const probe = new Rng(state.rngState);
+            const ctx = { state, pack: contentPack, rng: probe };
+            const presentationIndex = event.presentationVariants?.findIndex(variant =>
+              evalCondition(variant.condition, ctx),
+            ) ?? -1;
+            const contextLineIndex = event.contextLines?.findIndex(line =>
+              evalCondition(line.condition, ctx),
+            ) ?? -1;
+            if (presentationIndex >= 0) presentationHits.push(`${event.id}#${presentationIndex}`);
+            if (contextLineIndex >= 0) contextLineHits.push(`${event.id}#${contextLineIndex}`);
+          }
           const choice = view.choices.find(c => c.id === action.choiceId);
           log(`\n▶ ${view.title}`);
           log(`  选择:${choice?.text}`);
@@ -518,4 +539,4 @@ function main(): void {
   if (args.check) runCheck(batch);
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

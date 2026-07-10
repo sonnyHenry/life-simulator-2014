@@ -263,14 +263,22 @@ export function createEngine(pack: ContentPack): Engine {
         const ev = evId ? eventsById.get(evId) : undefined;
         if (!ev) throw new Error('EVENT screen without a current event');
         const rng = new Rng(state.rngState);
+        const ctx = { state, pack, rng };
+        const presentation = ev.presentationVariants?.find(variant =>
+          evalCondition(variant.condition, ctx),
+        );
+        const contextLine = ev.contextLines?.find(line => evalCondition(line.condition, ctx));
         const visible = ev.choices.filter(c =>
-          evalCondition(c.visibleIf, { state, pack, rng }),
+          evalCondition(c.visibleIf, ctx),
         );
         return {
           kind: 'EVENT',
           eventId: ev.id,
-          title: withTraitTag(ev.title, ev.trigger),
-          text: renderText(ev.text, state),
+          title: withTraitTag(presentation?.title ?? ev.title, ev.trigger),
+          text: [presentation?.text ?? ev.text, contextLine?.text]
+            .filter((part): part is string => Boolean(part))
+            .map(part => renderText(part, state))
+            .join('\n\n'),
           major: ev.tier === 'major',
           choices: visible.map(c => ({
             id: c.id,

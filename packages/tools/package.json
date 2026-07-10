@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "simulate": "tsx src/simulate.ts",
+    "repetition": "tsx src/repetition.ts",
     "validate": "tsx src/validate.ts",
     "typecheck": "tsc --noEmit"
   },

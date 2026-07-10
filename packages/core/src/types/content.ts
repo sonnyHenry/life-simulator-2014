@@ -26,6 +26,10 @@ export interface GameEvent {
   pools: string[];
   title: string;
   text: string;
+  /** 首个条件命中的版本替换标题/正文，不改变事件 ID、选择或因果链。 */
+  presentationVariants?: { condition: Condition; title: string; text: string }[];
+  /** 正文后、选择前显示的短回响；首个条件命中的一句生效。 */
+  contextLines?: { condition: Condition; text: string }[];
   category?: string;
   trigger?: Condition;
   weight?: number;

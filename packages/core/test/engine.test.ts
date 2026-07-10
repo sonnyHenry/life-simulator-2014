@@ -834,3 +834,34 @@ describe('trait tag rendering', () => {
     throw new Error('never reached EVENT view');
   });
 });
+
+describe('event presentation variants', () => {
+  it('uses the first matching conditional title and text without changing the event id', () => {
+    const pack = miniPack();
+    pack.events[0]!.presentationVariants = [
+      { condition: { always: true }, title: '情境标题', text: '属于这一局的开场' },
+    ];
+    pack.events[0]!.contextLines = [
+      { condition: { always: true }, text: '你还记得上一年的选择。' },
+    ];
+    const engine = createEngine(pack);
+    let state = engine.start(7);
+    for (let guard = 0; guard < 100; guard++) {
+      const view = engine.view(state);
+      if (view.kind === 'EVENT') {
+        expect(view.eventId).toBe('ev_a');
+        expect(view.title).toBe('情境标题');
+        expect(view.text).toBe('属于这一局的开场\n\n你还记得上一年的选择。');
+        return;
+      }
+      const action: PlayerAction = view.kind === 'TITLE' ? { type: 'START' }
+        : view.kind === 'BACKGROUND_DRAW' ? pickTraits(engine, state)
+        : view.kind === 'SETUP' ? { type: 'CHOOSE_SETUP', gender: 'male', track: '理' }
+        : view.kind === 'EXAM' ? { type: 'ANSWER', optionIndex: 0 }
+        : view.kind === 'APPLICATION' ? { type: 'APPLY', optionId: 'app1' }
+        : { type: 'CONTINUE' };
+      state = engine.dispatch(state, action);
+    }
+    throw new Error('never reached EVENT view');
+  });
+});

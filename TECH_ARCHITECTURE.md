@@ -95,7 +95,8 @@ life-simulator-2014/
 │   └── tools/                 # @life-sim/tools 校验与模拟 CLI
 │       └── src/
 │           ├── validate.ts    # 静态校验
-│           └── simulate.ts    # 批量自动对局
+│           ├── simulate.ts    # 批量自动对局
+│           └── repetition.ts  # 跨局重复率与变体覆盖仪表盘
 └── apps/
     └── miniprogram/           # (未来)Taro 小程序,复用 core+content
 ```
@@ -506,12 +507,22 @@ interface GameEvent {
   id: string;                   // 'ev_drama_pig_butchering'
   pools: string[];              // 属于哪些池:'college' | 'work' | 'npc' | 'invest' | 'random' | ...
   title: string;
-  text: string;                 // 纯静态中文文案,没有插值机制,想带数值就得在文案里手写
+  text: string;                 // 支持 {{ta}}/{{university}} 等 renderText 插值
+  presentationVariants?: Array<{ // 首个 condition 命中时替换开场,事件 ID/选择/因果链不变
+    condition: Condition;
+    title: string;
+    text: string;
+  }>;
+  contextLines?: Array<{         // 正文后、选择前追加一条最先命中的短回响
+    condition: Condition;
+    text: string;
+  }>;
   category?: string;            // 'money' | 'relationship' | 'career' | ... ,只给结局的 historyCount 统计用
   trigger?: Condition;          // 这个事件本轮"有没有资格"被抽到
   weight?: number;              // 默认 1,常规池加权抽取时用;是个死数字,不会根据状态动态变化
   once?: boolean;               // 默认 true(只能触发一次);显式设 false 才能重复触发
   mandatory?: boolean;          // 强制时代节点,不受 eventSlots 限制,trigger 满足就必进队
+  variantGroup?: string;        // mandatory 同组同轮只抽一个,用于完整事件变体池
   order?: number;               // 同轮内的排序,默认 0,数值越小越靠前(如"毕业散伙饭"排最后)
   tier?: 'major';               // 打上这个标记的事件文案更长,UI 会显示"关键节点"标识
   choices: Array<{
@@ -724,7 +735,15 @@ React 18 + Vite + TypeScript + Zustand(仅做 UI 状态壳,真状态在 GameStat
 
 这是纯写死内容游戏做数值平衡的唯一低成本手段,列为**每次内容合并前的必跑项**。
 
-### 7.3 测试
+### 7.3 重复率仪表盘 `pnpm repetition -n 300`
+
+使用与 `simulate` 相同的确定性 bot 连续跑多局,输出相邻两局 Jaccard 重合率、去除强制节点后的重合率、连续 3 局独有事件比例,并按强制节点/NPC 线/职业线/公共池/主时间线拆分来源。报告同时列出高频事件、平均跨局再见间隔、相同与不同“职业 + 激活 NPC”配置的差异,以及当前 `variantGroup` 的变体数量。
+
+M5 第四十八轮起,`runOne` 在每次 EVENT 展示时用与 `engine.view` 相同的 `rngState` 和求值顺序记录实际命中的 `presentationVariants` / `contextLines` 索引。仪表盘据此报告每局实际回响数、至少命中一条的对局比例、带回响事件出现后的命中率、逐事件命中率、300 局零命中与低命中单句。它记录的是玩家真正看到的条件文案,不是用终局 flag 反推。
+
+该工具只诊断、不参与抽取。修改强制节点、导演权重或事件池后,先比较固定 `--seed` 的基线再判断是否真的减少重复感。
+
+### 7.4 测试
 
 - 引擎单元测试(vitest):调度器、DSL 求值器、结局判定、RNG 复现性
 - 黄金存档回归:固定 seed + actionLog,断言最终 GameState 快照不变(引擎重构的安全网)

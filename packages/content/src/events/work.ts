@@ -199,6 +199,23 @@ export const workEvents: GameEvent[] = [
     category: 'invest',
     title: '牛市与股灾',
     text: '2015年上半年，连食堂打饭的阿姨都在聊股票。室友开了户，把三个月生活费投了进去，收益率截图天天发群里。他把开户二维码推到你面前：“牛市不进场，等于白活。”',
+    presentationVariants: [
+      {
+        condition: { background: 'bg_rural' },
+        title: '那笔不能亏的生活费',
+        text: '2015年上半年，食堂里都在聊股票。室友把三个月生活费投进去，收益截图每天刷新。他把开户二维码推给你时，你想起爸妈塞进行李箱夹层的零钱。别人讨论的是错过牛市，你先算的是：这笔钱亏掉以后，下个月怎么吃饭。',
+      },
+      {
+        condition: { background: 'bg_demolition' },
+        title: '存折之外的快钱',
+        text: '2015年上半年，室友靠股票浮盈换了新电脑。他说你家刚拿补偿款，更该学会“让钱生钱”。开户页面只要几分钟，收益曲线一路向上。你却想起爸爸反复看存折时那句“钱来得快，也不能乱花”。',
+      },
+      {
+        condition: { background: 'bg_family_biz' },
+        title: '一天涨出小店一个月利润',
+        text: '2015年上半年，室友账户一天的浮盈，快赶上爸妈小店一个月利润。他把开户二维码推来：“辛苦做生意哪有牛市快。”你盯着那条上涨曲线，第一次真切感到，劳动和财富之间似乎出现了一条危险的捷径。',
+      },
+    ],
     trigger: { year: { from: 2015, to: 2015 } },
     choices: [
       {
@@ -842,6 +859,23 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '朋友圈两极分化',
     text: '2019年，你的朋友圈开始泾渭分明：一条是大学同学晒出创业公司的融资喜报，配图是庆功宴上举着的香槟；另一条是另一个同学转发的万字长文《裁员实录》，字字都在讲“降本增效”——这个词，比它在大厂里流行的时间还要早两年。你划着屏幕，一半是喜报，一半是实录，拇指停在中间不知道点哪个赞。',
+    presentationVariants: [
+      {
+        condition: { any: [{ career: 'cs' }, { career: 'finance' }] },
+        title: '同一栋楼里的融资与裁员',
+        text: '2019年，楼上创业团队刚贴出融资喜报，楼下会议室就在做人员调整。茶水间有人算期权，有人算补偿金。朋友圈里的“星辰大海”和《裁员实录》不再是两拨人的故事，它们共用一部电梯，而你每天都要乘。',
+      },
+      {
+        condition: { any: [{ career: 'gov' }, { career: 'education' }, { career: 'medicine' }, { career: 'psychology' }] },
+        title: '围墙外的融资喜报',
+        text: '2019年，你的工作仍按排班、通知和流程向前走，朋友圈却一半在晒融资香槟，一半在转裁员实录。有人羡慕你的稳定，也有人说你错过时代红利。你隔着职业围墙看那阵喧闹，开始重新衡量：安稳究竟是落后，还是一种不显眼的收益。',
+      },
+      {
+        condition: { career: 'local' },
+        title: '小城屏幕里的大起大落',
+        text: '2019年，小城的日子没有明显变化，手机里却每天都有人融资、裁员、财富自由。大学同学举香槟的照片和《裁员实录》挨在一起，而你明天仍要走熟悉的通勤路。屏幕把别人的剧烈人生送到眼前，也把自己的平稳照得有些黯淡。',
+      },
+    ],
     mandatory: true,
     trigger: { all: [{ year: { from: 2019, to: 2019 } }, working] },
     choices: [
@@ -892,6 +926,11 @@ export const workEvents: GameEvent[] = [
     category: 'invest',
     title: '基金上车',
     text: '2020年，朋友圈都在晒基金收益。白酒、新能源、医药，每条曲线都像通往财富自由的楼梯。你打开理财软件，首页写着“历史业绩不代表未来表现”。',
+    contextLines: [
+      { condition: { flag: 'p2p_burned' }, text: '手机里那个已经打不开的P2P应用曾经也写着漂亮的历史收益。你盯着“风险提示”四个字，比旁人多看了几秒。' },
+      { condition: { flag: 'dodged_p2p' }, text: '你想起同事当年展示的年化15%截图。躲过一次陷阱不会让人永远正确，只会让“大家都在买”听起来没那么可靠。' },
+      { condition: { flag: 'stock_lesson' }, text: '2015年牛市里，你也见过一条仿佛只会向上的曲线。后来那张账户截图，替所有“这次不一样”加上了注脚。' },
+    ],
     trigger: { year: { from: 2020, to: 2020 } },
     choices: [
       {
@@ -1117,13 +1156,36 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_work_trend_chasing_2024_tech_finance', pools: ['work'], category: 'career',
+    title: '风口吹进工位', mandatory: true, variantGroup: 'era_2024_trend',
+    trigger: { all: [{ year: { from: 2024, to: 2024 } }, working, { any: [{ career: 'cs' }, { career: 'finance' }] }] },
+    text: '2024年，AI、出海和短剧不再只是朋友圈热词。你所在的行业正在重排岗位：旧项目缩编，新团队抢人，同事午饭时讨论的不是“要不要追风口”，而是“会不会被风口留在后面”。这一次，变化已经吹进工位。',
+    choices: [
+      { id: 'a', text: '申请新业务，把已有经验带上船', outcomes: [{ weight: 1, text: '你没有从零扮演专家，而是把旧业务里的客户、数据和踩坑经验带进新团队。风口仍然混乱，但你第一次发现，可迁移的能力比热点名词更耐用。', effects: [{ stats: { knowledge: 6, network: 4, mindset: -3, health: -3 } }, { setFlag: 'trend_transferred_skill' }] }] },
+      { id: 'b', text: '先做三个月小项目，再决定是否转向', outcomes: [{ weight: 1, text: '你用业余时间做了一个最小版本。数据没有朋友圈截图漂亮，却足够告诉你哪些是机会、哪些只是营销。你错过了最早一波喧闹，也避开了最贵的一堂课。', effects: [{ stats: { knowledge: 5, money: 3000, mindset: 2, health: -2 } }, { setFlag: 'trend_tested_first' }] }] },
+      { id: 'c', text: '守住主业，但开始准备下一张简历', outcomes: [{ weight: 1, text: '你没追着每个新词改标题，只把真正做过的能力重新整理。年底风口换了两轮，你的简历没有过时，也没有假装自己站在浪尖。', effects: [{ stats: { knowledge: 3, mindset: 4, money: 2000 } }] }] },
+    ],
+  },
+  {
+    id: 'ev_work_trend_chasing_2024_stable', pools: ['work'], category: 'career',
+    title: '风口吹不到的走廊', mandatory: true, variantGroup: 'era_2024_trend',
+    trigger: { all: [{ year: { from: 2024, to: 2024 } }, working, { any: [{ career: 'gov' }, { career: 'education' }, { career: 'medicine' }, { career: 'psychology' }] }] },
+    text: '2024年，朋友们在谈短剧、出海和AI，你的工作群里却仍是排班、通知、材料和等待解决的人。风口像从另一条街吹过来：听得见，很热闹，却未必能直接进这条走廊。真正的问题不是要不要辞职，而是这些变化会怎样改写你手里的工作。',
+    choices: [
+      { id: 'a', text: '挑一个工具，先解决手头最烦的重复劳动', outcomes: [{ weight: 1, text: '你没给自己贴“转型”标签，只拿新工具整理材料、归纳记录。省下的时间不惊天动地，却每周真实多出几个小时。风口第一次不是远处的财富故事，而是少加一次班。', effects: [{ stats: { knowledge: 5, mindset: 4, health: 2 } }, { setFlag: 'trend_practical_tool' }] }] },
+      { id: 'b', text: '不被焦虑带走，把专业基本功继续做深', outcomes: [{ weight: 1, text: '你承认自己不会因为一张投流截图就换掉多年积累。热点继续滚动，眼前的人和问题仍需要有人认真处理。年底回看，你没有暴富，却更清楚自己为何留下。', effects: [{ stats: { knowledge: 4, mindset: 5, network: 2 } }] }] },
+      { id: 'c', text: '去听行业交流，给未来留一扇侧门', outcomes: [{ weight: 1, text: '你认识了几位做新业务的人，没有当场做决定，只把联系方式和真实门槛记下来。侧门尚未推开，但不再只是朋友圈里的一张照片。', effects: [{ stats: { knowledge: 3, network: 6, mindset: 1 } }] }] },
+    ],
+  },
+  {
     id: 'ev_work_trend_chasing_2024',
     pools: ['work'],
     category: 'career',
     title: '追风口',
     text: '2024年，朋友圈里的风口一个接一个换脸：做短剧的同学晒出“7天回本”的投流后台截图；做外贸的同学发了一组东南亚仓库的照片，配文“出海才是新蓝海”；隔壁工位每天在群里转发新能源产业链的研报，末尾都带一句“上车不晚”。你划着这些消息，盘算着自己剩下的存款和精力，够不够再赌一把。',
     mandatory: true,
-    trigger: { all: [{ year: { from: 2024, to: 2024 } }, working] },
+    variantGroup: 'era_2024_trend',
+    trigger: { all: [{ year: { from: 2024, to: 2024 } }, working, { not: { any: [{ career: 'cs' }, { career: 'finance' }, { career: 'gov' }, { career: 'education' }, { career: 'medicine' }, { career: 'psychology' }] } }] },
     choices: [
       {
         id: 'a',
@@ -1257,6 +1319,11 @@ export const workEvents: GameEvent[] = [
     category: 'career',
     title: '领导的反馈',
     text: '绩效沟通时，领导说你“执行不错，但要更有 owner 意识”。你点头记录，心里翻译成中文：活要多想，锅也要多背。',
+    contextLines: [
+      { condition: { flag: 'mentor_portable_skill' }, text: '你想起导师在方案首页圈出的那句话：先分清哪些判断离开平台仍然属于你。' },
+      { condition: { flag: 'trend_transferred_skill' }, text: '去年你把旧经验带进新业务；这次“owner意识”听起来不再只是让你多背一口锅。' },
+      { condition: { flag: 'trend_practical_tool' }, text: '你刚用新工具省下几小时重复劳动，桌上还放着那份前后效率对照表。' },
+    ],
     trigger: { all: [{ year: { from: 2019 } }, working, { not: { flag: 'medicine_resident' } }] },
     choices: [
       {
@@ -1855,6 +1922,11 @@ export const workEvents: GameEvent[] = [
     category: 'relationship',
     title: '相亲局',
     text: '亲戚给你介绍了一个人，理由很充分：“年龄差不多，工作也稳定。”你看着对方微信头像，想不出第一句话该说什么。',
+    contextLines: [
+      { condition: { flag: 'love_unsent_diary' }, text: '抽屉里那页没署名的日记还在；你曾经连一句喜欢都没敢发出去。' },
+      { condition: { flag: 'love_confession_failed' }, text: '很多年前操场上的那句“你是个很好的人”，忽然又从记忆里冒出来。' },
+      { condition: { flag: 'love_silence_separated' }, text: '上一次关系结束在一场沉默的视频通话里；这次你至少想把话说清楚。' },
+    ],
     trigger: { all: [{ year: { from: 2022 } }, { not: { flag: 'in_love' } }] },
     choices: [
       {
@@ -1957,14 +2029,39 @@ export const workEvents: GameEvent[] = [
     // 2025 全职业线"三十而立"节点:回看前面十年的选择,后期最缺的 payoff 型事件。
     // outcome 按 has_house/restarted_after_layoff/婚恋 npcStage 等长期 flag 分支,
     // 让玩家在这里"撞见"自己前几年的决定。
+    id: 'ev_work_thirty_mirror_2025_house',
+    pools: ['work'], category: 'mindset', tier: 'major', title: '三十岁，钥匙和账单',
+    mandatory: true, variantGroup: 'life_2025_mirror', order: -5,
+    trigger: { all: [{ year: { from: 2025, to: 2025 } }, { flag: 'has_house' }] },
+    text: '2025年生日，你回到那套写着自己名字、也写着很多年房贷的房子。钥匙落在玄关，银行提醒准时亮起。相册里的宿舍、出租屋和搬家纸箱一路翻到交房照片。三十岁的镜子没有挂在墙上，它是这扇门，也是门后每个月都要偿还的选择。',
+    choices: [
+      { id: 'a', text: '重新算一次账，但也记下这盏灯带来的安稳', outcomes: [{ weight: 1, text: '数字依然有压力，可你没有只看负债。那些不再被房东催搬、可以按自己喜好钉下的钉子，也属于资产表。你给未来做了提前还款计划，然后关掉表格，好好吃完蛋糕。', effects: [{ stats: { knowledge: 4, mindset: 6 } }, { setFlag: 'thirty_house_reframed' }] }] },
+      { id: 'b', text: '邀请重要的人来家里吃顿饭', outcomes: [{ weight: 1, text: '桌子不大，菜也普通。有人参观阳台，有人吐槽通勤，最后一起把蛋糕吃完。房子从一项沉重资产变成了一个真实地址：想见的人知道该往哪里来。', effects: [{ stats: { mindset: 8, network: 4, money: -1000 } }] }] },
+      { id: 'c', text: '什么都不总结，换个灯泡继续过日子', outcomes: [{ weight: 1, text: '你踩着椅子换掉闪了半个月的灯泡。灯亮起来，没有掌声。三十岁也一样：不是突然拥有答案，只是终于有些日常故障，得由你自己修。', effects: [{ stats: { mindset: 5, health: 2 } }] }] },
+    ],
+  },
+  {
+    id: 'ev_work_thirty_mirror_2025_restart',
+    pools: ['work'], category: 'mindset', tier: 'major', title: '三十岁，履历上的断行',
+    mandatory: true, variantGroup: 'life_2025_mirror', order: -5,
+    trigger: { all: [{ year: { from: 2025, to: 2025 } }, { flag: 'restarted_after_layoff' }, { not: { flag: 'has_house' } }] },
+    text: '2025年生日，招聘软件推来“工作周年提醒”。你的履历中间有一道被裁员切开的断行：离职证明、沉默的投递、重新开始的工牌。别人看见的是不连续，你知道那里面装着多少次自我怀疑。三十岁这面镜子，先照见的不是成就，而是你确实从地上站起来过。',
+    choices: [
+      { id: 'a', text: '把断行补进故事，不再假装它没发生', outcomes: [{ weight: 1, text: '你重新写简历，没有掩去低谷，而是写清自己怎样重建能力和节奏。那一年不再是履历污点，而是你能解释、也能承担的一段经历。', effects: [{ stats: { knowledge: 5, mindset: 7, network: 2 } }, { setFlag: 'thirty_owned_restart' }] }] },
+      { id: 'b', text: '约当年接住自己的人吃饭', outcomes: [{ weight: 1, text: '你发出几条感谢：替你改简历的人、转来岗位的人、在你不想说话时仍问“还好吗”的人。饭桌上没人把那次失业说成励志故事，只庆祝你今天还在往前走。', effects: [{ stats: { mindset: 8, network: 6, money: -1000 } }] }] },
+      { id: 'c', text: '关掉招聘软件，给自己放一天假', outcomes: [{ weight: 1, text: '你没有复盘，没有证明韧性，只睡到自然醒。经历过被工作突然拿走以后，你终于知道休息不是对职业忠诚的背叛。', effects: [{ stats: { mindset: 7, health: 4 } }] }] },
+    ],
+  },
+  {
     id: 'ev_work_thirty_mirror_2025',
     pools: ['work'],
     category: 'mindset',
     tier: 'major',
     title: '三十岁，照镜子',
     mandatory: true,
+    variantGroup: 'life_2025_mirror',
     order: -5,
-    trigger: { year: { from: 2025, to: 2025 } },
+    trigger: { all: [{ year: { from: 2025, to: 2025 } }, { not: { flag: 'has_house' } }, { not: { flag: 'restarted_after_layoff' } }] },
     text: '2025年，你三十岁了。生日那天没有仪式感，你在下班路上买了个小蛋糕，一个人吃掉了大半。手机里躺着几条生日祝福，有爸妈的、有老同学的，还有一条来自银行的账单提醒。你点开相册，从2014年那张考场外的照片开始往下翻：军训、宿舍、毕业照、工牌、体检报告……十一年翻完只用了五分钟。三十岁不是一道门，更像一面镜子——你站在它面前，第一次认真打量这些年自己活成的样子。',
     choices: [
       {
@@ -2703,6 +2800,11 @@ export const workEvents: GameEvent[] = [
     category: 'npc',
     title: '朋友圈的红点',
     text: '深夜刷朋友圈，一条动态跳出来：是{{ta}}。照片里{{ta}}站在一个你不认识的城市街头，笑得和当年一样，身边的人和生活都换了一轮。你的拇指在屏幕上停了几秒——你们已经很多年没说过话了，久到连"在吗"都显得突兀。',
+    contextLines: [
+      { condition: { flag: 'love_unsent_diary' }, text: '抽屉里的大学日记还夹在那一页：“如果今晚下楼，会怎样。”十年过去，这句话终于等到了一个很轻的回答机会。' },
+      { condition: { flag: 'love_silence_separated' }, text: '你记得最后那场视频通话：两个人都在等对方先说未来，最后只剩屏幕右上角不断增加的通话时长。' },
+      { condition: { flag: 'love_confession_failed' }, text: '操场上那句“你是个很好的人”早已不再刺耳，但你的手指仍记得当时攥紧又松开的感觉。' },
+    ],
     choices: [
       {
         id: 'a_diary',

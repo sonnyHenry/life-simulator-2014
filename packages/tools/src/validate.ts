@@ -152,6 +152,12 @@ function checkTraitFlagRefs(owner: string, cond: Condition | undefined): void {
 }
 for (const event of contentPack.events) {
   checkTraitFlagRefs(`event ${event.id} trigger`, event.trigger);
+  for (const [index, variant] of (event.presentationVariants ?? []).entries()) {
+    checkTraitFlagRefs(`event ${event.id} presentation ${index}`, variant.condition);
+  }
+  for (const [index, line] of (event.contextLines ?? []).entries()) {
+    checkTraitFlagRefs(`event ${event.id} context line ${index}`, line.condition);
+  }
   for (const choice of event.choices) {
     checkTraitFlagRefs(`event ${event.id} choice ${choice.id} visibleIf`, choice.visibleIf);
     for (const outcome of choice.outcomes) {
@@ -208,11 +214,26 @@ for (const event of contentPack.events) {
     warn(`event has no pool and is not referenced by an NPC stage or schedule: ${event.id}`);
   }
   if (event.choices.length === 0) error(`event has no choices: ${event.id}`);
+  checkUnique(`choice in ${event.id}`, event.choices.map(choice => choice.id));
   visitCondition(event.trigger, cond => {
     if ('fn' in cond && !fnIds.has(cond.fn)) error(`event ${event.id} references missing condition fn: ${cond.fn}`);
     if ('npcFavor' in cond && !npcIds.has(cond.npcFavor)) error(`event ${event.id} references missing npc: ${cond.npcFavor}`);
     if ('npcStage' in cond && !npcIds.has(cond.npcStage)) error(`event ${event.id} references missing npc: ${cond.npcStage}`);
   });
+  for (const [index, variant] of (event.presentationVariants ?? []).entries()) {
+    visitCondition(variant.condition, cond => {
+      if ('fn' in cond && !fnIds.has(cond.fn)) error(`presentation ${event.id}.${index} references missing condition fn: ${cond.fn}`);
+      if ('npcFavor' in cond && !npcIds.has(cond.npcFavor)) error(`presentation ${event.id}.${index} references missing npc: ${cond.npcFavor}`);
+      if ('npcStage' in cond && !npcIds.has(cond.npcStage)) error(`presentation ${event.id}.${index} references missing npc: ${cond.npcStage}`);
+    });
+  }
+  for (const [index, line] of (event.contextLines ?? []).entries()) {
+    visitCondition(line.condition, cond => {
+      if ('fn' in cond && !fnIds.has(cond.fn)) error(`context line ${event.id}.${index} references missing condition fn: ${cond.fn}`);
+      if ('npcFavor' in cond && !npcIds.has(cond.npcFavor)) error(`context line ${event.id}.${index} references missing npc: ${cond.npcFavor}`);
+      if ('npcStage' in cond && !npcIds.has(cond.npcStage)) error(`context line ${event.id}.${index} references missing npc: ${cond.npcStage}`);
+    });
+  }
   for (const choice of event.choices) {
     visitCondition(choice.visibleIf, cond => {
       if ('fn' in cond && !fnIds.has(cond.fn)) error(`choice ${event.id}.${choice.id} references missing condition fn: ${cond.fn}`);
@@ -398,6 +419,16 @@ for (const ending of contentPack.endings) {
 for (const event of contentPack.events) {
   if (conditionImpossible(event.trigger)) {
     warn(`event trigger can never be true: ${event.id}`);
+  }
+  for (const [index, variant] of (event.presentationVariants ?? []).entries()) {
+    if (conditionImpossible(variant.condition)) {
+      warn(`presentation condition can never be true: ${event.id}.${index}`);
+    }
+  }
+  for (const [index, line] of (event.contextLines ?? []).entries()) {
+    if (conditionImpossible(line.condition)) {
+      warn(`context line condition can never be true: ${event.id}.${index}`);
+    }
   }
   for (const choice of event.choices) {
     if (conditionImpossible(choice.visibleIf)) {

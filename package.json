@@ -7,7 +7,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "validate": "pnpm --filter @life-sim/tools validate",
-    "simulate": "pnpm --filter @life-sim/tools simulate"
+    "simulate": "pnpm --filter @life-sim/tools simulate",
+    "repetition": "pnpm --filter @life-sim/tools repetition"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

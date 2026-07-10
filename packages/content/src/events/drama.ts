@@ -713,6 +713,11 @@ export const dramaEvents: GameEvent[] = [
     title: '老同学的“项目”',
     trigger: { year: { from: 2016, to: 2019 } },
     text: '一个高中同学突然热络起来，朋友圈全是酒店会场、导师合影和“感恩遇见”。他约你见面，神秘地压低声音：“有个项目，三个月回本，一年翻十倍，名额有限，我第一个想到你。”他的眼睛亮得吓人，像被什么点着了。',
+    contextLines: [
+      { condition: { flag: 'roommate_took_debt' }, text: '“名额有限”让你想起室友借钱追风口的那个晚上：当时那张欠条上的数字，可没有导师合影这么闪亮。' },
+      { condition: { flag: 'roommate_refused_debt' }, text: '你曾经对室友说过“想法可以试，债不能替热血买单”。同一句话此刻又顶到了嘴边。' },
+      { condition: { flag: 'stock_lesson' }, text: '2015年那张忽红忽绿的账户截图还躺在旧相册里。市场至少允许你卖出，而眼前这个“项目”连钱究竟去了哪里都不肯说。' },
+    ],
     choices: [
       {
         id: 'a',

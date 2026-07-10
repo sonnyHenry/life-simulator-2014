@@ -24,6 +24,11 @@ export const randomEvents: GameEvent[] = [
     category: 'health',
     title: '换季重感冒',
     text: '一场降温，你中招了。头晕、咳嗽、浑身发冷，外卖软件里的粥店你已经收藏了三家。',
+    contextLines: [
+      { condition: { flag: 'pandemic_volunteer' }, text: '体温计跳出数字时，你想起那年在小区门口给别人测过的几千次体温；轮到自己，反倒没那么会照顾人。' },
+      { condition: { flag: 'pandemic_wfh' }, text: '你下意识把电脑搬到床边，像当年在老家书桌前那样准备“边病边上班”，才发现那套生存习惯一直没戒掉。' },
+      { condition: { flag: 'pandemic_return' }, text: '咳嗽声在房间里一响，你又想起那趟空荡荡的返城路；身体比日历更记得那些年份。' },
+    ],
     choices: [
       {
         id: 'a',
@@ -84,6 +89,12 @@ export const randomEvents: GameEvent[] = [
     category: 'family',
     title: '家里的电话',
     text: '晚上十点，家里打来电话。电话那头先问你吃没吃饭，又问钱够不够花，最后才装作随口一提：“最近累不累啊？”',
+    contextLines: [
+      { condition: { flag: 'reopen_homecoming' }, text: '你想起解封后推开家门的那顿热饭；这次不想再只回一句“都挺好”。' },
+      { condition: { flag: 'has_house' }, text: '他们上次问的还是首付和月供，今天却先问你有没有按时吃饭。' },
+      { condition: { flag: 'hometown_drifted' }, text: '你忽然想到春节烧烤摊上，自己也曾只顾讲大城市，忘了问故乡后来怎样。' },
+      { condition: { flag: 'pandemic_wfh' }, text: '你记得那年在老家书桌前开会，家人总在门外放一盘切好的水果；当时嫌打扰，如今却很久没听见那声敲门。' },
+    ],
     choices: [
       {
         id: 'a',
@@ -128,6 +139,12 @@ export const randomEvents: GameEvent[] = [
     trigger: { year: { from: 2020 } },
     title: '老同学的朋友圈',
     text: '你刷到高中同学的朋友圈：有人晒婚纱照，有人晒工牌，有人晒孩子，有人晒国外定位。你看了很久，突然想起当年大家都穿着一样的校服。',
+    contextLines: [
+      { condition: { flag: 'dorm_farewell_video' }, text: '相册忽然弹出“多年前的今天”：毕业那晚，你举着手机替所有人录下了没说出口的话。' },
+      { condition: { flag: 'dorm_last_game' }, text: '其中一张合照里有人穿着你熟悉的旧T恤，你想起散伙饭后那局谁也不肯先下线的游戏。' },
+      { condition: { flag: 'roommate_farewell_ledger' }, text: '你又翻到那张毕业时算到最后一笔的旧账单；钱早结清了，一起冒过的险却还留着。' },
+      { condition: { flag: 'dorm_bond' }, text: '大学宿舍群还躺在消息列表深处，群名没改，最后一句话却已经停在很久以前。你突然明白，共同生活过和仍在联系是两回事。' },
+    ],
     choices: [
       {
         id: 'a',
@@ -445,7 +462,7 @@ export const randomEvents: GameEvent[] = [
         ],
       },
       {
-        id: 'c',
+        id: 'd',
         text: '提前到场帮忙，红包按关系多包一点',
         outcomes: [
           {
@@ -649,6 +666,12 @@ export const randomEvents: GameEvent[] = [
     category: 'money',
     title: '换手机',
     text: '手机电池一天三充，屏幕边缘也开始失灵。你打开电商软件，旗舰机、二手机、分期免息三个选项一起盯着你。',
+    contextLines: [
+      { condition: { flag: 'family_biz_mobile_seed' }, text: '你想起2014年替家里把第一批商品搬进手机时，用的也是一台边角磨花的旧机器；它不体面，却真的打开过一扇门。' },
+      { condition: { flag: 'p2p_burned' }, text: '“分期免息”四个字让你停了一秒。经历过那次暴雷后，所有轻松付款的承诺听起来都多了一层回声。' },
+      { condition: { flag: 'dodged_p2p' }, text: '你还记得当年关掉P2P页面时那一下克制；这次只是台手机，但“先算清楚”已经成了习惯。' },
+      { condition: { flag: 'stock_lesson' }, text: '2015年你第一次学会，账面上涨不等于花得起。如今面对“月供只要几百”，你先点开的不是商品详情，而是计算器。' },
+    ],
     trigger: { year: { from: 2015 } },
     choices: [
       {

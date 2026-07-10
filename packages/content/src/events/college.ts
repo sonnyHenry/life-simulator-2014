@@ -481,15 +481,98 @@ export const collegeEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_college_roommate_farewell_cofounder',
+    pools: ['work'],
+    category: 'friendship',
+    mandatory: true,
+    variantGroup: 'era_2018_farewell',
+    order: -10,
+    tier: 'major',
+    title: '散伙饭，也是散伙会',
+    text: '2018年6月，宿舍的纸箱堆到门口。校门口那家吃了四年的馆子里，大家在说毕业去向，你和创业室友面前却多放着一本皱巴巴的账本。三年前你们把生活费投进校园跑腿，如今最后一笔押金也退完了。老板送来花生米，说“毕业快乐”。室友碰了碰你的杯子：“创始团队今晚正式解散？”这顿饭既要告别大学，也要给你们共同做砸的第一件事收尾。',
+    trigger: { all: [{ year: { from: 2018, to: 2018 } }, { flag: 'roommate_startup_joined' }] },
+    choices: [
+      {
+        id: 'a', text: '在账本最后一页写：项目散了，朋友不散', outcomes: [{
+          weight: 1,
+          text: '你写完把笔递给他。他在下面补了一句：“亏损已结清，人情长期持有。”全桌人笑他到毕业还讲商业黑话。后来群聊慢慢安静，那本账本却一直跟着他搬家。多年后他再拿出来，第一页是你们投进去的钱，最后一页是你们没赔进去的关系。',
+          effects: [{ stats: { network: 5, mindset: 5 } }, { npcFavor: 'roommate', delta: 8 }, { setFlag: 'roommate_farewell_ledger' }],
+        }],
+      },
+      {
+        id: 'b', text: '把失败编成段子，敬“第一家倒闭的公司”', outcomes: [{
+          weight: 1,
+          text: '你举杯宣布公司完成“主动战略性清算”，室友笑到呛住。大家轮流补充创业黑历史，连被宿管追着撕传单都成了高光时刻。回宿舍后你看见空掉的床位，才意识到有些失败之所以能笑着讲，是因为当年一起失败的人还坐在桌边。',
+          effects: [{ stats: { network: 4, mindset: 3 } }, { npcFavor: 'roommate', delta: 5 }],
+        }],
+      },
+      {
+        id: 'c', text: '认真问他：离开学校以后，你还想创业吗', outcomes: [{
+          weight: 1,
+          text: '他摸着账本封面，沉默很久：“想。但下次先学会怎么输。”你们没有许诺以后一定再合作，只约定谁先撞到墙，另一个至少接电话。二十二岁的告别第一次不只是“常联系”，而是一句知道代价之后仍愿意给出的承诺。',
+          effects: [{ stats: { knowledge: 3, network: 4, mindset: 2 } }, { npcFavor: 'roommate', delta: 7 }],
+        }],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_roommate_farewell_dorm',
+    pools: ['work'],
+    category: 'friendship',
+    mandatory: true,
+    variantGroup: 'era_2018_farewell',
+    order: -10,
+    tier: 'major',
+    title: '最后一把，真的最后一把',
+    text: '2018年6月，宿舍只剩电脑还没装箱。四年前室友第一次喊“三缺一”，你放下高数课本上了号；今晚，大家又把椅子拖到一起，说散伙饭前再打最后一把。熟悉的登录音乐响起，墙上撕掉的海报只剩胶印。你们都知道这一把结束后，下一次凑齐四个人，不会再只需要从上铺探个头。',
+    trigger: {
+      all: [
+        { year: { from: 2018, to: 2018 } },
+        { flag: 'dorm_bond' },
+        { not: { flag: 'roommate_startup_joined' } },
+      ],
+    },
+    choices: [
+      {
+        id: 'a', text: '不催散伙饭，认真把最后一局打完', outcomes: [{
+          weight: 1,
+          text: '你们打得像决赛，输了还厚着脸皮说“三局两胜”。到饭馆时菜已经凉了一半，老板重新热了一遍。多年后谁也记不清那晚输赢，只记得退出游戏时，四个人的头像依次暗下去，宿舍忽然安静得不像住过四年。',
+          effects: [{ stats: { mindset: 4, network: 5, health: -2 } }, { setFlag: 'dorm_last_game' }],
+        }],
+      },
+      {
+        id: 'b', text: '游戏先停，给每个人录一段毕业留言', outcomes: [{
+          weight: 1,
+          text: '镜头一对准，平时最吵的人反而不会说话。有人只憋出一句“苟富贵”，有人骂你煽情，最后还是认真讲完。视频存在旧手机里，画质一年比一年糊；但每次点开，你都能听见那间宿舍最后一个晚上的风扇声。',
+          effects: [{ stats: { network: 5, mindset: 4 } }, { setFlag: 'dorm_farewell_video' }],
+        }],
+      },
+      {
+        id: 'c', text: '照旧讲段子，谁伤感谁请客', outcomes: [{
+          weight: 1,
+          text: '你们互相揭了整晚的短，谁都没让眼泪落下来。直到第二天清晨，最后一个室友拖着箱子关门，群里发来一句：“退游了，兄弟们。”你盯着那行字，第一次没有接梗。',
+          effects: [{ stats: { mindset: -1, network: 3 } }],
+        }],
+      },
+    ],
+  },
+  {
     id: 'ev_college_roommate_farewell',
     pools: ['work'],
     category: 'friendship',
     mandatory: true,
+    variantGroup: 'era_2018_farewell',
     order: -10,
     tier: 'major',
     title: '散伙饭',
     text: '2018年6月，答辩通过的红色横幅还挂在学院楼下，宿舍楼里已经到处是打包的胶带声。行李陆续寄走，床位一张张空出来，墙上的海报撕下来后留着四个胶印。走的前一晚，宿舍凑钱在校门口那家吃了四年的馆子订了个包间——老板认得你们，送了盘花生米，说“毕业快乐”。桌上，有人明天飞南方入职，有人下周去北京找房，有人回老家等编制考试，有人的去向还写在“再看看”里。大家举杯说“以后常联系”，说“每年聚一次”，说到后来声音低下去，一个个都低头看起了手机。其实没人有消息要回。分别这件事，二十二岁的人总以为，可以用一个永远不解散的群来解决。',
-    trigger: { year: { from: 2018, to: 2018 } },
+    trigger: {
+      all: [
+        { year: { from: 2018, to: 2018 } },
+        { not: { flag: 'roommate_startup_joined' } },
+        { not: { flag: 'dorm_bond' } },
+      ],
+    },
     choices: [
       {
         id: 'a',
@@ -630,6 +713,23 @@ export const collegeEvents: GameEvent[] = [
     tier: 'major',
     title: '操场上的心动',
     text: '你在社团认识了一个人。你们一起值过班、赶过策划案、办完活动一起收过场，收到最后整栋楼只剩你们俩和一串没关的灯。{{ta}}笑起来的时候，你总是会忘记自己刚才要说什么。今晚十一点半，{{ta}}发来消息：“在干嘛？”后面跟着一句，“睡不着，操场走走？”你盯着屏幕看了很久。宿舍熄灯的铃声响了，你的心跳比铃声还吵。你知道，有些话如果今晚不说，可能就要在心里存很多年。',
+    presentationVariants: [
+      {
+        condition: { any: [{ flag: 'major_track', equals: 'cs' }, { flag: 'major_track', equals: 'finance' }] },
+        title: '凌晨一点的文件传输',
+        text: '你和{{ta}}是在一次课程项目里熟起来的。你们争过数据、改过演示，也在机房断网时一起守着进度条到凌晨。今晚，{{ta}}把最终文件发来，紧接着又补了一句：“项目结束以后，我们是不是就没理由总见面了？”光标在输入框里闪。你知道这句话问的不是项目。',
+      },
+      {
+        condition: { any: [{ flag: 'major_track', equals: 'education' }, { flag: 'major_track', equals: 'medicine' }, { flag: 'major_track', equals: 'psychology' }] },
+        title: '实习记录背面的名字',
+        text: '你和{{ta}}在一次见习活动里被分到同组。你们一起整理记录、安慰紧张的人、收拾所有人走后留下的东西。{{ta}}总会在你的表格漏一项时悄悄补上。今晚，{{ta}}把记录表拍给你，照片边缘露出一行手写的小字：“明天没任务，也想见你。”你盯着那行字，心跳比晚自习铃还响。',
+      },
+      {
+        condition: { flag: 'trait_social' },
+        title: '散场以后还有两个人',
+        text: '你们是在你组织的一场校园活动里认识的。你负责把所有人照顾到，{{ta}}却是散场后唯一回来问“你累不累”的人。今晚群聊已经安静，{{ta}}私发来一句：“大家都走了，要不要操场转一圈？”你第一次不是在安排别人的气氛，而是在等一个只属于自己的回答。',
+      },
+    ],
     choices: [
       {
         id: 'a',
@@ -774,13 +874,85 @@ export const collegeEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_college_mobile_wave_2014_rural',
+    pools: ['college'],
+    category: 'campus',
+    title: '行李箱夹层里的生活费',
+    text: '2014年9月，爸妈把一叠零钱塞进行李箱夹层，反复叮嘱你别乱花。刚到宿舍，室友已经在抢红包、换4G套餐，校门口的打车软件地推喊着“首单立减”。你那部用了三年的手机连定位链接都打开得很慢。第一次离家，你忽然发现所谓移动互联网浪潮，落到自己身上，先是一道每月要不要多花几十块的算术题。',
+    mandatory: true,
+    variantGroup: 'era_2014_mobile_wave',
+    trigger: { all: [{ year: { from: 2014, to: 2014 } }, { background: 'bg_rural' }] },
+    choices: [
+      {
+        id: 'a', text: '换最便宜的4G套餐，旧手机继续用', outcomes: [{
+          weight: 1,
+          text: '你在营业厅比了半小时价目表，只换套餐，不换手机。视频还是会卡，但地图终于能打开。月底给家里报平安时，你没提自己为了省流量，总在教学楼门口蹭校园网。你开始学会把“想要”和“需要”分开算。',
+          effects: [{ stats: { money: -100, knowledge: 2, network: 1, mindset: -1 } }],
+        }],
+      },
+      {
+        id: 'b', text: '先加入抢红包群，把能薅的补贴攒下来', outcomes: [{
+          weight: 1,
+          text: '你认真记下每个新客红包和打车券，抢到的钱不多，却够买几顿早饭。室友笑你把红包群当勤工俭学，你也笑。只有你知道，行李箱夹层里的每一张钱都带着家里干活留下的折痕。',
+          effects: [{ stats: { money: 300, network: 2, mindset: 2, health: -1 } }],
+        }],
+      },
+      {
+        id: 'c', text: '不追这些热闹，先去找勤工助学岗位', outcomes: [{
+          weight: 1,
+          text: '你错过了宿舍第一轮红包大战，却在图书馆找到整理书架的岗位。第一次领到工资时，你给家里打电话说学校挺好，什么都不缺。电话那头沉默两秒，只回了一句：“别太省。”',
+          effects: [{ stats: { money: 600, knowledge: 2, network: -1, health: -2 } }],
+        }],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_mobile_wave_2014_business',
+    pools: ['college'],
+    category: 'campus',
+    title: '爸妈店里的客人去哪了',
+    text: '2014年9月，校门口挤满4G套餐、打车软件和团购网站的地推。室友忙着抢红包，你却想起爸妈店里越来越少的客人——他们总说“人都跑到网上买了”。手机里的优惠券看起来只是几块钱，背后却像有一条看不见的河，正在把生意和人一起往线上推。',
+    mandatory: true,
+    variantGroup: 'era_2014_mobile_wave',
+    trigger: { all: [{ year: { from: 2014, to: 2014 } }, { background: 'bg_family_biz' }] },
+    choices: [
+      {
+        id: 'a', text: '把校园里的玩法拍下来，发给爸妈看看', outcomes: [{
+          weight: 1,
+          text: '你拍了扫码领券、线上下单和同城配送的摊位，给爸妈发了一长串语音。爸爸回：“我们那小店搞不了这些。”过了几分钟，他又问：“那个收款码，怎么申请？”你第一次意识到，大学里学到的东西未必只写在课本上。',
+          effects: [{ stats: { knowledge: 4, network: 2, mindset: 2 } }, { setFlag: 'family_biz_mobile_seed' }],
+        }],
+      },
+      {
+        id: 'b', text: '先享受补贴，生意的事以后再说', outcomes: [{
+          weight: 1,
+          text: '你用新人券吃饭、打车、买日用品，一个月省下不少。每次看到“全网最低价”，你都会短暂想起家里的货架，然后把页面划过去。十八岁的你刚离开那间店，还不想这么快又替它操心。',
+          effects: [{ stats: { money: 500, mindset: 3, knowledge: -1 } }],
+        }],
+      },
+      {
+        id: 'c', text: '拉个校园团购群，试着赚一次差价', outcomes: [{
+          weight: 1,
+          text: '你照着家里进货的办法统计需求、谈价格、收定金。第一单只赚了两百块，却让你看懂：互联网没有消灭生意，只是把柜台搬进了群聊。爸妈听完笑你，“出去读大学，还是做买卖。”',
+          effects: [{ stats: { money: 700, network: 5, knowledge: 2, health: -2 } }, { setFlag: 'family_biz_mobile_seed' }],
+        }],
+      },
+    ],
+  },
+  {
     id: 'ev_college_mobile_wave_2014',
     pools: ['college'],
     category: 'campus',
     title: '开学季的红包大战',
     text: '2014年9月，你拖着行李箱刚在宿舍坐下，室友的手机就没停过响：抢红包的提示音一个接一个。楼下，滴滴和快的的地推举着传单在校门口拦人，喊着“打车立减”；营业厅的海报贴得比迎新横幅还显眼——“开学不换4G，流量不够用”。你摸出兜里那部用了三年的手机，忽然觉得，这个学校比高中班主任描述的“大学生活”要吵得多。',
     mandatory: true,
-    trigger: { year: { from: 2014, to: 2014 } },
+    variantGroup: 'era_2014_mobile_wave',
+    trigger: {
+      all: [
+        { year: { from: 2014, to: 2014 } },
+        { not: { any: [{ background: 'bg_rural' }, { background: 'bg_family_biz' }] } },
+      ],
+    },
     choices: [
       {
         id: 'a',
@@ -840,13 +1012,79 @@ export const collegeEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_college_campus_trends_2016_cofounder',
+    pools: ['college'],
+    category: 'campus',
+    title: '账本旁边的新风口',
+    text: '2016年，校园贷和直播广告贴满楼道。室友却把你们跑腿项目的账本推过来：订单开始变慢，他想贷款买几台新手机，让接单的人顺便直播引流。“流量、分期、创业，一套闭环。”他说得眼睛发亮。你看着账本里自己投进去的生活费，忽然发现风口不是海报上的新闻，它正坐在你对面，等你签字。',
+    mandatory: true,
+    variantGroup: 'era_2016_campus_business',
+    trigger: { all: [{ year: { from: 2016, to: 2016 } }, { flag: 'roommate_startup_joined' }] },
+    choices: [
+      {
+        id: 'a', text: '拒绝贷款，先把现有账算明白', outcomes: [{
+          weight: 1,
+          text: '你把“闭环”两个字划掉，逼着两个人逐笔核对订单和成本。室友不太痛快，但最后承认，项目需要的不是新手机，是少接一些根本不赚钱的单。那晚你第一次不像陪朋友玩创业，而像一个会说“不”的合伙人。',
+          effects: [{ stats: { knowledge: 5, money: 300, mindset: -1 } }, { npcFavor: 'roommate', delta: 4 }, { setFlag: 'roommate_refused_debt' }],
+        }],
+      },
+      {
+        id: 'b', text: '拿一部手机试直播，但不碰校园贷', outcomes: [{
+          weight: 1,
+          text: '你们借来手机，在取快递的路上直播“大学创业的一天”。围观的人比下单的人多，却真带来一批新客户。账本上终于多了几行收入，也多了一行你亲手写的提醒：流量可以借，债别借。',
+          effects: [{ stats: { money: 900, network: 5, mindset: 3, health: -3 } }, { npcFavor: 'roommate', delta: 6 }, { setFlag: 'roommate_stream_test' }],
+        }],
+      },
+      {
+        id: 'c', text: '赌一次，贷款买设备把规模做起来', outcomes: [{
+          weight: 1,
+          outcomeTag: 'failure',
+          text: '设备买回来了，订单却没有按计划增长。账本后面第一次出现了红色的逾期数字。室友说再撑一个月，你知道那不是预测，只是希望。原本共同承担的创业，开始带上共同欠债的重量。',
+          effects: [{ moneyCost: { rate: 0.3, max: 7000, roundTo: 100, reason: 'investment' } }, { stats: { mindset: -7, knowledge: 2 } }, { npcFavor: 'roommate', delta: -3 }, { setFlag: 'roommate_took_debt' }],
+        }],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_campus_trends_2016_observer',
+    pools: ['college'],
+    category: 'campus',
+    title: '庆功群外的直播邀请',
+    text: '2016年，校园贷与直播广告贴满楼道。你没加入室友的跑腿项目，却曾陪他改过两个通宵的PPT。现在他突然发来消息，问你愿不愿意帮项目做一场直播。聊天框上方，仍停着你从朋友圈才知道庆功烧烤的那张照片。你没有进创始团队，但他似乎还记得你的判断。',
+    mandatory: true,
+    variantGroup: 'era_2016_campus_business',
+    trigger: { all: [{ year: { from: 2016, to: 2016 } }, { flag: 'roommate_helped_from_sideline' }] },
+    choices: [
+      {
+        id: 'a', text: '答应帮这一次，但先说清楚自己不是免费员工', outcomes: [{
+          weight: 1,
+          text: '你帮他把直播流程理顺，也坦白那张烧烤照片让你不舒服。他愣了一会儿，说：“我以为你不在乎。”直播只来了几十个人，但你们把那句一直没说的话讲开了。项目的边界和朋友的边界，终于不再混在一起。',
+          effects: [{ stats: { network: 5, knowledge: 3, mindset: 3 } }, { npcFavor: 'roommate', delta: 8 }, { setFlag: 'roommate_observer_spoke_up' }],
+        }],
+      },
+      {
+        id: 'b', text: '婉拒，别再站在项目边缘帮忙', outcomes: [{
+          weight: 1,
+          text: '你回他说最近忙，没有提庆功群，也没有再替他改方案。拒绝发出去后，你反而松了口气。有些关系不是非要靠不断帮忙来证明；只是从这以后，他谈创业时很少再找你。',
+          effects: [{ stats: { mindset: 2, network: -2, knowledge: 2 } }, { npcFavor: 'roommate', delta: -3 }, { setFlag: 'roommate_observer_withdrew' }],
+        }],
+      },
+    ],
+  },
+  {
     id: 'ev_college_campus_trends_2016',
     pools: ['college'],
     category: 'campus',
     title: '校园里的新生意',
     text: '2016年，公告栏和宿舍楼道里贴满了花花绿绿的小广告：“无需家长同意，凭学生证秒批”“开直播，日入过百不是梦”。隔壁班有人换上了最新款手机，朋友圈配文“分期不影响生活”；还有人架起手机支架，对着镜头唱歌聊天，说这是“第二份收入”。你划着朋友圈，盘算着自己那点生活费还能怎么折腾。',
     mandatory: true,
-    trigger: { year: { from: 2016, to: 2016 } },
+    variantGroup: 'era_2016_campus_business',
+    trigger: {
+      all: [
+        { year: { from: 2016, to: 2016 } },
+        { not: { any: [{ flag: 'roommate_startup_joined' }, { flag: 'roommate_helped_from_sideline' }] } },
+      ],
+    },
     choices: [
       {
         id: 'a',

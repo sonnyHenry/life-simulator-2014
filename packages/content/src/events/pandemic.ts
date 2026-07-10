@@ -34,6 +34,23 @@ export const pandemicEvents: GameEvent[] = [
       all: [working, { not: { major: '临床医学' } }, { not: { major: '心理学' } }, { year: { from: 2020, to: 2020 } }],
     },
     text: '2020年1月，你拖着行李箱回老家过年。年夜饭桌上，长辈们还在劝你多吃点，手机里的新闻已经一条比一条短促：武汉封城、口罩售罄、返程航班取消。大年初二，公司群里弹出通知：延迟复工，等候安排。你原定初六的车票躺在钱包里，突然不知道该退还是该留。窗外的县城安静得出奇，没有拜年的鞭炮，只有大喇叭在循环播放"不串门、不聚集"。你第一次意识到，有些改变来的时候不打招呼，一来就是很多年。',
+    presentationVariants: [
+      {
+        condition: { flag: 'trait_homebody' },
+        title: '偷来的团圆突然没有期限',
+        text: '2020年春节，你本来只打算在家待七天。武汉封城、车票取消、复工延期，七天忽然变成不知道多久。爸妈嘴上说“多住些日子正好”，却每天盯着新闻。你曾无数次希望工作别催自己离家，这次愿望以最坏的方式实现了。',
+      },
+      {
+        condition: { any: [{ career: 'cs' }, { career: 'finance' }] },
+        title: '工位被搬回旧书桌',
+        text: '2020年春节，返程票取消，公司连夜把会议和权限搬到线上。你在老家翻出高中书桌，屏幕里是项目进度，门外是大喇叭循环播放“不串门”。城市里的工位还亮不亮没人知道，工作却已经沿着网线追到家里。',
+      },
+      {
+        condition: { any: [{ career: 'gov' }, { career: 'education' }] },
+        title: '春节群里弹出的紧急通知',
+        text: '2020年春节，年夜饭还没结束，工作群已经开始接龙：摸排、登记、值班、线上安排。返程票可以退，责任却没有暂停。窗外没有拜年鞭炮，只有大喇叭反复播放防控通知。你第一次知道，所谓稳定岗位，也会在时代突然转弯时站到最前排。',
+      },
+    ],
     choices: [
       {
         id: 'a',
@@ -141,6 +158,11 @@ export const pandemicEvents: GameEvent[] = [
     category: 'era',
     title: '绿码时代',
     text: '第二年，口罩从"暂时戴戴"变成了出门标配，健康码成了新的身份证。进小区扫码，进公司扫码，买感冒药也要登记。核酸亭像便利店一样长满街角，"你做核酸了吗"取代了"吃了吗"。生活好像恢复了，又好像一直悬着——你的日程表上，所有计划后面都默默加了一个括号：（视情况而定）。',
+    contextLines: [
+      { condition: { flag: 'pandemic_volunteer' }, text: '路过社区门口时，保安还认得你那件红马甲。你从帮别人登记的人，重新变回排队扫码的人。' },
+      { condition: { flag: 'pandemic_return' }, text: '电脑包里的洗漱用品一直没拿出来。那趟抢票返城教会你的，不是勇敢，而是随时准备计划失效。' },
+      { condition: { flag: 'pandemic_wfh' }, text: '家里那张旧书桌偶尔还会出现在视频背景里。你和父母都不再问“什么时候彻底恢复”，只问下一次回家是哪天。' },
+    ],
     choices: [
       {
         id: 'a',
@@ -226,14 +248,35 @@ export const pandemicEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'ev_pandemic_2022_reopen_volunteer', pools: ['work'], category: 'era', tier: 'major',
+    title: '红马甲最后一次出门', mandatory: true, variantGroup: 'era_2022_reopen', order: 10,
+    trigger: { all: [{ year: { from: 2022, to: 2022 } }, { flag: 'pandemic_volunteer' }] },
+    text: '2022年12月，核酸亭突然关门，业主群从报点位变成了求药。有人认出你就是2020年穿红马甲送菜的人，私聊一句：“你那边还有退烧药吗？”三年过去，你以为那件马甲早该收进柜子，邻居们却还记得。',
+    choices: [
+      { id: 'a', text: '再组织最后一次互助，把药拆开分', outcomes: [{ weight: 1, text: '你按楼层统计需求，把药拆成单板挂在门把手上。后来你也发烧，门外陆续出现梨、罐头和电解质水。红马甲没再穿，可这栋楼已经知道困难时该怎么找到彼此。', effects: [{ stats: { network: 10, mindset: 7, health: -7 } }, { setFlag: 'pandemic_mutual_aid_closed' }] }] },
+      { id: 'b', text: '这次先照顾自己，把名单交给别人', outcomes: [{ weight: 1, text: '你把表格和联系人交给新群主，第一次没有冲在最前面。群里很快有人接手。你躺下喝药时忽然明白：互助不是永远由同一个人扛着，能放心交棒，也是三年留下的东西。', effects: [{ stats: { health: -4, mindset: 5, network: 4 } }, { setFlag: 'pandemic_volunteer_handed_over' }] }] },
+    ],
+  },
+  {
+    id: 'ev_pandemic_2022_reopen_home', pools: ['work'], category: 'era', tier: 'major',
+    title: '那张终于不用报备的车票', mandatory: true, variantGroup: 'era_2022_reopen', order: 10,
+    trigger: { all: [{ year: { from: 2022, to: 2022 } }, { flag: 'trait_homebody' }, { not: { flag: 'pandemic_volunteer' } }] },
+    text: '2022年12月，健康码从手机首屏退场。你点开购票软件，第一次不用先查隔离政策。家庭群里爸妈一边报体温，一边说“别急着回来，路上不安全”。可那张三年里改签、退掉、再收藏的回家路线，就在屏幕上等你确认。',
+    choices: [
+      { id: 'a', text: '等全家退烧，买最早一班回家的票', outcomes: [{ weight: 1, text: '站台依旧拥挤，却不再有人查码。推开家门时，爸妈明显老了一些，桌上是刚热好的菜。你没有说“三年终于结束”，只把行李放下，去厨房帮忙端汤。', effects: [{ stats: { mindset: 10, health: -4, money: -3000, network: 2 } }, { setFlag: 'reopen_homecoming' }] }] },
+      { id: 'b', text: '先寄药回去，等身体恢复再团聚', outcomes: [{ weight: 1, text: '你跑了几家药店凑齐一小包药寄回去，每天视频确认体温。真正回家已是几周后。妈妈说你错过了最难受的几天，你却知道，有时靠近不是立刻出发，而是别让牵挂变成新的风险。', effects: [{ stats: { mindset: 6, health: 1, money: -1200, knowledge: 2 } }] }] },
+    ],
+  },
+  {
     id: 'ev_pandemic_2022_reopen',
     pools: ['work'],
     category: 'era',
     tier: 'major',
     title: '十二月的退烧药',
     mandatory: true,
+    variantGroup: 'era_2022_reopen',
     order: 10,
-    trigger: { year: { from: 2022, to: 2022 } },
+    trigger: { all: [{ year: { from: 2022, to: 2022 } }, { not: { flag: 'pandemic_volunteer' } }, { not: { flag: 'trait_homebody' } }] },
     text: '2022年12月，持续了三年的防控在几周之内落幕。核酸亭一夜之间关了门，健康码从手机首屏悄悄退场。紧接着，几乎每个人的家庭群都变成了体温播报台：谁阳了，谁还是"天选打工人"，谁家还有布洛芬。药店门口排起长队，朋友圈开始流行晒抗原和电解质水。三年里你无数次想象过"结束"的样子，真到了这一天，它安静得让人恍惚——没有庆典，只有此起彼伏的咳嗽声，和终于可以随便买的火车票。',
     choices: [
       {

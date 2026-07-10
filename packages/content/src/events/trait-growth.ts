@@ -20,6 +20,14 @@ export const traitGrowthEvents: GameEvent[] = [
     },
     title: '你终于看懂了自己的脾气',
     text: '三十岁越来越近。你发现，年轻时被叫作“性格”的东西，已经在一次次选择里长出了方向。两种特质都还在，但你决定让其中一条成为接下来几年的主轴。它未必更正确，只是更像现在的你。',
+    contextLines: [
+      { condition: { flag: 'p2p_burned' }, text: '那笔至今没有完全回来的钱提醒你：所谓性格，不只写在自我介绍里，也写在你明知高息可疑却仍按下确认的那一秒。' },
+      { condition: { flag: 'dodged_p2p' }, text: '你想起当年关掉年化15%页面的那个晚上。后来你才明白，克制不是“什么都没做”，它本身就是一次选择。' },
+      { condition: { flag: 'stock_lesson' }, text: '2015年那张忽红忽绿的账户截图还在相册深处。市场没有替你定义性格，却很早就照见了你面对得失时的样子。' },
+      { condition: { flag: 'pandemic_volunteer' }, text: '那件红马甲早已收进柜子，但你仍记得自己在最不确定的时候，选择站到别人身边。' },
+      { condition: { flag: 'pandemic_wfh' }, text: '老家书桌上的会议、门外那盘切好的水果，让你第一次看见：工作方式会变，自己真正舍不得的东西却很稳定。' },
+      { condition: { flag: 'pandemic_return' }, text: '那趟几乎空无一人的返城路上，你曾相信“先把事情扛住”就是答案。三年后，你终于有机会重新判断。' },
+    ],
     choices: [
       {
         id: 'grinder_disciplined', text: '把能吃苦变成可持续的节奏', visibleIf: { flag: 'trait_grinder' },
