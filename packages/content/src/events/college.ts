@@ -37,6 +37,7 @@ export const collegeEvents: GameEvent[] = [
               { stats: { network: 3, mindset: -1 } },
               { npcFavor: 'roommate', delta: 5 },
               { npcStage: 'roommate', stage: 'observer' },
+              { setFlag: 'roommate_helped_from_sideline' },
             ],
           },
         ],
@@ -57,7 +58,22 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            text: '你合上他的账本，说：“走，烧烤。”那晚你们坐在校门口的塑料凳上，从大一军训的教官聊到食堂三楼的阿姨，从游戏版本聊到各自的家乡，唯独没聊商业模式。他喝得不多，话却很多。回宿舍的路上，他踢着一个空瓶子走了很远，忽然说：“其实我早知道成不了。就是……还好当时有人陪我疯过。”你没接话——有些话接了反而轻了。你只是在他去上厕所的时候，把账单结了。多年以后你们各自漂在不同的城市，他还是每年记得你的生日。',
+            condition: { npcStage: 'roommate', stage: 'cofounder' },
+            outcomeTag: 'roommate_warm',
+            text: '你把那本写着你们两个人名字的账本合上：“今天不复盘，走，烧烤。”他盯着封面上“创始团队”四个字，忽然说：“钱亏了还能再挣，我最怕的是把你也亏掉。”那晚你们没聊商业模式，只把最后一笔散伙账一起结了。多年以后，他仍记得你不是来安慰失败者的——你本来就在这场失败里。',
+            effects: [
+              { moneyCost: { rate: 0.04, max: 200, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: 4, network: 4 } },
+              { npcFavor: 'roommate', delta: 15 },
+              { npcStage: 'roommate', stage: 'close_friend' },
+              { setFlag: 'roommate_close_friend' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { npcStage: 'roommate', stage: 'observer' },
+            outcomeTag: 'roommate_warm',
+            text: '你把那本从没写过你名字的账本合上：“今天不复盘，走，烧烤。”他有点意外：“你当年都没入伙，还陪我收什么尸？”你说：“没入伙，又不是没把你当室友。”那晚他第一次把庆功群之外的失落讲给你听。你错过了创始团队，却没有错过他最需要朋友的晚上。',
             effects: [
               { moneyCost: { rate: 0.04, max: 200, roundTo: 100, reason: 'daily' } },
               { stats: { mindset: 4, network: 4 } },
@@ -74,7 +90,20 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            text: '你觉得这是帮他的最好方式：趁记忆还热，把失败拆开看清楚。你讲现金流，讲获客成本，讲平台壁垒，讲“其实从第二个学期就该止损”。每一句都对，有几句甚至说到了他自己都没想明白的点上。他一直点头，点到后来就只剩点头了。账本被他慢慢收了回去，像收回去一部分自己。那学期剩下的日子，你们在宿舍客客气气，聊天停留在“帮我带份饭”的深度。后来你才慢慢懂：人在难过的时候，要的往往不是正确答案——正确答案他自己半夜早就算过一百遍了。',
+            condition: { npcStage: 'roommate', stage: 'cofounder' },
+            outcomeTag: 'roommate_cool',
+            text: '你摊开那本共同账本，把“我们的失败”拆成现金流、获客成本和止损时点。他听着听着忽然问：“这些我半夜都算过。你今天是合伙人，还是评委？”你答不上来。账算清了，你们之间那笔账却第一次变得含糊。',
+            effects: [
+              { stats: { knowledge: 3, network: -2 } },
+              { npcFavor: 'roommate', delta: -8 },
+              { npcStage: 'roommate', stage: 'distant' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { npcStage: 'roommate', stage: 'observer' },
+            outcomeTag: 'roommate_cool',
+            text: '你站在局外，把他的失败分析得很完整：现金流、获客成本、平台壁垒。他一直点头，最后只说：“确实，没入伙的人看得清楚。”这句话没有责怪，却把你重新放回了看台。后来你才懂，他那晚需要的不是一份更正确的旁观者报告。',
             effects: [
               { stats: { knowledge: 3, network: -2 } },
               { npcFavor: 'roommate', delta: -8 },
@@ -564,11 +593,13 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'hometown_warm',
             text: '他说哪里新开了商场，谁家孩子出生了，哪条路终于修好了。你突然意识到，你离开的地方也在继续长大。',
             effects: [
               { stats: { mindset: 3, network: 2 } },
               { npcFavor: 'hometown_friend', delta: 8 },
               { npcStage: 'hometown_friend', stage: 'civil_servant' },
+              { setFlag: 'hometown_listened' },
             ],
           },
         ],
@@ -579,11 +610,13 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'hometown_cool',
             text: '你讲地铁、讲实习、讲同学创业。他听得很认真，但你也听出一点距离。见过不同世界的人，有时会突然找不到共同语言。',
             effects: [
               { stats: { network: 1, mindset: -1 } },
               { npcFavor: 'hometown_friend', delta: -2 },
               { npcStage: 'hometown_friend', stage: 'civil_servant' },
+              { setFlag: 'hometown_drifted' },
             ],
           },
         ],
@@ -612,6 +645,7 @@ export const collegeEvents: GameEvent[] = [
               { setFlag: 'in_love' },
               { npcFavor: 'first_love', delta: 25 },
               { npcStage: 'first_love', stage: 'together' },
+              { setFlag: 'love_confession_succeeded' },
               { schedule: { eventId: 'ev_love_winter', afterRounds: 0 } },
             ],
           },
@@ -623,6 +657,7 @@ export const collegeEvents: GameEvent[] = [
               { stats: { mindset: -8 } },
               { npcFavor: 'first_love', delta: -8 },
               { npcStage: 'first_love', stage: 'missed' },
+              { setFlag: 'love_confession_failed' },
             ],
           },
         ],
@@ -641,6 +676,7 @@ export const collegeEvents: GameEvent[] = [
               { setFlag: 'in_love' },
               { npcFavor: 'first_love', delta: 25 },
               { npcStage: 'first_love', stage: 'together' },
+              { setFlag: 'love_confession_succeeded' },
               { schedule: { eventId: 'ev_love_winter', afterRounds: 0 } },
             ],
           },
@@ -652,6 +688,7 @@ export const collegeEvents: GameEvent[] = [
               { stats: { mindset: -3 } },
               { npcFavor: 'first_love', delta: -2 },
               { npcStage: 'first_love', stage: 'missed' },
+              { setFlag: 'love_confession_failed' },
             ],
           },
         ],
@@ -666,6 +703,7 @@ export const collegeEvents: GameEvent[] = [
             effects: [
               { stats: { mindset: 2 } },
               { npcStage: 'first_love', stage: 'missed' },
+              { setFlag: 'love_unsent_diary' },
             ],
           },
         ],
@@ -711,6 +749,7 @@ export const collegeEvents: GameEvent[] = [
               { stats: { mindset: 4, knowledge: -3 } },
               { npcFavor: 'first_love', delta: 8 },
               { npcStage: 'first_love', stage: 'steady' },
+              { setFlag: 'love_kept_distance_promise' },
             ],
           },
         ],
@@ -727,6 +766,7 @@ export const collegeEvents: GameEvent[] = [
               { setFlag: 'in_love', value: false },
               { npcFavor: 'first_love', delta: -12 },
               { npcStage: 'first_love', stage: 'separated' },
+              { setFlag: 'love_silence_separated' },
             ],
           },
         ],

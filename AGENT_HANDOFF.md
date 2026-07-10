@@ -606,12 +606,23 @@
 
 验证:typecheck 全过 / test 30 / validate 0err0warn(base@0.26.0,事件仍 175) / simulate 200(172/175 事件可达,3 个未触发均为房贷/期权类无关事件)。另用确定性驱动脚本(临时,未入库)跑通两条路径:全暖 a/a/a/a → 四段按 2016→2018→2022→2024 全触发、终态 `parallel_lives`、`grinder_true_mirror=true`;全冷 b/b/b/b → 同样全触发、终态 `parallel_lives`、专属 flag 未解锁且 B 路径 flag(`grinder_own_pace`/`grinder_silent_2018`)正确设置。**后续**:用同一四层机制逐条推广到发小/室友/贵人/初恋。
 
+### M5 第三十八至三十九轮(其余 NPC 精修 + 回响显性化)
+
+由 Codex 完成,内容版本 0.26.0 → 0.28.0,事件仍为 175。先将卷王样板推广到发小,再根据实玩反馈“后台有回响但玩家感受不到”,把关键回响前置到可见选项与具体物件。
+
+- **县城发小**:2015 埋 warm/cool 与具体选择,2019 分为 `settled_close/settled_distant`,2025 同时读取 stage 与 warm 次数。选项直接显示“认出修了三年的路”“补一句迟到的关心”“为提前退休的玩笑道歉”。`packages/tools/src/verify-hometown.ts` 跑通全暖、先疏后补、疏远后低头、全冷四条路径。
+- **创业室友**:2017 读取 2015 的 `cofounder/observer`,同一行动分别写成共同账本中的合伙人和站在局外的旁观者;账本、创始团队、烧烤与后续直播/名片构成贯穿物。
+- **职场贵人**:初见时在方案首页圈出“真正属于你的判断”,写入 `mentor_portable_skill`;2024 拿出同一张红圈方案,回收为“你已经会自己区分平台与能力”。
+- **初恋**:操场表白成功/失败、未寄出的日记、异地承诺/沉默分别留 flag;结婚选择回收高铁票,2024 错过线按经历显示日记、操场坦白或迟到告别三种选项。
+- **体验验收标准**:技术上 condition 命中不等于体验完成。关键回响应在选择前可见,并复用早期物件、原话或未完成动作;只改后台 flag、好感或一两句结果文案视为弱回响。
+- **验证**:typecheck / test 30 / validate 0err0warn(base@0.28.0) / simulate 10000 全过(175/175、26 结局全可达、最大结局 23.4%、兜底 2.0%、提前结局 5.2%)。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.26.0'
+version: '0.28.0'
 title: '2014：我的十二年'
 ```
 
@@ -633,18 +644,17 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第三十六轮 NPC 选择调整后):
+最近一次完整验证通过(M5 第三十九轮 NPC 回响显性化后):
 
 - `pnpm typecheck`
 - `pnpm test`(30 通过)
 - `pnpm validate`
 - `pnpm simulate -n 10000 --check`(CI 实跑档位)
-- `pnpm --filter @life-sim/web build` / `pnpm --filter @life-sim/minigame build`
 
 最近一次 `pnpm validate`:
 
 ```text
-校验内容包 base@0.25.0
+校验内容包 base@0.28.0
 事件 175, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6, 特质成长 12, 人生目标 5
 完成: 0 errors, 0 warnings
 ```
@@ -653,9 +663,9 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ```text
 事件覆盖: 175/175
-26 结局全可达;最大单一结局 23.3%,兜底 2.1%
+26 结局全可达;最大单一结局 23.4%,兜底 2.0%
 提前结局占比: 5.2%
-金钱分位: p10=¥140300 p50=¥248600 p90=¥458100 · 心态分位: p10=23 p50=52 p90=91
+金钱分位: p10=¥140300 p50=¥248600 p90=¥457900 · 心态分位: p10=23 p50=52 p90=91
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 

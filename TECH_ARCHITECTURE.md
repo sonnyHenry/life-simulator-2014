@@ -333,15 +333,22 @@ stateDiagram-v2
     [*] --> freshman: 初始好感度20
     freshman --> cofounder: 2015年→弹出ev_npc_roommate_startup_pitch<br/>(选"投钱入伙")
     freshman --> observer: 2015年→同一个事件<br/>(选"不入伙")
-    cofounder --> distant: 2017年→弹出ev_npc_roommate_startup_reality
-    observer --> distant: 2017年→同一个事件
-    distant --> livestream_comeback: 2020年→弹出ev_npc_roommate_2020
-    distant --> close_friend: 2020年→同一个事件
-    livestream_comeback --> [*]
-    close_friend --> [*]
+    cofounder --> close_friend: 2017年→共同账本/陪伴
+    cofounder --> distant: 2017年→以合伙人身份复盘
+    observer --> close_friend: 2017年→局外仍选择陪伴
+    observer --> distant: 2017年→以旁观者身份复盘
+    close_friend --> livestream_comeback: 2020年→主动支持直播
+    distant --> livestream_comeback: 2020年→重新接上线
+    close_friend --> faded: 2020年→点赞划走
+    distant --> faded: 2020年→继续疏远
+    livestream_comeback --> old_friend: 2025年→十年收束
+    faded --> old_friend: 2025年→迟到的重逢
+    old_friend --> [*]
 ```
 
 玩家进入 `NPC_SELECTION` 时,引擎固定初始化初恋状态机,并从其余 4 人中接收 1 位玩家选择后初始化对应状态机。调度器每轮检查当前 stage 的 `advanceWhen`;每轮最多播放 1 个 NPC 节点,同年其余候选写入 `pendingNpcEvents` 顺延,下一轮即使越过原年份窗口也会继续播放,但会先核验 NPC 仍处于对应 stage。玩家在事件里通过 `npcStage` effect 决定下一阶段。
+
+长期回响由三类状态共同承担:`flag` 记录具体选择,`npcStage` 表示当前关系结构,`historyCount(outcomeTag)` 统计多次互动倾向。内容既可在 outcome 上用 `condition` 改变结果,也可在 choice 上用互斥 `visibleIf` 直接改变玩家看到的行动。强回响优先使用后者,并复用账本、修路、红圈方案、日记、高铁票等具体物件。
 
 ### 3.7 结局怎么判定(`packages/core/src/systems/ending.ts`)
 

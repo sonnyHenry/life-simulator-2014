@@ -2228,11 +2228,11 @@ export const workEvents: GameEvent[] = [
     choices: [
       {
         id: 'a',
-        text: '打算就是：我们去领证吧',
+        text: '把那捆攒下的高铁票放到桌上：“下一站，民政局”',
         outcomes: [
           {
             weight: 1,
-            text: '你说：“打算就是，挑个日子，去把证领了。”{{ta}}愣了一下，说这算什么求婚，一点仪式感都没有，说着说着就笑了，笑着笑着眼睛就红了。你们挑了个不用请假的工作日去民政局，拍照的时候两个人都绷不住，工作人员见怪不怪：“笑可以，别太夸张。”婚礼办得不大，来的都是真心想来的人，你敬酒敬到嗓子哑，你爸喝多了，拉着{{ta}}爸的手说了四十分钟“孩子交给你们家我放心”——逻辑不对，但没人纠正他。那晚宾客散尽，你看着床头的两本红本子想：十二年里做对的事不多，这件，肯定算。',
+            text: '你从抽屉里拿出那捆高铁票，最早一张的字已经褪色：“当年说异地能撑过去，不是随口说的。下一站，民政局。”{{ta}}笑你求婚道具太寒酸，笑着笑着眼睛却红了。领证那天，你们把最新一张车票和两本红本子放在一起拍了照。六年前检票口前说过的话，终于有了抵达记录。',
             effects: [
               { moneyCost: { rate: 0.2, max: 40000, roundTo: 1000, reason: 'family' } },
               { stats: { mindset: 12, network: 5 } },
@@ -2245,7 +2245,7 @@ export const workEvents: GameEvent[] = [
       },
       {
         id: 'b',
-        text: '再等等，等我再稳定一点',
+        text: '把高铁票收回抽屉：“再等我稳定一点”',
         outcomes: [
           {
             weight: 1,
@@ -2404,16 +2404,36 @@ export const workEvents: GameEvent[] = [
     text: '县城发小发来消息：他考上了本地事业单位。工资不高，但单位离家十分钟。他说中午还能回家吃饭，语气里有一种你很久没听过的安稳。',
     choices: [
       {
-        id: 'a',
-        text: '真心祝贺他',
+        id: 'a_listened',
+        text: '认出照片里那条修了三年的路，认真祝贺他',
+        visibleIf: { flag: 'hometown_listened' },
         outcomes: [
           {
             weight: 1,
-            text: '你发了很长一段祝福。他回你：“等你回来请你吃饭。”你突然发现，你们不是走散了，只是走在不同的地图上。',
+            outcomeTag: 'hometown_warm',
+            text: '他发来的入职照就在那条路边。你回他：“路终于修好了，你也终于上岸了。”他秒回：“你居然还记得？当年烧烤摊上我就随口提了一句。”紧接着又发来那家烧烤摊的新招牌：“老板还在，位置给你留着。”四年前你认真听进去的那些小事，今天成了你们之间不用重新解释的暗号。',
             effects: [
               { stats: { mindset: 4, network: 2 } },
               { npcFavor: 'hometown_friend', delta: 8 },
-              { npcStage: 'hometown_friend', stage: 'settled' },
+              { npcStage: 'hometown_friend', stage: 'settled_close' },
+              { setFlag: 'hometown_friend_settled' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'a_reconnect',
+        text: '翻到四年前的聊天记录，补上一句迟到的关心',
+        visibleIf: { not: { flag: 'hometown_listened' } },
+        outcomes: [
+          {
+            weight: 1,
+            outcomeTag: 'hometown_warm',
+            text: '你往上翻，上一段像样的对话还停在四年前：满屏都是你讲地铁、实习和创业，他只回了几句“挺好的”。你第一次问：“你备考这几年是不是挺难的？”过了很久，他回：“还以为你早忘了。”你没有假装这些年一直关心，只认真听他把错过的四年讲完。断掉的线，被你从这一句重新接上。',
+            effects: [
+              { stats: { mindset: 4, network: 1 } },
+              { npcFavor: 'hometown_friend', delta: 6 },
+              { npcStage: 'hometown_friend', stage: 'settled_close' },
               { setFlag: 'hometown_friend_settled' },
             ],
           },
@@ -2425,11 +2445,12 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            text: '他回了个“哈哈”。你知道自己没有恶意，但也知道这玩笑里藏着一点羡慕和一点不服气。',
+            outcomeTag: 'hometown_cool',
+            text: '他回了个“哈哈”。你知道自己没有恶意，但也知道这玩笑里藏着一点羡慕和一点不服气。那句“哈哈”之后，你们的对话框安静了很久。',
             effects: [
               { stats: { mindset: -1 } },
               { npcFavor: 'hometown_friend', delta: -3 },
-              { npcStage: 'hometown_friend', stage: 'settled' },
+              { npcStage: 'hometown_friend', stage: 'settled_distant' },
             ],
           },
         ],
@@ -2444,15 +2465,61 @@ export const workEvents: GameEvent[] = [
     text: '2025年春节，你和发小又坐回那家烧烤摊。县城变化不大，你们都变化不少。他聊孩子和单位，你聊房价和项目。两种生活互相羡慕，也互相庆幸。',
     choices: [
       {
-        id: 'a',
-        text: '承认自己也羡慕稳定',
+        id: 'a_true_friend',
+        text: '指着那条终于修好的路：“我一直记得”',
+        visibleIf: {
+          all: [
+            { npcStage: 'hometown_friend', stage: 'settled_close' },
+            { historyCount: { outcomeTag: 'hometown_warm', op: '>=', value: 2 } },
+          ],
+        },
         outcomes: [
           {
             weight: 1,
-            text: '他说稳定也有稳定的烦恼。你们碰了一杯，突然都笑了。原来每条路都有别人看不见的坡。',
+            outcomeTag: 'hometown_warm',
+            text: '他愣了一下，笑着说：“2015 年我说这路修了三年，2019 年你看一眼照片就认出来了。你这人，嘴上不说，什么都记着。”老板没问就端上你们高中时常点的烤馒头。他给你夹了一串，像十年前一样自然：“我们班同学里，也就你每次回来还坐这张桌。”你终于明白，真正没走散的关系，不靠天天联系，而是多年后仍能接住当年的半句话。',
+            effects: [
+              { stats: { mindset: 6, network: 2 } },
+              { npcFavor: 'hometown_friend', delta: 10 },
+              { npcStage: 'hometown_friend', stage: 'close' },
+              { setFlag: 'hometown_true_friend' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'a_reconnected',
+        text: '承认这些年错过很多，问他能不能重新讲讲',
+        visibleIf: {
+          all: [
+            { npcStage: 'hometown_friend', stage: 'settled_close' },
+            { not: { historyCount: { outcomeTag: 'hometown_warm', op: '>=', value: 2 } } },
+          ],
+        },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你说：“以前总顾着讲自己的世界，你这些年怎么过的，我其实漏掉了很多。”他看了你一会儿，把杯子推过来：“那就从我爸住院那年讲起，挺长的。”这一次你没有急着拿自己的经历作比较。烧烤摊打烊时，你们才讲到去年。错过的年份不能重来，但关系可以从愿意听的这一刻重新长出来。',
             effects: [
               { stats: { mindset: 5 } },
               { npcFavor: 'hometown_friend', delta: 8 },
+              { npcStage: 'hometown_friend', stage: 'close' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'a_apologize',
+        text: '先为当年那句“提前退休”道歉',
+        visibleIf: { npcStage: 'hometown_friend', stage: 'settled_distant' },
+        outcomes: [
+          {
+            weight: 1,
+            outcomeTag: 'hometown_warm',
+            text: '你说：“2019 年你上岸，我拿‘提前退休’开玩笑。其实不是看不起你，是那时候我自己过得很慌，又有点羡慕。”他捏着杯子沉默了一会儿：“那句我确实记了挺久。”你没有辩解。后来他给你添了酒，说：“能回来把这话说开，就行。”旧伤没有被一句道歉抹掉，但你们终于不必再假装它不存在。',
+            effects: [
+              { stats: { mindset: 4 } },
+              { npcFavor: 'hometown_friend', delta: 6 },
               { npcStage: 'hometown_friend', stage: 'close' },
             ],
           },
@@ -2464,6 +2531,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'hometown_cool',
             text: '他说挺好，年轻人就该闯。你听出这话像祝福，也像告别。你们都没有错，只是越来越难交换人生。',
             effects: [
               { stats: { network: -1, mindset: -2 } },
@@ -2482,17 +2550,18 @@ export const workEvents: GameEvent[] = [
     text: '一次项目复盘后，一位前辈把你叫住。他没有讲鸡汤，只指出你方案里真正值钱的部分，也指出你一直没看见的盲区。',
     choices: [
       {
-        id: 'a',
-        text: '认真请教，保持联系',
+        id: 'a_portable',
+        text: '追问：“哪些能力离开这个平台还算数？”',
         outcomes: [
           {
             weight: 1,
-            text: '你后来偶尔向他请教关键选择。他回消息不多，但每次都很准。贵人不是替你走路的人，是提醒你别往坑里走的人。',
+            text: '前辈把你的方案翻回第一页，圈出三处：“这三处是你的判断，剩下的是平台资源。以后每做完一个项目，都这样分一次。”你把那张写满红圈的首页留了下来。后来偶尔请教，他总先问同一句：“这次，哪部分真正属于你？”',
             effects: [
               { stats: { knowledge: 4, network: 6, mindset: 2 } },
               { npcFavor: 'mentor', delta: 25 },
               { npcStage: 'mentor', stage: 'available' },
               { setFlag: 'mentor_connected' },
+              { setFlag: 'mentor_portable_skill' },
             ],
           },
         ],
@@ -2522,11 +2591,11 @@ export const workEvents: GameEvent[] = [
     choices: [
       {
         id: 'a',
-        text: '记下来，重新整理方向',
+        text: '拿出当年那张红圈方案，请他再看一次',
         outcomes: [
           {
             weight: 1,
-            text: '你回去后删掉了几个虚荣目标，留下真正能积累的技能。那杯咖啡不贵，但像一次迟来的职业体检。',
+            text: '你把保存多年的方案首页推过去。前辈看见那些红圈，笑了：“还留着？”你把这些年真正属于自己的能力一项项写在背面。他划掉两个虚荣头衔，留下三项能带走的本事：“现在不用我告诉你了。”第一次见面时他替你分清平台和能力；临别时，这道题你已经会自己做。',
             effects: [
               { stats: { knowledge: 6, network: 3, mindset: 4 } },
               { npcFavor: 'mentor', delta: 8 },
@@ -2636,18 +2705,43 @@ export const workEvents: GameEvent[] = [
     text: '深夜刷朋友圈，一条动态跳出来：是{{ta}}。照片里{{ta}}站在一个你不认识的城市街头，笑得和当年一样，身边的人和生活都换了一轮。你的拇指在屏幕上停了几秒——你们已经很多年没说过话了，久到连"在吗"都显得突兀。',
     choices: [
       {
-        id: 'a',
-        text: '点个赞，就够了',
+        id: 'a_diary',
+        text: '翻出那页没署名的日记，再点这个赞',
+        visibleIf: { flag: 'love_unsent_diary' },
         outcomes: [
           {
-            weight: 2,
-            text: '你点了赞，锁屏，睡觉。第二天{{ta}}回赞了你半年前的一条动态。你们没有对话，但都收到了同一句话：我看见你过得不错，我也是。有些关系的最好结局，就是成为彼此朋友圈里安静的一个赞。',
+            weight: 1,
+            text: '你找出大学日记本，那页还停在“如果今晚下楼，会怎样”。十年后你终于没有再把心意只留在纸上——你点了赞。第二天{{ta}}回赞了你半年前的一条动态。没有对话，也不需要对话；那个从未寄出的答案，终于以最轻的方式抵达过一次。',
             effects: [{ stats: { mindset: 4 } }, { npcStage: 'first_love', stage: 'memory' }],
           },
+        ],
+      },
+      {
+        id: 'a_confessed',
+        text: '想起操场上说出口的那句话，点个赞',
+        visibleIf: {
+          all: [
+            { npcStage: 'first_love', stage: 'missed' },
+            { not: { flag: 'love_unsent_diary' } },
+          ],
+        },
+        outcomes: [
           {
             weight: 1,
-            text: '赞点下去几分钟后，{{ta}}发来一句："好久不见。"你们聊了半小时，全是安全话题：工作、城市、共同认识的人。结束时谁都没说"下次约"。你放下手机，心里那页纸终于翻了过去——不是因为释怀，是因为确认了彼此都好。',
+            text: '当年操场上，你至少把喜欢说出口了；今天也不必把一个赞想得太重。几分钟后，{{ta}}发来一句：“好久不见。”你们聊了半小时，全是安全话题。结束时谁都没说“下次约”。你放下手机，忽然庆幸青春里那次笨拙的坦白——遗憾还在，但没有欠下一句没说的话。',
             effects: [{ stats: { mindset: 5, network: 1 } }, { npcStage: 'first_love', stage: 'memory' }],
+          },
+        ],
+      },
+      {
+        id: 'a_separated',
+        text: '想起那次沉默的视频通话，发一句“祝你幸福”',
+        visibleIf: { npcStage: 'first_love', stage: 'separated' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '输入框亮着，你终于补上当年视频里没能说出的完整句子：“那时候不是不爱，是我不敢答应未来。祝你幸福。”{{ta}}过了很久回：“我后来明白了。你也要幸福。”这不是复合，也不是重新开始，只是两个成年人替当年沉默的自己，把那场迟到多年的告别说完。',
+            effects: [{ stats: { mindset: 6 } }, { npcStage: 'first_love', stage: 'memory' }],
           },
         ],
       },

@@ -122,7 +122,13 @@ export const npcs: NpcDef[] = [
         advanceWhen: { year: { from: 2019, to: 2019 } },
         eventId: 'ev_npc_hometown_settled',
       },
-      settled: {
+      // 2019 上岸事件按“你是否还惦记这段情谊”分叉出的两个中期 stage,均在 2025 复用同一团聚事件:
+      // settled_close = 一直保持联系;settled_distant = 客气但疏远。
+      settled_close: {
+        advanceWhen: { year: { from: 2025, to: 2025 } },
+        eventId: 'ev_npc_hometown_reunion',
+      },
+      settled_distant: {
         advanceWhen: { year: { from: 2025, to: 2025 } },
         eventId: 'ev_npc_hometown_reunion',
       },
