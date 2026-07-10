@@ -102,9 +102,15 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
     props.view.shareCard.traits.length > 0
       ? `特质:${props.view.shareCard.traits.join(' × ')}`
       : null;
+  const goalLine = props.view.shareCard.goal ? `人生目标:${props.view.shareCard.goal}` : null;
+  const evolutionLine = props.view.shareCard.traitEvolutions.length > 0
+    ? `性格成长:${props.view.shareCard.traitEvolutions.join(' × ')}`
+    : null;
   const shareText = [
     `我在《2014：我的十二年》里达成结局：${props.view.title}`,
     props.view.shareCard.tagline,
+    ...(goalLine ? [goalLine] : []),
+    ...(evolutionLine ? [evolutionLine] : []),
     ...(traitLine ? [traitLine] : []),
     `人生总分 ${props.view.score}（成绩：${props.view.grade} 级）`,
     `学识${stats.knowledge} 金钱¥${stats.money.toLocaleString()} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
@@ -131,6 +137,8 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         years: props.view.shareCard.years,
         seed: props.view.shareCard.seed,
         traits: props.view.shareCard.traits,
+        goal: props.view.shareCard.goal,
+        traitEvolutions: props.view.shareCard.traitEvolutions,
         stats,
         score: props.view.score,
         grade: props.view.grade,
@@ -152,6 +160,8 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         </div>
         <h2>{props.view.shareCard.title}</h2>
         <p>{props.view.shareCard.tagline}</p>
+        {goalLine && <p className="share-traits">{goalLine}</p>}
+        {evolutionLine && <p className="share-traits">{evolutionLine}</p>}
         {traitLine && <p className="share-traits">{traitLine}</p>}
         <div className="share-score">
           <span className="share-grade">成绩：{props.view.grade}</span>

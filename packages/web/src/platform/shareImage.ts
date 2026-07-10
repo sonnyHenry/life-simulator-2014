@@ -13,6 +13,8 @@ export interface ShareImageData {
   gameTitle: string;
   /** 本局特质 label,空数组时不渲染该行 */
   traits?: string[];
+  goal?: string;
+  traitEvolutions?: string[];
 }
 
 const TONE_COLORS: Record<ShareImageData['tone'], { bg: string; border: string; accent: string }> = {
@@ -146,12 +148,21 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
     ctx.textAlign = 'center';
     ctx.fillText(`特质:${data.traits.join(' × ')}`, W / 2, 110);
   }
+  if (data.goal) {
+    ctx.textAlign = 'center';
+    ctx.fillText(`人生目标:${data.goal}`, W / 2, 142);
+  }
+  if (data.traitEvolutions && data.traitEvolutions.length > 0) {
+    ctx.textAlign = 'center';
+    ctx.fillText(`性格成长:${data.traitEvolutions.join(' × ')}`, W / 2, data.goal ? 174 : 142);
+  }
 
   // 结局标题
   ctx.fillStyle = '#2c2a24';
   ctx.textAlign = 'center';
   ctx.font = font(64, 700);
-  let y = 180;
+  const hasEvolution = Boolean(data.traitEvolutions?.length);
+  let y = hasEvolution ? (data.goal ? 224 : 198) : data.goal ? 198 : 180;
   for (const line of titleLines) {
     ctx.fillText(line, W / 2, y);
     y += 84;

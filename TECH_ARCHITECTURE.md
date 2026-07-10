@@ -147,7 +147,7 @@ interface Engine {
 ```ts
 type ScreenId =
   | 'TITLE' | 'BACKGROUND_DRAW' | 'SETUP' | 'EXAM' | 'EXAM_RESULT'
-  | 'APPLICATION' | 'CROSSROAD' | 'BRIEF' | 'EVENT' | 'OUTCOME'
+  | 'APPLICATION' | 'NPC_SELECTION' | 'LIFE_GOAL' | 'CROSSROAD' | 'BRIEF' | 'EVENT' | 'OUTCOME'
   | 'SETTLEMENT' | 'ENDING';
 ```
 
@@ -163,7 +163,8 @@ flowchart LR
     EXAM -->|答完/SKIP_EXAM| EXAM_RESULT
     EXAM_RESULT -->|CONTINUE| APPLICATION
     APPLICATION -->|APPLY 报志愿| O1(OUTCOME)
-    O1 -->|进入大学第1轮| BRIEF1(BRIEF)
+    O1 -->|CHOOSE_NPCS 选3位重点关系| NPC_SELECTION
+    NPC_SELECTION -->|进入大学第1轮| BRIEF1(BRIEF)
 ```
 
 **第二张:每一轮重复的循环(`rounds` 类型阶段,大学 4 轮 / 社会 9 轮都走这个循环)**
@@ -211,6 +212,7 @@ interface GameState {
   profile: Profile;              // 家境/省份/文理/分数/大学/专业/职业
   flags: Record<string, boolean | number | string>;  // 万能扩展槽,见下
   npcs: Record<string, { favor: number; stage: string }>;  // 每个 NPC 的好感度+剧情阶段
+  pendingNpcEvents?: { npcId: string; eventId: string }[]; // 同年撞车后顺延的 NPC 阶段事件
   scheduled: { eventId: string; dueRound: number }[];  // 延迟事件队列(事件链)
   triggeredEventIds: string[];   // 已经触发过的事件 id(配合 once 去重)
   history: HistoryEntry[];       // 全部已发生的事件/志愿/三岔口记录,结局判定和 historyCount 条件都读它
@@ -227,7 +229,7 @@ interface GameState {
 ```ts
 type PhaseConfig =
   | { kind: 'flow'; id: string; label: string; date: GameDate;
-      steps: ('BACKGROUND_DRAW'|'SETUP'|'EXAM'|'APPLICATION'|'CROSSROAD')[] }
+      steps: ('BACKGROUND_DRAW'|'SETUP'|'EXAM'|'APPLICATION'|'NPC_SELECTION'|'LIFE_GOAL'|'CROSSROAD')[] }
   | { kind: 'rounds'; id: string; label: string; date: GameDate;
       rounds: number; eventSlots: number; pools: string[]; briefs: string[]; isFinal?: boolean };
 ```
@@ -237,11 +239,11 @@ type PhaseConfig =
 ```ts
 export const phases: PhaseConfig[] = [
   { kind: 'flow', id: 'gaokao', label: '高考季', date: { year: 2014, month: 6 },
-    steps: ['BACKGROUND_DRAW', 'SETUP', 'EXAM', 'APPLICATION'] },
+    steps: ['BACKGROUND_DRAW', 'SETUP', 'EXAM', 'APPLICATION', 'NPC_SELECTION'] },
   { kind: 'rounds', id: 'college', label: '大学时代', date: { year: 2014, month: 9 },
     rounds: 4, eventSlots: 3, pools: ['college', 'npc', 'invest', 'random'], briefs: [/* 4条 */] },
   { kind: 'flow', id: 'crossroad', label: '大四三岔口', date: { year: 2018, month: 3 },
-    steps: ['CROSSROAD'] },
+    steps: ['LIFE_GOAL', 'CROSSROAD'] },
   { kind: 'rounds', id: 'work', label: '社会十年', date: { year: 2018, month: 7 },
     rounds: 9, eventSlots: 3, pools: ['work', 'invest', 'random'], briefs: [/* 9条 */], isFinal: true },
 ];
@@ -275,7 +277,7 @@ flowchart TD
 | 近两年类别冷却 | `state.history` 里近两年该 category 命中 ≥2 次 | ×0.6 |
 | 心态节奏(低谷给喘息) | `mindset ≤ 35` 且事件情绪期望 >0.5 / <-0.5 | ×1.8 / ×0.55 |
 | 心态节奏(顺风上压力) | `mindset ≥ 75` 且情绪期望 <-0.5 / >0.5 | ×1.5 / ×0.75 |
-| 特质类别偏好 | 玩家特质的 `poolBias[category]`(见 4.7) | 按配置连乘 |
+| 特质/成长/目标偏好 | 玩家特质、成年成长路线、人生目标的 `poolBias[category]` | 按配置连乘 |
 
 事件的"情绪期望"由 `eventMindsetValence(ev)`(同文件导出,WeakMap 缓存)自动推导:对每个选项按 outcome 权重求名义 mindset 变化的加权平均,再对所有选项取平均——**不需要给事件人工打情绪标签**。最终乘数钳位在 `[0.15, 4]`,保证没有事件被压成 0 权重,`simulate -n 10000 --check` 的全事件覆盖/全结局可达门禁不受威胁。导演不碰 ①②③(强制/NPC/schedule 事件),因果链的确定性不变。
 
@@ -339,7 +341,7 @@ stateDiagram-v2
     close_friend --> [*]
 ```
 
-调度器每轮都会检查(`scheduler.ts:32-40`):当前 stage 配置的 `advanceWhen` 满不满足(通常是"年份到了"),满足就把对应 `eventId` 塞进本轮队列,玩家在那个事件里做的选择(`effects` 里的 `npcStage` 字段)决定跳到哪个下一阶段。**同一个 NPC 定义,靠"阶段+条件"就能表达出好几条分岔剧情线,不需要为每条分支单独写一个"NPC"。**
+玩家在 `NPC_SELECTION` 从 5 人中选 3 人后,引擎才初始化对应状态机。调度器每轮检查当前 stage 的 `advanceWhen`;每轮最多播放 1 个 NPC 节点,同年其余候选写入 `pendingNpcEvents` 顺延,下一轮即使越过原年份窗口也会继续播放,但会先核验 NPC 仍处于对应 stage。玩家在事件里通过 `npcStage` effect 决定下一阶段。
 
 ### 3.7 结局怎么判定(`packages/core/src/systems/ending.ts`)
 
@@ -619,6 +621,7 @@ interface TraitCard {
 - **抽 4 选 2**:开局 `BACKGROUND_DRAW` 流程步里 `rng.sample(pack.traits, 4)` 写入 `state.traitOffer`;此时还不写 `flags`。玩家提交 `{ type:'CHOOSE_TRAITS', traitIds }` 后,引擎校验数量、去重和候选合法性,再写 `state.flags[trait.id] = true`、应用 `statMods`、清空 `traitOffer` 并进入 SETUP。miniPack/测试包特质少于 4 时候选数为 `min(4, traits.length)`,选择数仍按实际候选钳到最多 2。
 - **展示**:`BACKGROUND_DRAW` ViewModel 透出 `{ card, traitOffer: TraitCard[], pickCount }`,三端抽卡屏渲染可选卡;StatsBar/小程序/小游戏顶栏从 flags 反查已选特质常驻展示。
 - **影响事件分布**:`poolBias` 被调度器读取(见 3.4),按 category 调整随机池抽取概率。
+- **成年分化**:2023 年 mandatory 事件从已选两项特质衍生出 4 个可见选项,玩家选 1 条 `trait_growth_*` 路线;`TraitEvolution.poolBias` 继续参与导演权重,成长标签同步显示在顶栏与分享结果。
 - **影响开局数值**:`statMods` 在 CHOOSE_TRAITS 时立即应用;`knowledge/mindset/network/health` 钳到 0-100,`money` 只做非负钳位。当前 6 张卡有得有失,避免一眼最优。
 - **影响事件内容**:内容用现成的 DSL 分支——选项 `visibleIf: { flag: 'trait_social' }` 做专属选项,outcome `condition` 做专属结果文案,无需任何新 DSL 能力;每个特质另有 1 个 `mandatory` 专属事件(`events/trait-moments.ts`,年份窗口 + trait flag 门控,带该特质的玩家该年必触发)。M5 第三十二轮后特质分支约 33 处。
 - **影响终局表达**:6 个特质专属结局排在职业/叙事结局之后、兜底之前,只收原本会落入「平凡之路」的玩家;ENDING shareCard viewmodel 额外带 `traits: string[]`,web/小程序/小游戏分享文案与分享图同步展示。

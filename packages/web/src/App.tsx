@@ -6,6 +6,8 @@ import {
   CrossroadScreen,
   ExamResultScreen,
   ExamScreen,
+  LifeGoalScreen,
+  NpcSelectionScreen,
   SetupScreen,
   TitleScreen,
 } from './screens/FlowScreens';
@@ -32,6 +34,10 @@ function Screen() {
       return <ExamResultScreen view={view} />;
     case 'APPLICATION':
       return <ApplicationScreen view={view} />;
+    case 'NPC_SELECTION':
+      return <NpcSelectionScreen view={view} />;
+    case 'LIFE_GOAL':
+      return <LifeGoalScreen view={view} />;
     case 'CROSSROAD':
       return <CrossroadScreen view={view} />;
     case 'BRIEF':

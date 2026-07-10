@@ -88,6 +88,9 @@ checkUnique('background', contentPack.backgrounds.map(b => b.id));
 // ---- 特质校验 ----
 checkUnique('trait', contentPack.traits.map(t => t.id));
 const traitIds = new Set(contentPack.traits.map(t => t.id));
+checkUnique('trait evolution', contentPack.traitEvolutions.map(e => e.id));
+const traitEvolutionIds = new Set(contentPack.traitEvolutions.map(e => e.id));
+const knownTraitFlagIds = new Set([...traitIds, ...traitEvolutionIds]);
 const eventCategories = new Set(
   contentPack.events.map(e => e.category).filter((c): c is string => Boolean(c)),
 );
@@ -112,10 +115,37 @@ for (const trait of contentPack.traits) {
     }
   }
 }
+for (const evolution of contentPack.traitEvolutions) {
+  if (!evolution.id.startsWith('trait_growth_')) {
+    error(`trait evolution id must start with "trait_growth_": ${evolution.id}`);
+  }
+  if (!traitIds.has(evolution.traitId)) {
+    error(`trait evolution ${evolution.id} references unknown trait: ${evolution.traitId}`);
+  }
+  if (!evolution.label.trim()) error(`trait evolution has empty label: ${evolution.id}`);
+  for (const [category, bias] of Object.entries(evolution.poolBias ?? {})) {
+    if (!(bias > 0 && bias <= 5)) {
+      error(`trait evolution ${evolution.id} poolBias.${category} out of range (0, 5]: ${bias}`);
+    }
+    if (!eventCategories.has(category)) {
+      error(`trait evolution ${evolution.id} poolBias references unknown event category: ${category}`);
+    }
+  }
+}
+checkUnique('life goal', contentPack.lifeGoals.map(goal => goal.id));
+for (const goal of contentPack.lifeGoals) {
+  if (!goal.id.startsWith('goal_')) error(`life goal id must start with "goal_": ${goal.id}`);
+  const weightSum = Object.values(goal.scoringWeights).reduce((sum, weight) => sum + weight, 0);
+  if (Math.abs(weightSum - 1) > 1e-9) error(`life goal ${goal.id} scoring weights must sum to 1`);
+  for (const [category, bias] of Object.entries(goal.poolBias ?? {})) {
+    if (!(bias > 0 && bias <= 5)) error(`life goal ${goal.id} has invalid poolBias.${category}: ${bias}`);
+    if (!eventCategories.has(category)) error(`life goal ${goal.id} references unknown event category: ${category}`);
+  }
+}
 // 条件里引用的 trait_ flag 必须真实存在;内容不得 setFlag 特质(特质只在开局抽取时赋值)
 function checkTraitFlagRefs(owner: string, cond: Condition | undefined): void {
   visitCondition(cond, c => {
-    if ('flag' in c && c.flag.startsWith('trait_') && !traitIds.has(c.flag)) {
+    if ('flag' in c && c.flag.startsWith('trait_') && !knownTraitFlagIds.has(c.flag)) {
       error(`${owner} references unknown trait flag: ${c.flag}`);
     }
   });
@@ -127,7 +157,7 @@ for (const event of contentPack.events) {
     for (const outcome of choice.outcomes) {
       checkTraitFlagRefs(`event ${event.id} choice ${choice.id} outcome`, outcome.condition);
       for (const effect of outcome.effects) {
-        if ('setFlag' in effect && effect.setFlag.startsWith('trait_')) {
+        if ('setFlag' in effect && effect.setFlag.startsWith('trait_') && !traitEvolutionIds.has(effect.setFlag)) {
           error(`event ${event.id} sets trait flag via setFlag (traits are draw-only): ${effect.setFlag}`);
         }
       }
@@ -427,7 +457,7 @@ const errors = issues.filter(i => i.level === 'error');
 const warnings = issues.filter(i => i.level === 'warn');
 
 console.log(`校验内容包 ${contentPack.meta.id}@${contentPack.meta.version}`);
-console.log(`事件 ${contentPack.events.length}, 结局 ${contentPack.endings.length}, NPC ${contentPack.npcs.length}, 题目 ${contentPack.examBank.length}, 收入规则 ${contentPack.incomes.length}, 特质 ${contentPack.traits.length}`);
+console.log(`事件 ${contentPack.events.length}, 结局 ${contentPack.endings.length}, NPC ${contentPack.npcs.length}, 题目 ${contentPack.examBank.length}, 收入规则 ${contentPack.incomes.length}, 特质 ${contentPack.traits.length}, 特质成长 ${contentPack.traitEvolutions.length}, 人生目标 ${contentPack.lifeGoals.length}`);
 for (const issue of issues) {
   console.log(`${issue.level === 'error' ? 'ERROR' : 'WARN'} ${issue.message}`);
 }

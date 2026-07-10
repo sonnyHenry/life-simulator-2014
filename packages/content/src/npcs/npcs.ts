@@ -4,6 +4,7 @@ export const npcs: NpcDef[] = [
   {
     id: 'roommate',
     name: '创业室友',
+    description: '永远在折腾新点子。你可能陪他创业，也可能只在多年后听说他的消息。',
     initialFavor: 20,
     initialStage: 'freshman',
     stages: {
@@ -41,6 +42,7 @@ export const npcs: NpcDef[] = [
   {
     id: 'first_love',
     name: '初恋',
+    description: '从大学操场开始的一段关系，可能走过异地，也可能只剩朋友圈里的红点。',
     initialFavor: 10,
     initialStage: 'club_acquaintance',
     stages: {
@@ -72,6 +74,7 @@ export const npcs: NpcDef[] = [
   {
     id: 'grinder',
     name: '卷王同学',
+    description: '你的镜像和参照物：保研、大厂、裁员，每一步都让人忍不住比较。',
     initialFavor: 15,
     initialStage: 'freshman',
     stages: {
@@ -101,6 +104,7 @@ export const npcs: NpcDef[] = [
   {
     id: 'hometown_friend',
     name: '县城发小',
+    description: '留在家乡的老朋友。你们走向不同城市，也会在春节饭桌上互相打量。',
     initialFavor: 25,
     initialStage: 'home',
     stages: {
@@ -123,6 +127,7 @@ export const npcs: NpcDef[] = [
   {
     id: 'mentor',
     name: '职场贵人',
+    description: '需要足够人脉才会真正遇见的人，可能给你一次内推，也可能与你擦肩而过。',
     initialFavor: 0,
     initialStage: 'unknown',
     stages: {

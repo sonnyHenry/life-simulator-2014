@@ -112,6 +112,8 @@ function miniPack(): ContentPack {
       { id: 'trait_b', label: '特质B', text: '测试特质B' },
       { id: 'trait_c', label: '特质C', text: '测试特质C' },
     ],
+    traitEvolutions: [],
+    lifeGoals: [],
     applications: [
       { id: 'app1', label: '保底大学', university: '某大学', minScore: 0, majors: [{ id: 'm1', name: '某专业', trackFlag: 'management' }] },
     ],
@@ -208,6 +210,9 @@ describe('M2 flow support', () => {
 
   it('schedules NPC stage events when their stage condition becomes true', () => {
     const pack = miniPack();
+    const flow = pack.timeline[0]!;
+    if (flow.kind !== 'flow') throw new Error('expected flow phase');
+    flow.steps.push('NPC_SELECTION');
     pack.npcs = [
       {
         id: 'friend',
@@ -233,6 +238,8 @@ describe('M2 flow support', () => {
     state = engine.dispatch(state, { type: 'CONTINUE' });
     state = engine.dispatch(state, { type: 'APPLY', optionId: 'app1' });
     state = engine.dispatch(state, { type: 'CONTINUE' });
+    expect(engine.view(state).kind).toBe('NPC_SELECTION');
+    state = engine.dispatch(state, { type: 'CHOOSE_NPCS', npcIds: ['friend'] });
     state = engine.dispatch(state, { type: 'CONTINUE' });
 
     const view = engine.view(state);
@@ -242,7 +249,7 @@ describe('M2 flow support', () => {
 });
 
 describe('event scheduling variety', () => {
-  it('activates only a sampled subset when a pack has many NPCs', () => {
+  it('lets the player activate exactly three NPCs from the offered cast', () => {
     const pack = miniPack();
     pack.npcs = Array.from({ length: 5 }, (_, i) => ({
       id: `npc_${i}`,
@@ -251,11 +258,57 @@ describe('event scheduling variety', () => {
       initialStage: 'start',
       stages: { start: {} },
     }));
-    const state = createEngine(pack).start(42);
-    expect(Object.keys(state.npcs)).toHaveLength(3);
+    const flow = pack.timeline[0]!;
+    if (flow.kind !== 'flow') throw new Error('expected flow phase');
+    flow.steps.push('NPC_SELECTION');
+    const engine = createEngine(pack);
+    let state = engine.start(42);
+    state.screen = 'NPC_SELECTION';
+    state.phaseIndex = 0;
+    state.flowStepIndex = flow.steps.length - 1;
+    const view = engine.view(state);
+    expect(view.kind).toBe('NPC_SELECTION');
+    if (view.kind !== 'NPC_SELECTION') throw new Error('expected NPC_SELECTION view');
+    state = engine.dispatch(state, {
+      type: 'CHOOSE_NPCS',
+      npcIds: view.npcs.slice(0, view.pickCount).map(npc => npc.id),
+    });
+    expect(Object.keys(state.npcs)).toEqual(['npc_0', 'npc_1', 'npc_2']);
   });
 
-  it('limits eligible NPC stage events to one per round', () => {
+  it('uses the chosen life goal to score the same life differently', () => {
+    const pack = miniPack();
+    pack.meta.scoring = {
+      weights: { knowledge: 0.2, money: 0.2, mindset: 0.2, network: 0.2, health: 0.2 },
+      moneyFullScore: 600000,
+    };
+    pack.lifeGoals = [
+      {
+        id: 'goal_money', label: '财富', text: '财富优先',
+        scoringWeights: { knowledge: 0, money: 1, mindset: 0, network: 0, health: 0 },
+      },
+      {
+        id: 'goal_mindset', label: '心态', text: '心态优先',
+        scoringWeights: { knowledge: 0, money: 0, mindset: 1, network: 0, health: 0 },
+      },
+    ];
+    const engine = createEngine(pack);
+    const state = engine.start(42);
+    state.screen = 'ENDING';
+    state.endingId = 'end_fallback';
+    state.stats = { knowledge: 0, money: 600000, mindset: 10, network: 0, health: 0 };
+    state.flags.life_goal = 'goal_money';
+    const moneyView = engine.view(state);
+    state.flags.life_goal = 'goal_mindset';
+    const mindsetView = engine.view(state);
+    expect(moneyView.kind).toBe('ENDING');
+    expect(mindsetView.kind).toBe('ENDING');
+    if (moneyView.kind !== 'ENDING' || mindsetView.kind !== 'ENDING') return;
+    expect(moneyView.score).toBe(100);
+    expect(mindsetView.score).toBe(10);
+  });
+
+  it('limits eligible NPC stage events to one per round and defers the rest', () => {
     const pack = miniPack();
     pack.events = ['ev_npc_a', 'ev_npc_b', 'ev_npc_c'].map(id => ({
       id,
@@ -280,10 +333,56 @@ describe('event scheduling variety', () => {
       },
     }));
     const state = createEngine(pack).start(7);
+    state.npcs = Object.fromEntries(
+      pack.npcs.map(npc => [npc.id, { favor: npc.initialFavor, stage: npc.initialStage }]),
+    );
     const phase = pack.timeline.find(p => p.kind === 'rounds')!;
     const picked = pickRoundEvents(state, pack, new Rng(7), phase);
     expect(picked).toHaveLength(1);
     expect(pack.events.map(e => e.id)).toContain(picked[0]);
+    expect(state.pendingNpcEvents).toHaveLength(2);
+  });
+
+  it('plays deferred NPC events after their original year window instead of dropping the chain', () => {
+    const pack = miniPack();
+    pack.events = ['ev_npc_a', 'ev_npc_b', 'ev_npc_c'].map(id => ({
+      id,
+      pools: [],
+      title: id,
+      text: id,
+      choices: [
+        {
+          id: 'ok',
+          text: '好',
+          outcomes: [{ weight: 1, text: '好', effects: [] }],
+        },
+      ],
+    }));
+    pack.npcs = pack.events.map((ev, i) => ({
+      id: `npc_${i}`,
+      name: `NPC ${i}`,
+      initialFavor: 10,
+      initialStage: 'start',
+      stages: {
+        start: { advanceWhen: { year: { from: 2014, to: 2014 } }, eventId: ev.id },
+      },
+    }));
+    const state = createEngine(pack).start(7);
+    state.npcs = Object.fromEntries(
+      pack.npcs.map(npc => [npc.id, { favor: npc.initialFavor, stage: npc.initialStage }]),
+    );
+    const phase = pack.timeline.find(p => p.kind === 'rounds')!;
+    const seen: string[] = [];
+    for (let round = 0; round < 3; round++) {
+      state.date.year = 2014 + round;
+      state.roundCounter = round;
+      const picked = pickRoundEvents(state, pack, new Rng(7 + round), phase);
+      expect(picked).toHaveLength(1);
+      seen.push(picked[0]!);
+      state.triggeredEventIds.push(picked[0]!);
+    }
+    expect(new Set(seen)).toEqual(new Set(['ev_npc_a', 'ev_npc_b', 'ev_npc_c']));
+    expect(state.pendingNpcEvents).toHaveLength(0);
   });
 
   it('picks only one mandatory event from the same variant group', () => {

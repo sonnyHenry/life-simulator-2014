@@ -34,6 +34,15 @@ export type ViewModel =
       }[];
     }
   | {
+      kind: 'NPC_SELECTION';
+      npcs: { id: string; name: string; description: string }[];
+      pickCount: number;
+    }
+  | {
+      kind: 'LIFE_GOAL';
+      goals: { id: string; label: string; text: string }[];
+    }
+  | {
       kind: 'CROSSROAD';
       year: number;
       university: string;
@@ -82,6 +91,10 @@ export type ViewModel =
         years: string;
         /** 本局选择的特质 label(如 ['天生胆大','恋家']),旧存档可能为空 */
         traits: string[];
+        /** 2023 年形成的成年性格路线 */
+        traitEvolutions: string[];
+        /** 2018 年选择的人生目标,旧存档可能为空 */
+        goal?: string;
       };
     };
 
@@ -93,5 +106,7 @@ export type PlayerAction =
   | { type: 'ANSWER'; optionIndex: number }
   | { type: 'SKIP_EXAM' }
   | { type: 'APPLY'; optionId: string; majorId?: string }
+  | { type: 'CHOOSE_NPCS'; npcIds: string[] }
+  | { type: 'CHOOSE_LIFE_GOAL'; goalId: string }
   | { type: 'CHOOSE_CROSSROAD'; optionId: string }
   | { type: 'CHOOSE'; choiceId: string };

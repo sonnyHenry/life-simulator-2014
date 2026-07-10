@@ -91,6 +91,8 @@ class LifeSimMiniGame {
   private actionLog: PlayerAction[] = [];
   /** BACKGROUND_DRAW 屏的特质选择(本地 UI 状态,提交后清空) */
   private traitSelection: string[] = [];
+  /** NPC_SELECTION 屏的重点关系选择 */
+  private npcSelection: string[] = [];
   private signature = '';
   private buttons: HitButton[] = [];
   private width = 375;
@@ -276,6 +278,10 @@ class LifeSimMiniGame {
         return this.renderExamResult(top, this.view);
       case 'APPLICATION':
         return this.renderApplication(top, this.view);
+      case 'NPC_SELECTION':
+        return this.renderNpcSelection(top, this.view);
+      case 'LIFE_GOAL':
+        return this.renderLifeGoal(top, this.view);
       case 'CROSSROAD':
         return this.renderCrossroad(top, this.view);
       case 'BRIEF':
@@ -323,8 +329,16 @@ class LifeSimMiniGame {
       .filter(t => Boolean(this.game.flags[t.id]))
       .map(t => t.label)
       .join('·');
-    if (traitLabels) {
-      this.drawText(traitLabels, x + 90, y + 12, { size: 11, color: '#d8c9a5', maxWidth: w - 180 });
+    const goalLabel = contentPack.lifeGoals.find(goal => goal.id === this.game.flags.life_goal)?.label;
+    const evolutionLabels = contentPack.traitEvolutions
+      .filter(evolution => Boolean(this.game.flags[evolution.id]))
+      .map(evolution => evolution.label)
+      .join('·');
+    const identityLine = [traitLabels, goalLabel ? `目标·${goalLabel}` : '', evolutionLabels ? `成长·${evolutionLabels}` : '']
+      .filter(Boolean)
+      .join('  ');
+    if (identityLine) {
+      this.drawText(identityLine, x + 90, y + 12, { size: 11, color: '#d8c9a5', maxWidth: w - 180 });
     }
     const compact = [
       `学识 ${this.game.stats.knowledge}`,
@@ -628,6 +642,84 @@ class LifeSimMiniGame {
     return y + 28;
   }
 
+  private renderNpcSelection(
+    top: number,
+    view: Extract<ViewModel, { kind: 'NPC_SELECTION' }>,
+  ): number {
+    const panel = this.beginPanel(top);
+    let y = panel.y + 26;
+    y = this.drawKicker('大学生活即将开始', panel, y);
+    y = this.drawHeading('谁会成为重要的人？', panel, y);
+    y = this.drawWrappedText(
+      `选择 ${view.pickCount} 个人。你选择的是重点关系,不是预先决定结局。`,
+      panel.contentX,
+      y,
+      panel.contentWidth,
+      { size: 15, lineHeight: 24, color: '#5c5142' },
+    ) + 14;
+    for (const npc of view.npcs) {
+      const picked = this.npcSelection.includes(npc.id);
+      y = this.drawButton(
+        `${picked ? '✓ ' : ''}${npc.name}`,
+        npc.description,
+        panel.contentX,
+        y,
+        panel.contentWidth,
+        () => {
+          this.npcSelection = picked
+            ? this.npcSelection.filter(id => id !== npc.id)
+            : this.npcSelection.length < view.pickCount
+              ? [...this.npcSelection, npc.id]
+              : this.npcSelection;
+          this.render();
+        },
+        { variant: picked ? 'primary' : 'secondary' },
+      );
+    }
+    const ready = this.npcSelection.length === view.pickCount;
+    y = this.drawButton(
+      ready ? '和他们一起走进大学' : `再选 ${view.pickCount - this.npcSelection.length} 人`,
+      '',
+      panel.contentX,
+      y + 8,
+      panel.contentWidth,
+      () => {
+        if (!ready) return;
+        const chosen = [...this.npcSelection];
+        this.npcSelection = [];
+        this.act({ type: 'CHOOSE_NPCS', npcIds: chosen });
+      },
+      { disabled: !ready },
+    );
+    return y + 28;
+  }
+
+  private renderLifeGoal(top: number, view: Extract<ViewModel, { kind: 'LIFE_GOAL' }>): number {
+    const panel = this.beginPanel(top);
+    let y = panel.y + 26;
+    y = this.drawKicker('2018 年 · 毕业之前', panel, y);
+    y = this.drawHeading('你想把什么放在人生前面？', panel, y);
+    y = this.drawWrappedText(
+      '目标不会锁死选项,但会改变事件倾向和最终评分方式。',
+      panel.contentX,
+      y,
+      panel.contentWidth,
+      { size: 15, lineHeight: 24, color: '#5c5142' },
+    ) + 14;
+    for (const goal of view.goals) {
+      y = this.drawButton(
+        goal.label,
+        goal.text,
+        panel.contentX,
+        y,
+        panel.contentWidth,
+        () => this.act({ type: 'CHOOSE_LIFE_GOAL', goalId: goal.id }),
+        { variant: 'secondary' },
+      );
+    }
+    return y + 28;
+  }
+
   private renderCrossroad(top: number, view: Extract<ViewModel, { kind: 'CROSSROAD' }>): number {
     const panel = this.beginPanel(top);
     let y = panel.y + 26;
@@ -753,7 +845,9 @@ class LifeSimMiniGame {
     width: number,
   ): number {
     const hasTraits = view.shareCard.traits.length > 0;
-    const cardHeight = hasTraits ? 198 : 178;
+    const hasGoal = Boolean(view.shareCard.goal);
+    const hasEvolution = view.shareCard.traitEvolutions.length > 0;
+    const cardHeight = 178 + (hasTraits ? 20 : 0) + (hasGoal ? 20 : 0) + (hasEvolution ? 20 : 0);
     const toneColor =
       view.shareCard.tone === 'triumph'
         ? '#2e6b57'
@@ -782,6 +876,22 @@ class LifeSimMiniGame {
       lineHeight: 21,
       color: '#e8dcc2',
     }) + 12;
+    if (view.shareCard.goal) {
+      this.drawText(`人生目标:${view.shareCard.goal}`, x + 16, cy, {
+        size: 12,
+        color: '#d8c9a5',
+        maxWidth: width - 32,
+      });
+      cy += 20;
+    }
+    if (hasEvolution) {
+      this.drawText(`性格成长:${view.shareCard.traitEvolutions.join(' × ')}`, x + 16, cy, {
+        size: 12,
+        color: '#d8c9a5',
+        maxWidth: width - 32,
+      });
+      cy += 20;
+    }
     if (hasTraits) {
       this.drawText(`特质:${view.shareCard.traits.join(' × ')}`, x + 16, cy, {
         size: 12,
@@ -1116,6 +1226,8 @@ class LifeSimMiniGame {
     return [
       `我在《${contentPack.meta.title}》里达成结局: ${view.title}`,
       view.shareCard.tagline,
+      ...(view.shareCard.goal ? [`人生目标:${view.shareCard.goal}`] : []),
+      ...(view.shareCard.traitEvolutions.length > 0 ? [`性格成长:${view.shareCard.traitEvolutions.join(' × ')}`] : []),
       ...(view.shareCard.traits.length > 0 ? [`特质:${view.shareCard.traits.join(' × ')}`] : []),
       `人生总分 ${view.score}(${view.grade} 级)`,
       `学识${stats.knowledge} 金钱¥${formatMoney(stats.money)} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,

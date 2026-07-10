@@ -140,6 +140,13 @@ function botAction(
     case 'APPLICATION':
       const appOpt = bot.pick(view.options);
       return { type: 'APPLY', optionId: appOpt.id, majorId: bot.pick(appOpt.majors).id };
+    case 'NPC_SELECTION':
+      return {
+        type: 'CHOOSE_NPCS',
+        npcIds: bot.sample(view.npcs, view.pickCount).map(npc => npc.id),
+      };
+    case 'LIFE_GOAL':
+      return { type: 'CHOOSE_LIFE_GOAL', goalId: bot.pick(view.goals).id };
     case 'CROSSROAD': {
       const preferred =
         strategy === 'money' ? 'job' : strategy === 'mindset' ? 'civil_service' : null;
@@ -238,6 +245,20 @@ function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: bool
         if (action.type === 'APPLY') {
           const opt = view.options.find(o => o.id === action.optionId);
           log(`🎓 志愿:${opt?.label}${opt?.risky ? '(有滑档风险)' : ''}`);
+        }
+        break;
+      case 'NPC_SELECTION':
+        if (action.type === 'CHOOSE_NPCS') {
+          const names = view.npcs
+            .filter(npc => action.npcIds.includes(npc.id))
+            .map(npc => npc.name)
+            .join(' × ');
+          log(`🤝 重要的人:${names}`);
+        }
+        break;
+      case 'LIFE_GOAL':
+        if (action.type === 'CHOOSE_LIFE_GOAL') {
+          log(`🧭 人生目标:${view.goals.find(goal => goal.id === action.goalId)?.label}`);
         }
         break;
       case 'CROSSROAD':

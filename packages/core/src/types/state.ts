@@ -7,6 +7,8 @@ export type ScreenId =
   | 'EXAM'
   | 'EXAM_RESULT'
   | 'APPLICATION'
+  | 'NPC_SELECTION'
+  | 'LIFE_GOAL'
   | 'CROSSROAD'
   | 'BRIEF'
   | 'EVENT'
@@ -86,6 +88,11 @@ export interface GameState {
   profile: Profile;
   flags: Flags;
   npcs: Record<string, NpcState>;
+  /**
+   * 同年撞车而顺延的 NPC 阶段事件。旧存档没有此字段时按空队列处理。
+   * 顺延播放前会再次核验 NPC 仍处于该事件对应的阶段。
+   */
+  pendingNpcEvents?: { npcId: string; eventId: string }[];
   scheduled: { eventId: string; dueRound: number }[];
   triggeredEventIds: string[];
   history: HistoryEntry[];

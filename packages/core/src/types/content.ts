@@ -58,6 +58,8 @@ export type FlowStep =
   | 'SETUP'
   | 'EXAM'
   | 'APPLICATION'
+  | 'NPC_SELECTION'
+  | 'LIFE_GOAL'
   | 'CROSSROAD';
 
 export type PhaseConfig =
@@ -115,6 +117,23 @@ export interface TraitCard {
   statMods?: Partial<Record<StatKey, number>>;
 }
 
+/** 2018 毕业节点由玩家选择的人生目标,改变事件偏好与最终评分权重。 */
+export interface LifeGoal {
+  id: string;
+  label: string;
+  text: string;
+  poolBias?: Record<string, number>;
+  scoringWeights: ScoringConfig['weights'];
+}
+
+/** 2023 年由基础特质分化出的成年性格路线。 */
+export interface TraitEvolution {
+  id: string;
+  traitId: string;
+  label: string;
+  poolBias?: Record<string, number>;
+}
+
 export interface ApplicationMajor {
   id: string;
   /** 专业名,需与 CROSSROAD 分流和事件 visibleIf 里的 major 字符串一致 */
@@ -154,6 +173,8 @@ export interface ScoringConfig {
 export interface NpcDef {
   id: string;
   name: string;
+  /** 重点关系选择页展示的一句话人物介绍 */
+  description?: string;
   initialStage: string;
   initialFavor: number;
   stages: Record<string, { advanceWhen?: Condition; eventId?: string }>;
@@ -182,6 +203,8 @@ export interface ContentPack {
   examBank: ExamQuestion[];
   backgrounds: BackgroundCard[];
   traits: TraitCard[];
+  traitEvolutions: TraitEvolution[];
+  lifeGoals: LifeGoal[];
   applications: ApplicationOption[];
   npcs: NpcDef[];
   fns: Record<string, ContentFn>;

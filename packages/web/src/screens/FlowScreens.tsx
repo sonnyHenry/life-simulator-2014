@@ -240,6 +240,72 @@ export function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APP
   );
 }
 
+export function NpcSelectionScreen(props: {
+  view: Extract<ViewModel, { kind: 'NPC_SELECTION' }>;
+}) {
+  const act = useGame(s => s.act);
+  const [selected, setSelected] = useState<string[]>([]);
+  const { npcs, pickCount } = props.view;
+  const toggle = (id: string) => {
+    setSelected(prev =>
+      prev.includes(id)
+        ? prev.filter(value => value !== id)
+        : prev.length < pickCount
+          ? [...prev, id]
+          : prev,
+    );
+  };
+  return (
+    <Card>
+      <p className="kicker">大学生活即将开始</p>
+      <h2>谁会成为重要的人？</h2>
+      <p className="muted">选择 {pickCount} 个人。你选择的是重点关系，不是预先决定结局。</p>
+      <div className="trait-list npc-selection-list">
+        {npcs.map(npc => (
+          <button
+            type="button"
+            className={`trait-card selectable ${selected.includes(npc.id) ? 'selected' : ''}`}
+            key={npc.id}
+            onClick={() => toggle(npc.id)}
+          >
+            <h3>{selected.includes(npc.id) ? '✓ ' : ''}{npc.name}</h3>
+            <p>{npc.description}</p>
+          </button>
+        ))}
+      </div>
+      <button
+        className="continue-btn"
+        disabled={selected.length !== pickCount}
+        onClick={() => act({ type: 'CHOOSE_NPCS', npcIds: selected })}
+      >
+        {selected.length === pickCount ? '和他们一起走进大学' : `再选 ${pickCount - selected.length} 人`}
+      </button>
+    </Card>
+  );
+}
+
+export function LifeGoalScreen(props: { view: Extract<ViewModel, { kind: 'LIFE_GOAL' }> }) {
+  const act = useGame(s => s.act);
+  return (
+    <Card>
+      <p className="kicker">2018 年 · 毕业之前</p>
+      <h2>你想把什么放在人生前面？</h2>
+      <p className="muted">目标不会锁死选项，但会改变事件倾向和最终评分方式。</p>
+      <div className="choices">
+        {props.view.goals.map(goal => (
+          <ChoiceButton
+            key={goal.id}
+            sub={goal.text}
+            onClick={() => act({ type: 'CHOOSE_LIFE_GOAL', goalId: goal.id })}
+          >
+            {goal.label}
+          </ChoiceButton>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 export function CrossroadScreen(props: { view: Extract<ViewModel, { kind: 'CROSSROAD' }> }) {
   const act = useGame(s => s.act);
   const { view } = props;

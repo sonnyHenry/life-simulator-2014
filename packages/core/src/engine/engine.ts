@@ -123,12 +123,6 @@ export function createEngine(pack: ContentPack): Engine {
   function start(seed?: number): GameState {
     const actualSeed = seed ?? randomSeed();
     const npcs: GameState['npcs'] = {};
-    const npcRng = new Rng(actualSeed ^ 0x4e5043);
-    const activeNpcs =
-      pack.npcs.length <= ACTIVE_NPC_COUNT ? pack.npcs : npcRng.sample(pack.npcs, ACTIVE_NPC_COUNT);
-    for (const npc of activeNpcs) {
-      npcs[npc.id] = { favor: npc.initialFavor, stage: npc.initialStage };
-    }
     return {
       schemaVersion: 1,
       seed: actualSeed,
@@ -161,6 +155,7 @@ export function createEngine(pack: ContentPack): Engine {
       },
       flags: {},
       npcs,
+      pendingNpcEvents: [],
       scheduled: [],
       triggeredEventIds: [],
       history: [],
@@ -223,6 +218,21 @@ export function createEngine(pack: ContentPack): Engine {
             };
           }),
         };
+      case 'NPC_SELECTION':
+        return {
+          kind: 'NPC_SELECTION',
+          npcs: pack.npcs.map(npc => ({
+            id: npc.id,
+            name: npc.name,
+            description: npc.description ?? '也许会在未来十二年里与你反复相遇。',
+          })),
+          pickCount: Math.min(ACTIVE_NPC_COUNT, pack.npcs.length),
+        };
+      case 'LIFE_GOAL':
+        return {
+          kind: 'LIFE_GOAL',
+          goals: pack.lifeGoals.map(goal => ({ id: goal.id, label: goal.label, text: goal.text })),
+        };
       case 'CROSSROAD':
         return {
           kind: 'CROSSROAD',
@@ -280,6 +290,7 @@ export function createEngine(pack: ContentPack): Engine {
         const ending = pack.endings.find(e => e.id === state.endingId);
         if (!ending) throw new Error(`ENDING screen with unknown ending: ${state.endingId}`);
         const { score, grade } = computeScore(state);
+        const goal = pack.lifeGoals.find(item => item.id === state.flags.life_goal);
         return {
           kind: 'ENDING',
           endingId: ending.id,
@@ -297,6 +308,10 @@ export function createEngine(pack: ContentPack): Engine {
             seed: state.seed,
             years: '2014-2026',
             traits: pack.traits.filter(t => Boolean(state.flags[t.id])).map(t => t.label),
+            traitEvolutions: pack.traitEvolutions
+              .filter(evolution => Boolean(state.flags[evolution.id]))
+              .map(evolution => evolution.label),
+            goal: goal?.label,
           },
         };
       }
@@ -304,10 +319,12 @@ export function createEngine(pack: ContentPack): Engine {
   }
 
   function computeScore(state: GameState): { score: number; grade: 'S' | 'A' | 'B' | 'C' | 'D' } {
-    const scoring = pack.meta.scoring ?? {
+    const baseScoring = pack.meta.scoring ?? {
       weights: { knowledge: 0.2, money: 0.25, mindset: 0.2, network: 0.15, health: 0.2 },
       moneyFullScore: 600000,
     };
+    const goal = pack.lifeGoals.find(item => item.id === state.flags.life_goal);
+    const scoring = goal ? { ...baseScoring, weights: goal.scoringWeights } : baseScoring;
     const raw = (Object.entries(scoring.weights) as [StatKey, number][]).reduce(
       (sum, [key, weight]) => {
         const statScore =
@@ -370,6 +387,12 @@ export function createEngine(pack: ContentPack): Engine {
       }
       case 'APPLICATION':
         state.screen = 'APPLICATION';
+        break;
+      case 'NPC_SELECTION':
+        state.screen = 'NPC_SELECTION';
+        break;
+      case 'LIFE_GOAL':
+        state.screen = 'LIFE_GOAL';
         break;
       case 'CROSSROAD':
         state.screen = 'CROSSROAD';
@@ -762,6 +785,32 @@ export function createEngine(pack: ContentPack): Engine {
         if (action.type !== 'APPLY') invalid(state, action);
         handleApplication(state, rng, action.optionId, action.majorId);
         return;
+      case 'NPC_SELECTION': {
+        if (action.type !== 'CHOOSE_NPCS') invalid(state, action);
+        const expected = Math.min(ACTIVE_NPC_COUNT, pack.npcs.length);
+        const chosen = [...new Set(action.npcIds)];
+        if (action.npcIds.length !== expected || chosen.length !== expected) {
+          throw new Error(`CHOOSE_NPCS expects ${expected} distinct NPCs`);
+        }
+        const defsById = new Map(pack.npcs.map(npc => [npc.id, npc]));
+        state.npcs = {};
+        for (const id of chosen) {
+          const npc = defsById.get(id);
+          if (!npc) throw new Error(`CHOOSE_NPCS unknown NPC: ${id}`);
+          state.npcs[id] = { favor: npc.initialFavor, stage: npc.initialStage };
+        }
+        nextFlowStep(state, rng);
+        return;
+      }
+      case 'LIFE_GOAL': {
+        if (action.type !== 'CHOOSE_LIFE_GOAL') invalid(state, action);
+        if (!pack.lifeGoals.some(goal => goal.id === action.goalId)) {
+          throw new Error(`CHOOSE_LIFE_GOAL unknown goal: ${action.goalId}`);
+        }
+        state.flags.life_goal = action.goalId;
+        nextFlowStep(state, rng);
+        return;
+      }
       case 'CROSSROAD':
         if (action.type !== 'CHOOSE_CROSSROAD') invalid(state, action);
         handleCrossroad(state, action.optionId);

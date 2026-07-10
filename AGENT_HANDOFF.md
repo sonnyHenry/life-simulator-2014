@@ -580,12 +580,23 @@
 - **工具/测试**:`simulate.ts` 的 bot 在 BACKGROUND_DRAW 随机选满 `pickCount`;verbose 日志打印家境和已选特质。`engine.test.ts` 全部旧 BACKGROUND_DRAW CONTINUE 改 CHOOSE_TRAITS,新增 offer 4 选 2/miniPack 3 选 2、非法选择、statMods 应用断言。`validate.ts` 增加 statMods 校验。
 - 验证:typecheck / test 25 / validate 0err0warn(153 事件、26 结局、6 特质)/ **simulate -n 10000 --check 通过**(153/153 全覆盖、26 结局全可达、提前结局 3.3%,兜底 4.7%)/ compare 500:随机55、卷钱52、保心态65、卷总分74(仍低于 A 线,无必胜解)/ web build + minigame build + miniprogram build:weapp 全过。
 
+### M5 第三十三至三十五轮(NPC 经营 + 人生目标 + 特质成长)
+
+由 Codex 完成,内容版本 0.22.0 → 0.24.0,事件 174 → 175。起因是重玩性审计发现:随机激活 3/5 NPC 虽有局间差异,但每轮只播 1 个 NPC 且大量阶段窗口只有单年,落选节点会永久错过;同时玩家仍缺少中长期目标和特质的成年变化。
+
+- **NPC 顺延队列**:`GameState.pendingNpcEvents` 保存同年撞车的 NPC 阶段事件;每轮仍最多播放 1 个,落选者后续回合按队列继续播放。播放前核验 NPC 仍处于对应 stage,避免过期剧情。单测覆盖 3 个 NPC 只在 2014 合法、但在 2014/2015/2016 三轮各播放 1 个且全数完成的场景。
+- **重点关系由玩家选择**:删除 `start()` 随机采样 3/5 NPC;高考 flow 在志愿结果后增加 `NPC_SELECTION`,三端展示 5 位角色简介并要求选 3 人,`CHOOSE_NPCS` 校验数量/去重/id 后才初始化对应状态机。simulate bot 随机选 3 人,verbose 输出本局重要角色。
+- **人生目标**:2018 crossroad 前增加 `LIFE_GOAL`,五选一(财富/稳定/专业成就/重要关系/自由),写入 `flags.life_goal`。`LifeGoal` 同时携带 `scoringWeights` 与 `poolBias`:最终人生总分使用目标权重,导演式选择器也轻微调整相关事件类别。目标在 Web/小程序/小游戏顶栏、结局页、分享文案和分享图常驻显示。
+- **成年特质成长**:新增 2023 mandatory major 事件《你终于看懂了自己的脾气》。已选两项特质各提供两条路线,玩家从 4 个可见选项里选 1 条;共 12 个 `TraitEvolution`(如自律者/燃烧模式、连接者/气氛维护者),写入 `trait_growth_*` flag,继续用 `poolBias` 改变后续事件分布,并在三端与分享结果展示。
+- **校验增强**:validate 校验人生目标 id/评分权重和必须和为 1、目标/成长 `poolBias` 类别与值域、成长 id/基础特质引用;基础特质仍禁止内容 setFlag,只允许登记过的 `trait_growth_*` 由成长事件写入。
+- **验证**:typecheck / test 30 / validate 0err0warn / **simulate -n 10000 --check 通过**(175/175、26 结局全可达、最大结局 24.1%、兜底 1.9%、提前结局 3.6%);compare 1000 为随机53/卷钱50/保心态64/卷总分73;Web、小游戏、小程序三端 build 全过。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.22.0'
+version: '0.24.0'
 title: '2014：我的十二年'
 ```
 
@@ -607,10 +618,10 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第三十二轮特质构筑后):
+最近一次完整验证通过(M5 第三十五轮特质成长后):
 
 - `pnpm typecheck`
-- `pnpm test`(25 通过)
+- `pnpm test`(30 通过)
 - `pnpm validate`
 - `pnpm simulate -n 10000 --check`(CI 实跑档位)
 - `pnpm --filter @life-sim/web build` / `pnpm --filter @life-sim/minigame build`
@@ -618,30 +629,30 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次 `pnpm validate`:
 
 ```text
-校验内容包 base@0.22.0
-事件 153, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6
+校验内容包 base@0.24.0
+事件 175, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6, 特质成长 12, 人生目标 5
 完成: 0 errors, 0 warnings
 ```
 
 最近一次 `pnpm simulate -n 10000 --check`(与 `.github/workflows/deploy.yml` 一致的档位):
 
 ```text
-事件覆盖: 153/153
-26 结局全可达;特质结局合计约 21.3%,兜底 4.7%
-提前结局占比: 3.3%
-金钱分位: p10=¥140400 p50=¥243900 p90=¥439200 · 心态分位: p10=32 p50=68 p90=95
+事件覆盖: 175/175
+26 结局全可达;最大单一结局 24.1%,兜底 1.9%
+提前结局占比: 3.6%
+金钱分位: p10=¥143700 p50=¥251101 p90=¥453101 · 心态分位: p10=28 p50=61 p90=95
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 
 **注意:n=1000/n=300 档位已不再可靠**——139 事件 + 20 结局中存在命中率 ~0.1% 的展示性稀有结局(end_early_retire、end_cashflow_break),固定种子下任何 RNG 流偏移(改题数、加事件、加职业线都会偏移)都会让小样本随机漏采:n=1000 曾稳定命中,第二十七轮加 14 事件 + 心理学线后 n=1000 掉到 0、n=3000 仍漏、n=5000 起 4-5 局、n=10000 达 8-11 局。CI 与本地可达性验证一律用 n=10000。
 
-最近一次 `pnpm simulate -n 500 --compare`(M5 第三十二轮特质构筑后):
+最近一次 `pnpm simulate -n 1000 --compare`(M5 第三十五轮后):
 
 ```text
-随机 55 · 卷钱 52(崩溃率 7.6%) · 保心态 65 · 卷总分 74
+随机 53 · 卷钱 50(崩溃率 14.9%) · 保心态 64 · 卷总分 73
 ```
 
-卷总分(开天眼)bot 74 分仍低于 A 线 76,无必胜解;statMods 和特质结局没有把策略 bot 推成必胜解。
+卷总分 bot 73 分,无必胜解;卷钱均财最高但崩溃率 14.9%,保心态 0% 崩溃但最穷。
 
 ## 当前重要实现点
 

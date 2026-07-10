@@ -81,11 +81,17 @@ function StatsBar() {
   if (view.kind === 'TITLE') return null;
   const { knowledge, money, mindset, network, health } = game.stats;
   const traits = contentPack.traits.filter(t => Boolean(game.flags[t.id]));
+  const evolutions = contentPack.traitEvolutions.filter(item => Boolean(game.flags[item.id]));
+  const goal = contentPack.lifeGoals.find(item => item.id === game.flags.life_goal);
   return (
     <View className="stats-bar">
       <Text className="stats-year">{game.date.year} 年</Text>
       {traits.length > 0 && (
         <Text className="stats-traits">{traits.map(t => t.label).join('·')}</Text>
+      )}
+      {goal && <Text className="stats-traits">目标·{goal.label}</Text>}
+      {evolutions.length > 0 && (
+        <Text className="stats-traits">成长·{evolutions.map(item => item.label).join('·')}</Text>
       )}
       <Text className="stat">学识 {knowledge}</Text>
       <Text className="stat">¥{fmtMoney(money)}</Text>
@@ -325,6 +331,69 @@ function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APPLICATIO
   );
 }
 
+function NpcSelectionScreen(props: { view: Extract<ViewModel, { kind: 'NPC_SELECTION' }> }) {
+  const act = useGame(s => s.act);
+  const [selected, setSelected] = useState<string[]>([]);
+  const { npcs, pickCount } = props.view;
+  const toggle = (id: string) => {
+    setSelected(prev =>
+      prev.includes(id)
+        ? prev.filter(value => value !== id)
+        : prev.length < pickCount
+          ? [...prev, id]
+          : prev,
+    );
+  };
+  return (
+    <Card>
+      <Text className="kicker">大学生活即将开始</Text>
+      <Text className="h2">谁会成为重要的人？</Text>
+      <Text className="muted block">选择 {pickCount} 个人。你选择的是重点关系，不是预先决定结局。</Text>
+      <View className="trait-list">
+        {npcs.map(npc => (
+          <View
+            key={npc.id}
+            className={`trait-card ${selected.includes(npc.id) ? 'trait-selected' : ''}`}
+            onClick={() => toggle(npc.id)}
+          >
+            <Text className="trait-title">{selected.includes(npc.id) ? '✓ ' : ''}{npc.name}</Text>
+            <Text className="block">{npc.description}</Text>
+          </View>
+        ))}
+      </View>
+      <ContinueButton
+        disabled={selected.length !== pickCount}
+        onClick={() => {
+          if (selected.length === pickCount) act({ type: 'CHOOSE_NPCS', npcIds: selected });
+        }}
+        label={selected.length === pickCount ? '和他们一起走进大学' : `再选 ${pickCount - selected.length} 人`}
+      />
+    </Card>
+  );
+}
+
+function LifeGoalScreen(props: { view: Extract<ViewModel, { kind: 'LIFE_GOAL' }> }) {
+  const act = useGame(s => s.act);
+  return (
+    <Card>
+      <Text className="kicker">2018 年 · 毕业之前</Text>
+      <Text className="h2">你想把什么放在人生前面？</Text>
+      <Text className="muted block">目标不会锁死选项，但会改变事件倾向和最终评分方式。</Text>
+      <View className="choices">
+        {props.view.goals.map(goal => (
+          <ChoiceButton
+            key={goal.id}
+            sub={goal.text}
+            onClick={() => act({ type: 'CHOOSE_LIFE_GOAL', goalId: goal.id })}
+          >
+            {goal.label}
+          </ChoiceButton>
+        ))}
+      </View>
+    </Card>
+  );
+}
+
 function CrossroadScreen(props: { view: Extract<ViewModel, { kind: 'CROSSROAD' }> }) {
   const act = useGame(s => s.act);
   const { view } = props;
@@ -482,6 +551,14 @@ function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' }> }) {
         </View>
         <Text className="share-title">{props.view.shareCard.title}</Text>
         <Text className="share-tagline block">{props.view.shareCard.tagline}</Text>
+        {props.view.shareCard.goal && (
+          <Text className="share-traits block">人生目标:{props.view.shareCard.goal}</Text>
+        )}
+        {props.view.shareCard.traitEvolutions.length > 0 && (
+          <Text className="share-traits block">
+            性格成长:{props.view.shareCard.traitEvolutions.join(' × ')}
+          </Text>
+        )}
         {props.view.shareCard.traits.length > 0 && (
           <Text className="share-traits block">
             特质:{props.view.shareCard.traits.join(' × ')}
@@ -524,6 +601,10 @@ function Screen() {
       return <ExamResultScreen view={view} />;
     case 'APPLICATION':
       return <ApplicationScreen view={view} />;
+    case 'NPC_SELECTION':
+      return <NpcSelectionScreen view={view} />;
+    case 'LIFE_GOAL':
+      return <LifeGoalScreen view={view} />;
     case 'CROSSROAD':
       return <CrossroadScreen view={view} />;
     case 'BRIEF':

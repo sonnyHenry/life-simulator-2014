@@ -6,7 +6,7 @@ export const phases: PhaseConfig[] = [
     id: 'gaokao',
     label: '高考季',
     date: { year: 2014, month: 6 },
-    steps: ['BACKGROUND_DRAW', 'SETUP', 'EXAM', 'APPLICATION'],
+    steps: ['BACKGROUND_DRAW', 'SETUP', 'EXAM', 'APPLICATION', 'NPC_SELECTION'],
   },
   {
     kind: 'rounds',
@@ -28,7 +28,7 @@ export const phases: PhaseConfig[] = [
     id: 'crossroad',
     label: '大四三岔口',
     date: { year: 2018, month: 3 },
-    steps: ['CROSSROAD'],
+    steps: ['LIFE_GOAL', 'CROSSROAD'],
   },
   {
     kind: 'rounds',

@@ -2,6 +2,8 @@ import type { ContentPack } from '@life-sim/core';
 import { phases } from './timeline/phases';
 import { backgrounds } from './setup/backgrounds';
 import { traits } from './setup/traits';
+import { lifeGoals } from './setup/life-goals';
+import { traitEvolutions } from './setup/trait-evolutions';
 import { applications } from './setup/applications';
 import { examBank } from './exam/questions';
 import { collegeEvents } from './events/college';
@@ -16,6 +18,7 @@ import { careerCsEvents } from './events/career-cs';
 import { careerEducationEvents } from './events/career-education';
 import { careerPsychologyEvents } from './events/career-psychology';
 import { traitMomentEvents } from './events/trait-moments';
+import { traitGrowthEvents } from './events/trait-growth';
 import { endings } from './endings/endings';
 import { npcs } from './npcs/npcs';
 import { incomes } from './economy/incomes';
@@ -23,7 +26,7 @@ import { incomes } from './economy/incomes';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.22.0',
+    version: '0.24.0',
     title: '2014：我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 7,
@@ -46,12 +49,15 @@ export const contentPack: ContentPack = {
     ...careerEducationEvents,
     ...careerPsychologyEvents,
     ...traitMomentEvents,
+    ...traitGrowthEvents,
   ],
   incomes,
   endings,
   examBank,
   backgrounds,
   traits,
+  traitEvolutions,
+  lifeGoals,
   applications,
   npcs,
   fns: {},

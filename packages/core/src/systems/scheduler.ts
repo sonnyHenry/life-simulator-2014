@@ -1,4 +1,4 @@
-import type { ContentPack, GameEvent, PhaseConfig, TraitCard } from '../types/content';
+import type { ContentPack, GameEvent, LifeGoal, PhaseConfig, TraitCard, TraitEvolution } from '../types/content';
 import type { GameState } from '../types/state';
 import type { Rng } from '../rng/rng';
 import { evalCondition } from '../dsl/evaluate';
@@ -69,6 +69,8 @@ function directorMultiplier(
   ev: GameEvent,
   state: GameState,
   activeTraits: TraitCard[],
+  activeEvolutions: TraitEvolution[],
+  activeGoal: LifeGoal | undefined,
   pickedCategories: ReadonlySet<string>,
   recentCounts: ReadonlyMap<string, number>,
 ): number {
@@ -80,6 +82,12 @@ function directorMultiplier(
       const bias = trait.poolBias?.[ev.category];
       if (bias !== undefined) m *= bias;
     }
+    for (const evolution of activeEvolutions) {
+      const bias = evolution.poolBias?.[ev.category];
+      if (bias !== undefined) m *= bias;
+    }
+    const goalBias = activeGoal?.poolBias?.[ev.category];
+    if (goalBias !== undefined) m *= goalBias;
   }
   // 节奏调节:低谷给喘息、顺风上压力(阈值间的中段不干预)
   const valence = eventMindsetValence(ev);
@@ -129,9 +137,30 @@ export function pickRoundEvents(
     if (!picked.includes(chosen.id)) picked.push(chosen.id);
   }
 
-  // NPC 阶段事件不占普通槽位,但每轮限量抽取:
-  // 每局只激活部分 NPC,同一年再从符合条件的 NPC 中抽少数,降低多周目固定剧本感。
-  const npcCandidates: { eventId: string; weight: number }[] = [];
+  // NPC 阶段事件不占普通槽位,但每轮限量播放。
+  // 同年撞车的事件进入 pendingNpcEvents,后续回合继续播放,避免错过单年窗口后整条人物线卡死。
+  const npcDefsById = new Map(pack.npcs.map(def => [def.id, def]));
+  const pendingNpcEvents = (state.pendingNpcEvents ?? []).filter(pending => {
+    const def = npcDefsById.get(pending.npcId);
+    const npc = state.npcs[pending.npcId];
+    const stage = npc && def?.stages[npc.stage];
+    return (
+      stage?.eventId === pending.eventId &&
+      !picked.includes(pending.eventId) &&
+      !state.triggeredEventIds.includes(pending.eventId)
+    );
+  });
+  state.pendingNpcEvents = [];
+
+  let npcSlotsLeft = MAX_NPC_STAGE_EVENTS_PER_ROUND;
+  while (npcSlotsLeft > 0 && pendingNpcEvents.length > 0) {
+    const pending = pendingNpcEvents.shift()!;
+    picked.push(pending.eventId);
+    npcSlotsLeft -= 1;
+  }
+  state.pendingNpcEvents.push(...pendingNpcEvents);
+
+  const npcCandidates: { npcId: string; eventId: string; weight: number }[] = [];
   for (const def of pack.npcs) {
     const npc = state.npcs[def.id];
     if (!npc) continue;
@@ -139,16 +168,23 @@ export function pickRoundEvents(
     if (!stage?.eventId || !evalCondition(stage.advanceWhen, ctx)) continue;
     if (picked.includes(stage.eventId)) continue;
     if (state.triggeredEventIds.includes(stage.eventId)) continue;
-    npcCandidates.push({ eventId: stage.eventId, weight: 1 + npc.favor / 100 });
+    if (state.pendingNpcEvents.some(pending => pending.eventId === stage.eventId)) continue;
+    npcCandidates.push({ npcId: def.id, eventId: stage.eventId, weight: 1 + npc.favor / 100 });
   }
-  for (let i = 0; i < MAX_NPC_STAGE_EVENTS_PER_ROUND && npcCandidates.length > 0; i++) {
+  while (npcSlotsLeft > 0 && npcCandidates.length > 0) {
     const chosen = rng.weightedPick(npcCandidates, c => c.weight);
     picked.push(chosen.eventId);
     npcCandidates.splice(npcCandidates.indexOf(chosen), 1);
+    npcSlotsLeft -= 1;
   }
+  state.pendingNpcEvents.push(
+    ...npcCandidates.map(candidate => ({ npcId: candidate.npcId, eventId: candidate.eventId })),
+  );
 
   // 随机槽位:导演式加权抽取(基础 weight × 类别冷却 × 特质偏好 × 心态节奏)
   const activeTraits = pack.traits.filter(t => Boolean(state.flags[t.id]));
+  const activeEvolutions = pack.traitEvolutions.filter(evolution => Boolean(state.flags[evolution.id]));
+  const activeGoal = pack.lifeGoals.find(goal => goal.id === state.flags.life_goal);
   const recentCounts = recentCategoryCounts(state);
   const eventsById = new Map(pack.events.map(ev => [ev.id, ev]));
   const pickedCategories = new Set<string>();
@@ -173,7 +209,7 @@ export function pickRoundEvents(
       candidates,
       ev =>
         (ev.weight ?? 1) *
-        directorMultiplier(ev, state, activeTraits, pickedCategories, recentCounts),
+        directorMultiplier(ev, state, activeTraits, activeEvolutions, activeGoal, pickedCategories, recentCounts),
     );
     picked.push(chosen.id);
     if (chosen.category) pickedCategories.add(chosen.category);
