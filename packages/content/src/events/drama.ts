@@ -707,6 +707,7 @@ export const dramaEvents: GameEvent[] = [
   {
     id: 'ev_drama_mlm_reunion',
     pools: ['random'],
+    weight: 1.5,
     category: 'money',
     tier: 'major',
     title: '老同学的“项目”',

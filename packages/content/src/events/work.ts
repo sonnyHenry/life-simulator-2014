@@ -195,6 +195,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_invest_stock_2015',
     pools: ['invest'],
+    weight: 2,
     category: 'invest',
     title: '牛市与股灾',
     text: '2015年上半年，连食堂打饭的阿姨都在聊股票。室友开了户，把三个月生活费投了进去，收益率截图天天发群里。他把开户二维码推到你面前：“牛市不进场，等于白活。”',
@@ -349,6 +350,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_invest_bitcoin_2017',
     pools: ['invest'],
+    weight: 2,
     category: 'invest',
     title: '论坛里的传说',
     text: '2017年，你常逛的论坛里有个帖子火了：楼主晒出几年前买的比特币，已经翻了几百倍。评论区一半人喊骗子，一半人问怎么买。你查了查，一个要好几千，但可以买零点几个。',
@@ -470,6 +472,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_invest_p2p',
     pools: ['invest'],
+    weight: 2,
     category: 'invest',
     title: '年化 15% 的理财',
     text: '同事神秘兮兮地给你看他的收益截图：某 P2P 平台，年化 15%，“国资背景，上市系，跑了好几年了”。他已经投了半年，每月利息准时到账。',
@@ -1033,6 +1036,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_invest_gold_2024',
     pools: ['invest'],
+    weight: 1.5,
     category: 'invest',
     title: '黄金和出海',
     text: '2024年，黄金、新出海、AI 应用轮番上热搜。你已经不像刚毕业时那样相信“错过这次就没了”，但手指还是会停在买入按钮上。',
@@ -1299,7 +1303,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_work_first_bonus',
     pools: ['work'],
-    weight: 0.5,
+    weight: 1,
     category: 'money',
     title: '第一笔年终奖',
     text: '年终奖到账了。金额没有传说中那么夸张，但比你学生时代见过的大多数数字都大。你打开购物车，又打开银行卡余额。',
@@ -1418,6 +1422,7 @@ export const workEvents: GameEvent[] = [
   {
     id: 'ev_work_buy_house_question',
     pools: ['work'],
+    weight: 0.8,
     category: 'money',
     title: '买房问题',
     text: '家里开始问你要不要考虑买房。首付、月供、城市、通勤、未来规划，每个词都像一块砖，压在聊天窗口里。',
@@ -1495,6 +1500,92 @@ export const workEvents: GameEvent[] = [
             condition: { stat: 'money', op: '<', value: 250000 },
             text: '你们把银行卡、工资流水和父母能支持的数字摊开算了一遍，最后还是差一截。中介继续催，你把聊天窗口关了。没买成当然失落，但至少这次你没有用未来很多年的安全感去赌一个“再等等就涨”。',
             effects: [{ stats: { mindset: -3 } }, { setFlag: 'no_house' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_work_rent_or_buy_question',
+    pools: ['work'],
+    category: 'money',
+    title: '租售同权的新闻',
+    text: '你刷到一条关于“租售同权”的新闻，评论区吵成一团。有人说年轻人没必要被房子绑住，有人说没有房子就没有真正的安全感。你关掉新闻，发现自己还是要面对下个月的房租。',
+    trigger: {
+      all: [
+        { year: { from: 2021, to: 2023 } },
+        { not: { flag: 'has_house' } },
+      ],
+    },
+    choices: [
+      {
+        id: 'a',
+        text: '继续租，先保留流动性',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有急着上车。租房让你少了一点归属感，也多了一点转身空间。成年人的选择很少完美，更多时候是在两种遗憾里挑一种能承受的。',
+            effects: [{ stats: { mindset: 1, knowledge: 2 } }, { setFlag: 'no_house' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '认真做一张买房测算表',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '>=', value: 260000 },
+            text: '你把首付、月供、通勤、装修和失业缓冲全填进表格。结果没有替你做决定，但让冲动降了温。你决定继续看房，但不被中介的倒计时推着走。',
+            effects: [{ stats: { knowledge: 4, mindset: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '表格算到第三行就很诚实：首付差一截，月供也太紧。你把买房计划改名为“以后再说”，心里有点空，但至少没有把未来硬塞进今天。',
+            effects: [{ stats: { knowledge: 2, mindset: -3 } }, { setFlag: 'no_house' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_work_parents_house_chat',
+    pools: ['work'],
+    category: 'family',
+    title: '父母问起房子',
+    text: '视频电话里，爸妈绕了几圈，还是问到房子：“我们也不是催你，就是想知道你以后怎么打算。”他们说得很轻，你却听出了存款、年龄和安全感一起落在桌上的声音。',
+    trigger: {
+      all: [
+        { year: { from: 2021, to: 2023 } },
+        { not: { flag: 'has_house' } },
+      ],
+    },
+    choices: [
+      {
+        id: 'a',
+        text: '把真实压力说出来',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有用“快了快了”糊弄过去，而是把收入、城市和首付缺口讲清楚。爸妈沉默了一会儿，说：“那就别太急，先把日子过稳。”这句话不解决房价，但能让你今晚睡好一点。',
+            effects: [{ stats: { mindset: 4, network: 2 } }, { setFlag: 'no_house' }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '顺着他们的话去看两套房',
+        outcomes: [
+          {
+            weight: 1,
+            condition: { stat: 'money', op: '>=', value: 280000 },
+            text: '你周末去看了两套房。样板间灯光很暖，价格也很冷静。你没有当场定下，但第一次把“以后”具体到小区、地铁和月供。',
+            effects: [{ stats: { knowledge: 3, mindset: -1 } }],
+          },
+          {
+            weight: 1,
+            text: '你看完房回家，打开银行卡余额，发现现实比样板间暗很多。那天你没再刷房源，只把记账软件里的预算重新排了一遍。',
+            effects: [{ stats: { knowledge: 2, mindset: -4 } }, { setFlag: 'no_house' }],
           },
         ],
       },
@@ -1607,6 +1698,7 @@ export const workEvents: GameEvent[] = [
     category: 'money',
     title: '第 N 次搬家',
     mandatory: true,
+    variantGroup: 'life_2025_no_house',
     trigger: { all: [{ flag: 'no_house' }, { year: { from: 2025, to: 2025 } }] },
     text: '房东发来消息：“房子要卖，下个月麻烦搬一下。”你环顾这间住了几年的屋子，发现所谓生活，原来可以被打包成十二个纸箱。',
     choices: [
@@ -1629,6 +1721,79 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你打开了老家省会的招聘软件，又打开了这座城市的地铁图。算到最后你发现，让你留下的不是机会，是不甘心。你续租了另一间房，把“离开”两个字又存回了草稿箱。',
             effects: [{ stats: { money: -5000, mindset: -2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_rent_renewal_2025',
+    pools: ['work'],
+    category: 'money',
+    title: '续租谈判',
+    mandatory: true,
+    variantGroup: 'life_2025_no_house',
+    trigger: { all: [{ flag: 'no_house' }, { year: { from: 2025, to: 2025 } }] },
+    text: '租约快到期了，房东说今年要涨租。你打开租房软件看了一圈，发现同小区更贵，远一点的房子又要把通勤时间加回来。',
+    choices: [
+      {
+        id: 'a',
+        text: '谈一谈，争取少涨一点',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把周边价格、自己的续租年限和按时交租记录摆出来，最后房东少涨了一半。成年人的体面有时很具体：不是不被涨价，而是还能讲价。',
+            effects: [{ stats: { money: -3000, mindset: 2, knowledge: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你谈了半天，对方只回一句“市场价都这样”。你续了租，也记下这个城市给你的提醒：稳定从来不是免费赠品。',
+            effects: [{ stats: { money: -6000, mindset: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '趁机换个便宜点的地方',
+        outcomes: [
+          {
+            weight: 1,
+            text: '新房子便宜一些，也远一些。每天多出来的通勤时间像一笔看不见的房租，按分钟扣在身上。',
+            effects: [{ stats: { money: 5000, mindset: -2, health: -4 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_commute_edge_2025',
+    pools: ['work'],
+    category: 'health',
+    title: '通勤的尽头',
+    mandatory: true,
+    variantGroup: 'life_2025_no_house',
+    trigger: { all: [{ flag: 'no_house' }, { year: { from: 2025, to: 2025 } }] },
+    text: '某天早高峰，你在换乘通道里被人群推着往前走，突然算了一下：这些年花在通勤上的时间，已经够认真学完一门新语言。',
+    choices: [
+      {
+        id: 'a',
+        text: '换到公司附近，贵一点也认了',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你搬到公司附近，房租涨了，但每天多出一个小时。那一个小时有时用来睡觉，有时用来做饭，有时只是坐着发呆。自由感很小，却很真。',
+            effects: [{ stats: { money: -9000, mindset: 5, health: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '继续忍，把钱攒下来',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有搬。每天挤上车时，你都告诉自己这是在攒未来的选择权。只是身体不太懂这些宏大叙事，它只知道你又少睡了四十分钟。',
+            effects: [{ stats: { money: 6000, mindset: -3, health: -5 } }],
           },
         ],
       },
@@ -1874,6 +2039,7 @@ export const workEvents: GameEvent[] = [
     category: 'relationship',
     title: '催婚催育',
     mandatory: true,
+    variantGroup: 'life_2025_family_pressure',
     trigger: { year: { from: 2025, to: 2025 } },
     text: '家庭群里，催婚催育的话题又被翻了出来。表姐晒娃、表弟晒婚戒，你妈发来一句“你看看人家”，后面跟着一个不太自然的笑脸表情。饭桌上，长辈的关心和逼问总是长得很像。',
     choices: [
@@ -1918,6 +2084,77 @@ export const workEvents: GameEvent[] = [
             weight: 1,
             text: '你笑着说“随缘随缘”，然后迅速把话题引到今年的年夜饭菜单上。饭桌上的紧张气氛暂时散了，只是你知道，这个话题明年还会准时回来。',
             effects: [{ stats: { mindset: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_life_parent_aging_2025',
+    pools: ['work'],
+    category: 'family',
+    title: '爸妈开始变老',
+    mandatory: true,
+    variantGroup: 'life_2025_family_pressure',
+    trigger: { year: { from: 2025, to: 2025 } },
+    text: '你回家时发现，爸爸看手机要拿远一点，妈妈爬楼会扶一下栏杆。他们还是会问你吃得好不好，只是你第一次意识到，那个总替你兜底的家，也在慢慢需要你兜底。',
+    choices: [
+      {
+        id: 'a',
+        text: '认真安排一次体检和保险梳理',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你陪他们约了体检，又把医保、商业险和常用药整理成一张表。做这些事一点都不浪漫，但它让焦虑从一团雾变成了几行可执行的清单。',
+            effects: [
+              { moneyCost: { rate: 0.08, max: 4000, roundTo: 100, reason: 'family' } },
+              { stats: { knowledge: 3, mindset: 2, network: 1 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '多打几次电话，先把陪伴补上',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你开始固定每周打电话，不只问“吃了吗”，也听他们讲邻居、菜价和小区修路。生活没有因此变轻，但距离变得没那么硬。',
+            effects: [{ stats: { mindset: 4, network: 2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_life_friend_family_gap_2025',
+    pools: ['work'],
+    category: 'relationship',
+    title: '朋友的人生进度',
+    mandatory: true,
+    variantGroup: 'life_2025_family_pressure',
+    trigger: { year: { from: 2025, to: 2025 } },
+    text: '朋友圈里，同龄人的人生像被分成了几条赛道：有人二胎，有人换房，有人离婚，有人去徒步。你刷着刷着，忽然不知道自己是在关心朋友，还是在给自己打分。',
+    choices: [
+      {
+        id: 'a',
+        text: '收起比较，联系一个老朋友',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有继续刷下去，而是给很久没联系的朋友发了条消息。你们聊了半小时，发现对方的光鲜和狼狈都比朋友圈真实得多。',
+            effects: [{ stats: { network: 4, mindset: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '把这股焦虑变成计划',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你关掉朋友圈，打开备忘录，写下接下来一年真正要做的三件事。计划不保证成功，但至少把别人的进度条从你的脑子里请了出去。',
+            effects: [{ stats: { knowledge: 2, mindset: 2 } }],
           },
         ],
       },

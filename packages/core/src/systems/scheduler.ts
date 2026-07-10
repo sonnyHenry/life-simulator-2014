@@ -18,6 +18,10 @@ const RECENT_CATEGORY_PENALTY = 0.6;
 /** 导演乘数钳位区间,保证不会把事件压到抽不到 */
 const MULTIPLIER_FLOOR = 0.15;
 const MULTIPLIER_CEIL = 4;
+/** 每轮最多抽取的公共随机池事件数,避免多周目反复看到同一批日常公共事件 */
+const MAX_RANDOM_POOL_EVENTS_PER_ROUND = 1;
+/** 每轮最多展示的 NPC 阶段事件数,避免同一局固定 NPC 线铺满全年 */
+const MAX_NPC_STAGE_EVENTS_PER_ROUND = 1;
 
 const valenceCache = new WeakMap<GameEvent, number>();
 
@@ -109,12 +113,25 @@ export function pickRoundEvents(
     return evalCondition(ev.trigger, ctx);
   };
 
+  const mandatoryGroups = new Map<string, GameEvent[]>();
   for (const ev of pack.events) {
-    if (ev.mandatory && isEligible(ev)) picked.push(ev.id);
+    if (!ev.mandatory || !isEligible(ev)) continue;
+    if (!ev.variantGroup) {
+      picked.push(ev.id);
+      continue;
+    }
+    const group = mandatoryGroups.get(ev.variantGroup) ?? [];
+    group.push(ev);
+    mandatoryGroups.set(ev.variantGroup, group);
+  }
+  for (const group of mandatoryGroups.values()) {
+    const chosen = rng.weightedPick(group, ev => ev.weight ?? 1);
+    if (!picked.includes(chosen.id)) picked.push(chosen.id);
   }
 
-  // NPC 阶段事件和强制事件一样保证入队,不受 eventSlots 限制:
-  // 阶段推进窗口多为单一年份,被挤掉一次就会永久卡死整条 NPC 线。
+  // NPC 阶段事件不占普通槽位,但每轮限量抽取:
+  // 每局只激活部分 NPC,同一年再从符合条件的 NPC 中抽少数,降低多周目固定剧本感。
+  const npcCandidates: { eventId: string; weight: number }[] = [];
   for (const def of pack.npcs) {
     const npc = state.npcs[def.id];
     if (!npc) continue;
@@ -122,7 +139,12 @@ export function pickRoundEvents(
     if (!stage?.eventId || !evalCondition(stage.advanceWhen, ctx)) continue;
     if (picked.includes(stage.eventId)) continue;
     if (state.triggeredEventIds.includes(stage.eventId)) continue;
-    picked.push(stage.eventId);
+    npcCandidates.push({ eventId: stage.eventId, weight: 1 + npc.favor / 100 });
+  }
+  for (let i = 0; i < MAX_NPC_STAGE_EVENTS_PER_ROUND && npcCandidates.length > 0; i++) {
+    const chosen = rng.weightedPick(npcCandidates, c => c.weight);
+    picked.push(chosen.eventId);
+    npcCandidates.splice(npcCandidates.indexOf(chosen), 1);
   }
 
   // 随机槽位:导演式加权抽取(基础 weight × 类别冷却 × 特质偏好 × 心态节奏)
@@ -130,13 +152,22 @@ export function pickRoundEvents(
   const recentCounts = recentCategoryCounts(state);
   const eventsById = new Map(pack.events.map(ev => [ev.id, ev]));
   const pickedCategories = new Set<string>();
+  let randomPoolPicked = 0;
   for (const id of picked) {
-    const cat = eventsById.get(id)?.category;
+    const ev = eventsById.get(id);
+    const cat = ev?.category;
     if (cat) pickedCategories.add(cat);
+    if (ev?.pools.includes('random')) randomPoolPicked += 1;
   }
 
   while (picked.length < phase.eventSlots) {
-    const candidates = pack.events.filter(ev => !ev.mandatory && isEligible(ev));
+    const candidates = pack.events.filter(ev => {
+      if (ev.mandatory || !isEligible(ev)) return false;
+      if (randomPoolPicked >= MAX_RANDOM_POOL_EVENTS_PER_ROUND && ev.pools.includes('random')) {
+        return false;
+      }
+      return true;
+    });
     if (candidates.length === 0) break;
     const chosen = rng.weightedPick(
       candidates,
@@ -146,6 +177,7 @@ export function pickRoundEvents(
     );
     picked.push(chosen.id);
     if (chosen.category) pickedCategories.add(chosen.category);
+    if (chosen.pools.includes('random')) randomPoolPicked += 1;
   }
 
   // 同回合内按 order 稳定排序(默认 0),让"毕业散伙饭"这类年末事件排在最后

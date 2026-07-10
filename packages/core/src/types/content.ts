@@ -31,6 +31,8 @@ export interface GameEvent {
   weight?: number;
   once?: boolean;
   mandatory?: boolean;
+  /** 同组事件同一轮只会抽取一个,用于时代/人生节点变体池 */
+  variantGroup?: string;
   /** 同一回合内的展示顺序,越小越靠前,默认 0(如毕业散伙饭应排在当年最后) */
   order?: number;
   /** 事件等级:major=剧情转折/高光事件(UI 有关键节点标识,文案更长) */

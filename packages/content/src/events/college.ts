@@ -879,6 +879,7 @@ export const collegeEvents: GameEvent[] = [
     title: '押金骑上共享单车',
     text: '2017年，五颜六色的共享单车一夜之间堆满了校门口，比自行车棚还壮观。扫码交99元押金就能骑走一辆，你盘算着：以后去教学楼、去实习单位、去校外约会，都能省下不少时间。只是你也隐约听说，有的平台押金退得没那么痛快。',
     mandatory: true,
+    variantGroup: 'era_2017_campus',
     trigger: { year: { from: 2017, to: 2017 } },
     choices: [
       {
@@ -934,6 +935,84 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             text: '慢慢走的代价是,有几次你真迟到了。老师点名时你刚好从后门溜进来,全班回头看。你在心里给“松弛”补了一条备注:提前十分钟可以,提前两分钟不叫松弛,叫侥幸。',
             effects: [{ stats: { mindset: -2, health: 2, knowledge: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_delivery_campus_2017',
+    pools: ['college'],
+    category: 'campus',
+    title: '外卖柜和跑腿群',
+    text: '2017年，宿舍楼下多了外卖柜，微信群里也开始有人接“代取快递、代买夜宵、代打印”的单子。你突然发现，校园里的懒和急，凑在一起也能变成一门小生意。',
+    mandatory: true,
+    variantGroup: 'era_2017_campus',
+    trigger: { year: { from: 2017, to: 2017 } },
+    choices: [
+      {
+        id: 'a',
+        text: '接几单试试水',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你跑了两个星期，赚到几百块，也熟悉了学校每栋楼最难找的入口。钱不多，但你第一次把“需求”这个词从课本里搬到了腿上。',
+            effects: [{ stats: { money: 900, knowledge: 2, network: 3, health: -3 } }],
+          },
+          {
+            weight: 1,
+            text: '订单来得很碎，取消也很随意。你赚了几顿饭钱，赔上两次作业 deadline。后来你明白，小生意最难的不是点子，是稳定交付。',
+            effects: [{ stats: { money: 300, knowledge: 1, mindset: -3, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '当用户，不当骑手',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你偶尔花两块钱让人帮取快递，省下来的时间拿去补觉。时代的风口从你身边吹过，你没有站上去，但也确实被它吹得舒服了一点。',
+            effects: [{ stats: { money: -300, mindset: 3, health: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_college_short_video_2017',
+    pools: ['college'],
+    category: 'campus',
+    title: '课间刷到的十五秒',
+    text: '2017年，短视频开始占据课间十分钟。有人拍宿舍段子，有人拍食堂测评，有人靠一条土味视频在全校出名。你第一次感觉，出名这件事离普通人也没那么远。',
+    mandatory: true,
+    variantGroup: 'era_2017_campus',
+    trigger: { year: { from: 2017, to: 2017 } },
+    choices: [
+      {
+        id: 'a',
+        text: '跟风拍一条',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你和室友拍了条宿舍段子，播放量不高，但评论区有几个陌生人认真笑了。那一晚你们反复刷新数据，像守着一株刚发芽的小草。',
+            effects: [{ stats: { network: 3, mindset: 3, knowledge: 1 } }],
+          },
+          {
+            weight: 1,
+            text: '视频被同学转到班群，大家笑得很开心，你却有点尴尬。被看见和被围观只有一线之隔，这一课来得很快。',
+            effects: [{ stats: { network: 2, mindset: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '看热闹就好',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你刷完几条，把手机扣在桌上继续写论文。不是每个风口都要亲自跳进去，有些时代变化，先看懂也算参与。',
+            effects: [{ stats: { knowledge: 2, mindset: 1 } }],
           },
         ],
       },

@@ -571,4 +571,490 @@ export const randomEvents: GameEvent[] = [
       },
     ],
   },
+  {
+    id: 'ev_random_library_night',
+    pools: ['random'],
+    weight: 0.7,
+    category: 'campus',
+    title: '图书馆闭馆铃',
+    text: '晚上十点，图书馆开始放闭馆音乐。你抬头看见窗外的路灯，桌上摊着没看完的书、凉掉的奶茶和一张写满待办的便利贴。',
+    trigger: { year: { from: 2014, to: 2017 } },
+    choices: [
+      {
+        id: 'a',
+        text: '再学半小时，把今天收住',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有突然开窍，只是把最后两页笔记补完了。走出图书馆时风有点凉，但你心里很稳：有些改变不是顿悟，是每天少欠一点账。',
+            effects: [{ stats: { knowledge: 4, mindset: 2, health: -1 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '合上书，去操场走两圈',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你绕着操场走了三圈，听见有人练歌，有人背单词，有人打电话吵架。大学忽然从成绩单里退出来，变成了很具体的一晚风。',
+            effects: [{ stats: { mindset: 4, health: 2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_group_project',
+    pools: ['random'],
+    weight: 0.7,
+    category: 'campus',
+    title: '小组作业',
+    text: '课程群里安静了三天，汇报前一晚突然所有人都活了。PPT、数据、排版、上台发言，每一项都像在问：谁来兜底？',
+    trigger: { year: { from: 2014, to: 2017 } },
+    choices: [
+      {
+        id: 'a',
+        text: '自己多做一点，保证能交',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你熬到凌晨两点，把缺的部分补齐。第二天展示顺利通过，老师夸了你们组。你笑着点头，心里默默把“们”字删掉。',
+            effects: [{ stats: { knowledge: 3, mindset: -3, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '把任务拆清楚，逼大家认领',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把任务、截止时间和负责人列成表。有人不情愿，但最后都交了。汇报不算惊艳，却第一次让你明白：合作不是等别人自觉，是把模糊变成具体。',
+            effects: [{ stats: { knowledge: 2, network: 3, mindset: 1 } }],
+          },
+          {
+            weight: 1,
+            text: '你拆得很清楚，大家答应得也很快，然后继续消失。最后你还是补了大半，只是这次多收获了一份对人性的课程学分。',
+            effects: [{ stats: { knowledge: 2, mindset: -4 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_second_hand_phone',
+    pools: ['random'],
+    weight: 0.6,
+    category: 'money',
+    title: '换手机',
+    text: '手机电池一天三充，屏幕边缘也开始失灵。你打开电商软件，旗舰机、二手机、分期免息三个选项一起盯着你。',
+    trigger: { year: { from: 2015 } },
+    choices: [
+      {
+        id: 'a',
+        text: '买新款，生产力投资',
+        outcomes: [
+          {
+            weight: 1,
+            text: '新手机很流畅，拍照也好看。只是第一期账单来的时候，你突然发现“生产力”这个词有时只是欲望穿上的正装。',
+            effects: [
+              { moneyCost: { rate: 0.08, max: 6000, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: 3 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '淘一台二手的先用',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你挑了半天，买到一台成色不错的二手机。它没有带来新生活，但让旧生活继续跑得很顺。',
+            effects: [
+              { moneyCost: { rate: 0.04, max: 2200, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: 1, knowledge: 1 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '卖家说“女生自用，几乎全新”。你收到后发现电池健康只有百分之七十六。人生第一次二手交易课，学费不算太贵。',
+            effects: [
+              { moneyCost: { rate: 0.05, max: 2500, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: -3, knowledge: 2 } },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_first_desk',
+    pools: ['random'],
+    weight: 2,
+    category: 'career',
+    title: '第一张工位',
+    text: '你坐到自己的工位前，显示器还贴着资产编号，抽屉里有上一任留下的便签纸。办公软件弹出第一条消息：“欢迎加入项目群。”',
+    trigger: { all: [{ year: { from: 2018, to: 2019 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '主动问清楚项目和流程',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你花了两天把文档、群聊和人名对上号。没有人正式教你，但你很快知道谁能拍板、谁懂细节、谁只是喜欢发问号。',
+            effects: [{ stats: { knowledge: 3, network: 2, mindset: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '先观察，少说少错',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你安静地坐在角落，记下所有缩写和黑话。没人为难你，也没人真正记住你。新人的安全感，有时就是一点点透明。',
+            effects: [{ stats: { knowledge: 1, mindset: 2, network: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_commute_line',
+    pools: ['random'],
+    weight: 0.6,
+    category: 'health',
+    title: '通勤路线',
+    text: '早高峰的地铁口排起长队，导航推荐了三条路线：最快的要挤，舒服的要贵，便宜的要早起。',
+    trigger: { all: [{ year: { from: 2018 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '选择最快路线，时间最贵',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你每天准点被人潮推进车厢，也准点抵达工位。时间省下来了，只是肩颈和耐心一点点交了通行费。',
+            effects: [{ stats: { knowledge: 1, mindset: -2, health: -3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '多花点钱，换一段清净',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你改坐了一段城际或打车接驳，路上终于能看书、听播客、发呆。钱包薄了一点，但早晨不再像战斗准备。',
+            effects: [
+              { moneyCost: { rate: 0.05, max: 2400, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: 4, health: 1 } },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_manager_one_on_one',
+    pools: ['random'],
+    weight: 0.6,
+    category: 'career',
+    title: '一对一谈话',
+    text: '领导把你叫进小会议室，说“随便聊聊”。桌上的水还没开封，你已经在脑子里过了一遍最近所有可能出错的事。',
+    trigger: { all: [{ year: { from: 2019 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '只汇报进度，不暴露焦虑',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把项目进度讲得很稳，问题都包装成“风险已识别”。领导点点头，说继续保持。你走出会议室，才发现手心全是汗。',
+            effects: [{ stats: { mindset: -1, network: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '顺便要资源和反馈',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你把卡点摊开讲，也问了下一阶段的期待。领导没有立刻解决所有问题，但给你指了两个能帮忙的人。职场里的成熟，有时是敢把困难说成需求。',
+            effects: [{ stats: { knowledge: 2, network: 3, mindset: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你说完需求，领导沉默几秒：“这些你先自己想办法。”话不好听，但边界很清楚。你少了一点幻想，多了一点计划。',
+            effects: [{ stats: { knowledge: 2, mindset: -2 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_app_notifications',
+    pools: ['random'],
+    weight: 0.6,
+    category: 'mindset',
+    title: '红点和推送',
+    text: '一天结束，你发现手机里还有几十个红点：新闻、短视频、购物券、工作群、理财收益提醒。每一个都说自己很重要。',
+    trigger: { year: { from: 2019 } },
+    choices: [
+      {
+        id: 'a',
+        text: '清一遍消息再睡',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你本来只想清红点，结果顺手刷了半小时。最后屏幕干净了，脑子更吵了。',
+            effects: [{ stats: { mindset: -3, health: -2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '关掉一批通知',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把不必要的推送关掉，桌面突然安静了很多。世界没有因此错过你，你也没有因此错过世界。',
+            effects: [{ stats: { mindset: 5, health: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_online_course',
+    pools: ['random'],
+    weight: 0.6,
+    category: 'career',
+    title: '收藏夹里的课程',
+    text: '你收藏夹里躺着十几门课：数据分析、英语口语、项目管理、AI 入门。每一门都像一扇门，只是门口堆满了“以后再学”。',
+    trigger: { all: [{ year: { from: 2020 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '买一门系统学完',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你每周固定两晚学习，进度不快，但真的学完了。证书没有改变命运，改变的是你对“我还能学新东西”的判断。',
+            effects: [
+              { moneyCost: { rate: 0.04, max: 1800, roundTo: 100, reason: 'daily' } },
+              { stats: { knowledge: 6, mindset: 3, health: -2 } },
+            ],
+          },
+          {
+            weight: 1,
+            text: '你买课后的三天热情高涨，第四天开始加班，第十天只剩自动续费提醒。收藏夹没有少，账单多了一条。',
+            effects: [
+              { moneyCost: { rate: 0.04, max: 1800, roundTo: 100, reason: 'daily' } },
+              { stats: { knowledge: 1, mindset: -2 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '先找免费资料试水',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你翻了公开课和文档，发现入门没有想象中神秘。省下的钱不多，但省下了“买了就等于学了”的幻觉。',
+            effects: [{ stats: { knowledge: 3, mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_neighbor_noise',
+    pools: ['random'],
+    weight: 0.5,
+    category: 'mindset',
+    title: '楼上的脚步声',
+    text: '晚上十一点半，楼上传来拖椅子和跑跳声。你盯着天花板，感觉每一声都踩在明天的精神状态上。',
+    trigger: { all: [{ year: { from: 2018 } }, working, { not: { flag: 'has_house' } }] },
+    choices: [
+      {
+        id: 'a',
+        text: '上楼沟通一次',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你尽量客气地说明情况。对方有点尴尬，之后确实安静了几晚。城市里的体面，有时靠一次敲门维持。',
+            effects: [{ stats: { mindset: 3, network: 1 } }],
+          },
+          {
+            weight: 1,
+            text: '对方说“我们也没办法，小孩还小”。你带着一肚子火回屋，发现冲突没有解决，只是有了具体对象。',
+            effects: [{ stats: { mindset: -4, health: -1 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '买耳塞，忍到搬家',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你买了耳塞和白噪音机器，生活质量有所改善。不是所有问题都值得正面硬刚，有些只是提醒你下一次租房要看顶楼。',
+            effects: [
+              { moneyCost: { rate: 0.02, max: 600, roundTo: 100, reason: 'daily' } },
+              { stats: { mindset: 1, health: 1 } },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_pet_video',
+    pools: ['random'],
+    weight: 0.5,
+    category: 'mindset',
+    title: '云养宠物',
+    text: '你连续刷到好几条宠物视频。评论区都在说“下班回家有它等着，什么都值了”。你看了看自己的出租屋和日程表。',
+    trigger: { all: [{ year: { from: 2020 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '先云养，别冲动',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你关注了几个博主，把想养宠物的冲动留在屏幕里。每天睡前看十分钟，像给心情贴了一片创可贴。',
+            effects: [{ stats: { mindset: 3 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '认真算一笔养宠成本',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把疫苗、粮、绝育、看病、寄养全列出来，表格越算越冷静。喜欢是真的，暂时不养也是真的负责。',
+            effects: [{ stats: { knowledge: 2, mindset: 1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_parent_smartphone',
+    pools: ['random'],
+    weight: 0.5,
+    category: 'family',
+    title: '爸妈的新手机',
+    text: '家里打来视频电话，说新手机总弹广告，字也太小。镜头晃来晃去，你看到他们把说明书摊在饭桌上。',
+    trigger: { year: { from: 2020 } },
+    choices: [
+      {
+        id: 'a',
+        text: '远程一步步教',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你花了四十分钟教他们关通知、调字体、删清理软件。过程很慢，但电话最后妈妈说：“现在看得清楚多了。”你忽然觉得这比很多工作反馈都具体。',
+            effects: [{ stats: { mindset: 4, network: 1 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '直接买一台更省心的',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你下单了一台屏幕大、系统简单的手机。钱花出去了，问题少了一半。另一半还是要靠每次耐心接电话。',
+            effects: [
+              { moneyCost: { rate: 0.06, max: 3000, roundTo: 100, reason: 'family' } },
+              { stats: { mindset: 2 } },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_tax_refund',
+    pools: ['random'],
+    weight: 0.5,
+    category: 'money',
+    title: '个税年度汇算',
+    text: '同事在群里说个税 App 可以退钱。你点进去，专项附加扣除、奖金计税方式、补税退税几个词排成一张成年人试卷。',
+    trigger: { all: [{ year: { from: 2021 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '认真填完',
+        outcomes: [
+          {
+            weight: 2,
+            text: '你核对租房、赡养、继续教育等信息，最后退了几百到几千不等。钱不算巨款，但像从系统缝隙里捡回一点生活费。',
+            effects: [{ stats: { money: 1800, knowledge: 2, mindset: 2 } }],
+          },
+          {
+            weight: 1,
+            text: '你填完才发现需要补税。虽然不多，但“补”这个字足够让一天的心情变钝。',
+            effects: [
+              { moneyCost: { rate: 0.03, max: 1200, roundTo: 100, reason: 'other' } },
+              { stats: { knowledge: 2, mindset: -2 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '太麻烦，先放着',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把 App 关掉，告诉自己周末再看。周末当然也有别的事。成年人的很多钱不是亏掉的，是嫌麻烦漏掉的。',
+            effects: [{ stats: { mindset: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_random_ai_tool_trial',
+    pools: ['random'],
+    weight: 0.6,
+    category: 'career',
+    title: 'AI 工具试用',
+    text: '同事开始用 AI 写周报、做表格、改邮件。你看着屏幕上几秒生成的文字，第一次觉得“工具”这个词带着一点压迫感。',
+    trigger: { all: [{ year: { from: 2023 } }, working] },
+    choices: [
+      {
+        id: 'a',
+        text: '把它当新工具学',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你试着让它改提纲、整理会议纪要、生成表格公式。它会胡说，也会省时间。你学到的第一课是：别迷信，也别装没看见。',
+            effects: [{ stats: { knowledge: 5, mindset: 2 } }],
+          },
+        ],
+      },
+      {
+        id: 'b',
+        text: '先观望，别被风口牵着走',
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有立刻注册一堆账号。几个月后，工具还在迭代，焦虑也还在迭代。观望没有错，只是不能一直把观望当判断。',
+            effects: [{ stats: { mindset: -1 } }],
+          },
+        ],
+      },
+    ],
+  },
 ];

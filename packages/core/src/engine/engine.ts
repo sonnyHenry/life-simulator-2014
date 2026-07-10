@@ -20,6 +20,7 @@ const EXAM_SCORE_RANGE = 270;
 const EXAM_SKIP_RATE = 0.55;
 const TRAIT_OFFER_COUNT = 4;
 const TRAIT_PICK_COUNT = 2;
+const ACTIVE_NPC_COUNT = 3;
 
 const CROSSROAD_OPTIONS = [
   {
@@ -122,7 +123,10 @@ export function createEngine(pack: ContentPack): Engine {
   function start(seed?: number): GameState {
     const actualSeed = seed ?? randomSeed();
     const npcs: GameState['npcs'] = {};
-    for (const npc of pack.npcs) {
+    const npcRng = new Rng(actualSeed ^ 0x4e5043);
+    const activeNpcs =
+      pack.npcs.length <= ACTIVE_NPC_COUNT ? pack.npcs : npcRng.sample(pack.npcs, ACTIVE_NPC_COUNT);
+    for (const npc of activeNpcs) {
       npcs[npc.id] = { favor: npc.initialFavor, stage: npc.initialStage };
     }
     return {

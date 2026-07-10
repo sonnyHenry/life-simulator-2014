@@ -5,6 +5,7 @@ import {
   CURRENT_SAVE_VERSION,
   evalCondition,
   eventMindsetValence,
+  pickRoundEvents,
   migrateSaveFile,
   restoreSave,
   Rng,
@@ -237,6 +238,93 @@ describe('M2 flow support', () => {
     const view = engine.view(state);
     expect(view.kind).toBe('EVENT');
     if (view.kind === 'EVENT') expect(view.eventId).toBe('ev_chain');
+  });
+});
+
+describe('event scheduling variety', () => {
+  it('activates only a sampled subset when a pack has many NPCs', () => {
+    const pack = miniPack();
+    pack.npcs = Array.from({ length: 5 }, (_, i) => ({
+      id: `npc_${i}`,
+      name: `NPC ${i}`,
+      initialFavor: 10,
+      initialStage: 'start',
+      stages: { start: {} },
+    }));
+    const state = createEngine(pack).start(42);
+    expect(Object.keys(state.npcs)).toHaveLength(3);
+  });
+
+  it('limits eligible NPC stage events to one per round', () => {
+    const pack = miniPack();
+    pack.events = ['ev_npc_a', 'ev_npc_b', 'ev_npc_c'].map(id => ({
+      id,
+      pools: [],
+      title: id,
+      text: id,
+      choices: [
+        {
+          id: 'ok',
+          text: '好',
+          outcomes: [{ weight: 1, text: '好', effects: [{ stats: { mindset: 1 } }] }],
+        },
+      ],
+    }));
+    pack.npcs = pack.events.map((ev, i) => ({
+      id: `npc_${i}`,
+      name: `NPC ${i}`,
+      initialFavor: 10,
+      initialStage: 'start',
+      stages: {
+        start: { advanceWhen: { year: { from: 2014, to: 2014 } }, eventId: ev.id },
+      },
+    }));
+    const state = createEngine(pack).start(7);
+    const phase = pack.timeline.find(p => p.kind === 'rounds')!;
+    const picked = pickRoundEvents(state, pack, new Rng(7), phase);
+    expect(picked).toHaveLength(1);
+    expect(pack.events.map(e => e.id)).toContain(picked[0]);
+  });
+
+  it('picks only one mandatory event from the same variant group', () => {
+    const pack = miniPack();
+    pack.events = [
+      {
+        id: 'ev_variant_a',
+        pools: ['main'],
+        title: '变体A',
+        text: '变体A',
+        mandatory: true,
+        variantGroup: 'era_test',
+        choices: [
+          {
+            id: 'ok',
+            text: '好',
+            outcomes: [{ weight: 1, text: '好', effects: [{ stats: { mindset: 1 } }] }],
+          },
+        ],
+      },
+      {
+        id: 'ev_variant_b',
+        pools: ['main'],
+        title: '变体B',
+        text: '变体B',
+        mandatory: true,
+        variantGroup: 'era_test',
+        choices: [
+          {
+            id: 'ok',
+            text: '好',
+            outcomes: [{ weight: 1, text: '好', effects: [{ stats: { mindset: 1 } }] }],
+          },
+        ],
+      },
+    ];
+    const state = createEngine(pack).start(7);
+    const phase = pack.timeline.find(p => p.kind === 'rounds')!;
+    const picked = pickRoundEvents(state, pack, new Rng(7), phase);
+    expect(picked).toHaveLength(1);
+    expect(['ev_variant_a', 'ev_variant_b']).toContain(picked[0]);
   });
 });
 

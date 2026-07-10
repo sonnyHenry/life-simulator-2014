@@ -49,8 +49,8 @@ export const endings: EndingDef[] = [
     condition: {
       all: [
         { year: { from: 2020 } },
-        { stat: 'money', op: '<=', value: 30000 },
-        { stat: 'mindset', op: '<=', value: 5 },
+        { stat: 'money', op: '<=', value: 50000 },
+        { stat: 'mindset', op: '<=', value: 8 },
         { stat: 'health', op: '>', value: 10 },
         { stat: 'network', op: '>', value: 20 },
       ],
