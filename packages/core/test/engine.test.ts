@@ -249,11 +249,11 @@ describe('M2 flow support', () => {
 });
 
 describe('event scheduling variety', () => {
-  it('lets the player activate exactly three NPCs from the offered cast', () => {
+  it('always activates the romance NPC and lets the player choose one other NPC', () => {
     const pack = miniPack();
-    pack.npcs = Array.from({ length: 5 }, (_, i) => ({
-      id: `npc_${i}`,
-      name: `NPC ${i}`,
+    pack.npcs = ['first_love', 'roommate', 'grinder', 'hometown_friend', 'mentor'].map(id => ({
+      id,
+      name: id,
       initialFavor: 10,
       initialStage: 'start',
       stages: { start: {} },
@@ -269,11 +269,14 @@ describe('event scheduling variety', () => {
     const view = engine.view(state);
     expect(view.kind).toBe('NPC_SELECTION');
     if (view.kind !== 'NPC_SELECTION') throw new Error('expected NPC_SELECTION view');
+    expect(view.requiredNpcs.map(npc => npc.id)).toEqual(['first_love']);
+    expect(view.npcs).toHaveLength(4);
+    expect(view.pickCount).toBe(1);
     state = engine.dispatch(state, {
       type: 'CHOOSE_NPCS',
       npcIds: view.npcs.slice(0, view.pickCount).map(npc => npc.id),
     });
-    expect(Object.keys(state.npcs)).toEqual(['npc_0', 'npc_1', 'npc_2']);
+    expect(Object.keys(state.npcs)).toEqual(['first_love', 'roommate']);
   });
 
   it('uses the chosen life goal to score the same life differently', () => {

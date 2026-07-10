@@ -245,7 +245,7 @@ export function NpcSelectionScreen(props: {
 }) {
   const act = useGame(s => s.act);
   const [selected, setSelected] = useState<string[]>([]);
-  const { npcs, pickCount } = props.view;
+  const { requiredNpcs, npcs, pickCount } = props.view;
   const toggle = (id: string) => {
     setSelected(prev =>
       prev.includes(id)
@@ -259,8 +259,14 @@ export function NpcSelectionScreen(props: {
     <Card>
       <p className="kicker">大学生活即将开始</p>
       <h2>谁会成为重要的人？</h2>
-      <p className="muted">选择 {pickCount} 个人。你选择的是重点关系，不是预先决定结局。</p>
+      <p className="muted">恋爱线必然出现。再从另外四个人里选择 {pickCount} 位重点关系。</p>
       <div className="trait-list npc-selection-list">
+        {requiredNpcs.map(npc => (
+          <div className="trait-card selected" key={npc.id}>
+            <h3>必然同行 · {npc.name}</h3>
+            <p>{npc.description}</p>
+          </div>
+        ))}
         {npcs.map(npc => (
           <button
             type="button"

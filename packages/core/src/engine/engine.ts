@@ -20,7 +20,8 @@ const EXAM_SCORE_RANGE = 270;
 const EXAM_SKIP_RATE = 0.55;
 const TRAIT_OFFER_COUNT = 4;
 const TRAIT_PICK_COUNT = 2;
-const ACTIVE_NPC_COUNT = 3;
+const REQUIRED_NPC_ID = 'first_love';
+const OPTIONAL_NPC_COUNT = 1;
 
 const CROSSROAD_OPTIONS = [
   {
@@ -219,14 +220,21 @@ export function createEngine(pack: ContentPack): Engine {
           }),
         };
       case 'NPC_SELECTION':
+        const requiredNpcs = pack.npcs.filter(npc => npc.id === REQUIRED_NPC_ID);
+        const optionalNpcs = pack.npcs.filter(npc => npc.id !== REQUIRED_NPC_ID);
         return {
           kind: 'NPC_SELECTION',
-          npcs: pack.npcs.map(npc => ({
+          requiredNpcs: requiredNpcs.map(npc => ({
             id: npc.id,
             name: npc.name,
             description: npc.description ?? '也许会在未来十二年里与你反复相遇。',
           })),
-          pickCount: Math.min(ACTIVE_NPC_COUNT, pack.npcs.length),
+          npcs: optionalNpcs.map(npc => ({
+            id: npc.id,
+            name: npc.name,
+            description: npc.description ?? '也许会在未来十二年里与你反复相遇。',
+          })),
+          pickCount: Math.min(OPTIONAL_NPC_COUNT, optionalNpcs.length),
         };
       case 'LIFE_GOAL':
         return {
@@ -787,16 +795,21 @@ export function createEngine(pack: ContentPack): Engine {
         return;
       case 'NPC_SELECTION': {
         if (action.type !== 'CHOOSE_NPCS') invalid(state, action);
-        const expected = Math.min(ACTIVE_NPC_COUNT, pack.npcs.length);
+        const required = pack.npcs.filter(npc => npc.id === REQUIRED_NPC_ID);
+        const optional = pack.npcs.filter(npc => npc.id !== REQUIRED_NPC_ID);
+        const expected = Math.min(OPTIONAL_NPC_COUNT, optional.length);
         const chosen = [...new Set(action.npcIds)];
         if (action.npcIds.length !== expected || chosen.length !== expected) {
-          throw new Error(`CHOOSE_NPCS expects ${expected} distinct NPCs`);
+          throw new Error(`CHOOSE_NPCS expects ${expected} distinct optional NPCs`);
         }
         const defsById = new Map(pack.npcs.map(npc => [npc.id, npc]));
         state.npcs = {};
-        for (const id of chosen) {
+        for (const id of [...required.map(npc => npc.id), ...chosen]) {
           const npc = defsById.get(id);
           if (!npc) throw new Error(`CHOOSE_NPCS unknown NPC: ${id}`);
+          if (id === REQUIRED_NPC_ID && chosen.includes(id)) {
+            throw new Error(`CHOOSE_NPCS cannot choose required NPC: ${id}`);
+          }
           state.npcs[id] = { favor: npc.initialFavor, stage: npc.initialStage };
         }
         nextFlowStep(state, rng);

@@ -163,7 +163,7 @@ flowchart LR
     EXAM -->|答完/SKIP_EXAM| EXAM_RESULT
     EXAM_RESULT -->|CONTINUE| APPLICATION
     APPLICATION -->|APPLY 报志愿| O1(OUTCOME)
-    O1 -->|CHOOSE_NPCS 选3位重点关系| NPC_SELECTION
+    O1 -->|CHOOSE_NPCS 初恋必出+其余4选1| NPC_SELECTION
     NPC_SELECTION -->|进入大学第1轮| BRIEF1(BRIEF)
 ```
 
@@ -341,7 +341,7 @@ stateDiagram-v2
     close_friend --> [*]
 ```
 
-玩家在 `NPC_SELECTION` 从 5 人中选 3 人后,引擎才初始化对应状态机。调度器每轮检查当前 stage 的 `advanceWhen`;每轮最多播放 1 个 NPC 节点,同年其余候选写入 `pendingNpcEvents` 顺延,下一轮即使越过原年份窗口也会继续播放,但会先核验 NPC 仍处于对应 stage。玩家在事件里通过 `npcStage` effect 决定下一阶段。
+玩家进入 `NPC_SELECTION` 时,引擎固定初始化初恋状态机,并从其余 4 人中接收 1 位玩家选择后初始化对应状态机。调度器每轮检查当前 stage 的 `advanceWhen`;每轮最多播放 1 个 NPC 节点,同年其余候选写入 `pendingNpcEvents` 顺延,下一轮即使越过原年份窗口也会继续播放,但会先核验 NPC 仍处于对应 stage。玩家在事件里通过 `npcStage` effect 决定下一阶段。
 
 ### 3.7 结局怎么判定(`packages/core/src/systems/ending.ts`)
 

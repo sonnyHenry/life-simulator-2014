@@ -521,6 +521,7 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'grinder_warm',
             text: '你跟着早起了两周，痛苦是真的，效率也是真的。后来你没变成他，但至少知道自己不是完全没潜力。',
             effects: [
               { stats: { knowledge: 7, mindset: -4, health: -2 } },
@@ -537,11 +538,13 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'grinder_cool',
             text: '你承认他很强，也承认自己不是那种人。比较没有消失，只是被你放到了一个不会每天刺痛自己的位置。',
             effects: [
               { stats: { mindset: 3 } },
               { npcFavor: 'grinder', delta: 2 },
               { npcStage: 'grinder', stage: 'big_tech' },
+              { setFlag: 'grinder_own_pace' },
             ],
           },
         ],

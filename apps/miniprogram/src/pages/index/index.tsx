@@ -334,7 +334,7 @@ function ApplicationScreen(props: { view: Extract<ViewModel, { kind: 'APPLICATIO
 function NpcSelectionScreen(props: { view: Extract<ViewModel, { kind: 'NPC_SELECTION' }> }) {
   const act = useGame(s => s.act);
   const [selected, setSelected] = useState<string[]>([]);
-  const { npcs, pickCount } = props.view;
+  const { requiredNpcs, npcs, pickCount } = props.view;
   const toggle = (id: string) => {
     setSelected(prev =>
       prev.includes(id)
@@ -348,8 +348,14 @@ function NpcSelectionScreen(props: { view: Extract<ViewModel, { kind: 'NPC_SELEC
     <Card>
       <Text className="kicker">大学生活即将开始</Text>
       <Text className="h2">谁会成为重要的人？</Text>
-      <Text className="muted block">选择 {pickCount} 个人。你选择的是重点关系，不是预先决定结局。</Text>
+      <Text className="muted block">恋爱线必然出现。再从另外四个人里选择 {pickCount} 位重点关系。</Text>
       <View className="trait-list">
+        {requiredNpcs.map(npc => (
+          <View key={npc.id} className="trait-card trait-selected">
+            <Text className="trait-title">必然同行 · {npc.name}</Text>
+            <Text className="block">{npc.description}</Text>
+          </View>
+        ))}
         {npcs.map(npc => (
           <View
             key={npc.id}

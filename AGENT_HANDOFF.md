@@ -591,12 +591,27 @@
 - **校验增强**:validate 校验人生目标 id/评分权重和必须和为 1、目标/成长 `poolBias` 类别与值域、成长 id/基础特质引用;基础特质仍禁止内容 setFlag,只允许登记过的 `trait_growth_*` 由成长事件写入。
 - **验证**:typecheck / test 30 / validate 0err0warn / **simulate -n 10000 --check 通过**(175/175、26 结局全可达、最大结局 24.1%、兜底 1.9%、提前结局 3.6%);compare 1000 为随机53/卷钱50/保心态64/卷总分73;Web、小游戏、小程序三端 build 全过。
 
+### M5 第三十六轮(恋爱线必出 + 其余 NPC 四选一)
+
+由 Codex 完成,内容版本 0.24.0 → 0.25.0。`NPC_SELECTION` 不再让玩家从 5 人里选 3 人:核心引擎固定初始化 `first_love`,选择页将初恋单独展示为“必然同行”,玩家只从创业室友/卷王同学/县城发小/职场贵人中选择 1 人。`ViewModel` 新增 `requiredNpcs`,Web/小程序/小游戏与 simulate bot 同步适配;核心测试断言最终只激活“初恋 + 所选 1 人”。验证:typecheck / test 30 / validate 0err0warn / simulate 10000(175/175、26 结局全可达) / Web 与小游戏 build 全过。
+
+### M5 第三十七轮(卷王线精修:确立“早期选择 → 中期分叉 → 后期回响”样板)
+
+由 Claude Code(Opus 4.8)完成,内容版本 0.25.0 → 0.26.0,**不新增事件节点,仅增强现有事件的分叉与回响**。背景:NPC 线虽已是“早中后”状态机,但普遍存在三个缺口——(1)**假分支**:多数中期事件不论 A/B 都推进到同一 stage,差别仅在好感与文案;(2)**伏笔无回响**:早期埋下的 flag(如卷王 `learned_from_grinder`)从不被后续事件读取;(3)`historyCount` 条件引擎支持但内容 0 使用。本轮**深挖卷王线一条作样板**,固化一套可复制到其余 NPC 的**四层机制**:
+
+- **L1 早期埋点**:2016 保研两个选项都补 `setFlag`(A `learned_from_grinder`、B 新增 `grinder_own_pace`)+ `outcomeTag`(warm/cool),两个分支都埋。
+- **L2 中期按早期 flag 分叉**:2018 大厂选项 A 按 `learned_from_grinder` 拆成“并肩者/仰望者”两套文案+数值。
+- **L3 结构性 stage 分叉**:`grinder.stages` 把原单一 `layoff_pending` 拆成 `caught_up`/`drifting`(两者复用同一 `ev_npc_grinder_layoff`,不新增事件),2018 的选择真正走不同 stage;2022 被裁事件按上一 stage 分出不同开场。
+- **L4 后期多重回响**:2024 收官在既有 `npcStage` 分支上叠加 `historyCount`——全程三处都 `grinder_warm`(warm≥3)才解锁“真正的镜子”专属结局并 `setFlag: grinder_true_mirror`;原 mirror_friend fallback 补上互斥 `not historyCount` 条件,避免专属变体命中时被随机稀释(`resolveChoice` 是“筛出全部条件为真的 outcome 后按 weight 加权随机”,不是取第一个,故靠互斥条件而非顺序保证独占)。
+
+验证:typecheck 全过 / test 30 / validate 0err0warn(base@0.26.0,事件仍 175) / simulate 200(172/175 事件可达,3 个未触发均为房贷/期权类无关事件)。另用确定性驱动脚本(临时,未入库)跑通两条路径:全暖 a/a/a/a → 四段按 2016→2018→2022→2024 全触发、终态 `parallel_lives`、`grinder_true_mirror=true`;全冷 b/b/b/b → 同样全触发、终态 `parallel_lives`、专属 flag 未解锁且 B 路径 flag(`grinder_own_pace`/`grinder_silent_2018`)正确设置。**后续**:用同一四层机制逐条推广到发小/室友/贵人/初恋。
+
 ## 当前内容版本
 
 `packages/content/src/index.ts`
 
 ```ts
-version: '0.24.0'
+version: '0.26.0'
 title: '2014：我的十二年'
 ```
 
@@ -618,7 +633,7 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第三十五轮特质成长后):
+最近一次完整验证通过(M5 第三十六轮 NPC 选择调整后):
 
 - `pnpm typecheck`
 - `pnpm test`(30 通过)
@@ -629,7 +644,7 @@ pnpm --filter @life-sim/miniprogram build:weapp
 最近一次 `pnpm validate`:
 
 ```text
-校验内容包 base@0.24.0
+校验内容包 base@0.25.0
 事件 175, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6, 特质成长 12, 人生目标 5
 完成: 0 errors, 0 warnings
 ```
@@ -638,9 +653,9 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ```text
 事件覆盖: 175/175
-26 结局全可达;最大单一结局 24.1%,兜底 1.9%
-提前结局占比: 3.6%
-金钱分位: p10=¥143700 p50=¥251101 p90=¥453101 · 心态分位: p10=28 p50=61 p90=95
+26 结局全可达;最大单一结局 23.3%,兜底 2.1%
+提前结局占比: 5.2%
+金钱分位: p10=¥140300 p50=¥248600 p90=¥458100 · 心态分位: p10=23 p50=52 p90=91
 ✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
 ```
 

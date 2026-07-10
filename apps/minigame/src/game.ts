@@ -651,12 +651,23 @@ class LifeSimMiniGame {
     y = this.drawKicker('大学生活即将开始', panel, y);
     y = this.drawHeading('谁会成为重要的人？', panel, y);
     y = this.drawWrappedText(
-      `选择 ${view.pickCount} 个人。你选择的是重点关系,不是预先决定结局。`,
+      `恋爱线必然出现。再从另外四个人里选择 ${view.pickCount} 位重点关系。`,
       panel.contentX,
       y,
       panel.contentWidth,
       { size: 15, lineHeight: 24, color: '#5c5142' },
     ) + 14;
+    for (const npc of view.requiredNpcs) {
+      y = this.drawButton(
+        `必然同行 · ${npc.name}`,
+        npc.description,
+        panel.contentX,
+        y,
+        panel.contentWidth,
+        () => {},
+        { variant: 'primary' },
+      );
+    }
     for (const npc of view.npcs) {
       const picked = this.npcSelection.includes(npc.id);
       y = this.drawButton(

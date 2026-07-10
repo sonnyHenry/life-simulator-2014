@@ -249,8 +249,7 @@ function runOne(seed: number, botSeed: number, strategy: Strategy, verbose: bool
         break;
       case 'NPC_SELECTION':
         if (action.type === 'CHOOSE_NPCS') {
-          const names = view.npcs
-            .filter(npc => action.npcIds.includes(npc.id))
+          const names = [...view.requiredNpcs, ...view.npcs.filter(npc => action.npcIds.includes(npc.id))]
             .map(npc => npc.name)
             .join(' × ');
           log(`🤝 重要的人:${names}`);

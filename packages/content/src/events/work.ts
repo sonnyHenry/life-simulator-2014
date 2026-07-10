@@ -2172,12 +2172,28 @@ export const workEvents: GameEvent[] = [
         text: '找他请教求职经验',
         outcomes: [
           {
+            // 当年一起卷过(learned_from_grinder):你们是并肩者,他把你当同路人
             weight: 1,
-            text: '他给你发来一份面试资料，还帮你改了简历。强者的帮助有时很直接，也很刺眼：原来差距真的可以被一条条列出来。',
+            condition: { flag: 'learned_from_grinder' },
+            outcomeTag: 'grinder_warm',
+            text: '他没客气，直接把自己那套面试题库和内推群甩给你："当年你陪我卷过，这点忙算什么。"你忽然发现，那两周早起早就悄悄改写了你们的关系——不是他单方面领先，而是两个人一起往前挪。',
+            effects: [
+              { stats: { knowledge: 4, network: 6 } },
+              { npcFavor: 'grinder', delta: 10 },
+              { npcStage: 'grinder', stage: 'caught_up' },
+              { setFlag: 'grinder_resume_help' },
+            ],
+          },
+          {
+            // 当年只是佩服没跟(非 learned_from_grinder):仰望者口吻,帮助刺眼
+            weight: 1,
+            condition: { not: { flag: 'learned_from_grinder' } },
+            outcomeTag: 'grinder_warm',
+            text: '他给你发来一份面试资料，还帮你改了简历。强者的帮助有时很直接，也很刺眼：原来差距真的可以被一条条列出来。你道了谢，心里那点距离却没缩短。',
             effects: [
               { stats: { knowledge: 4, network: 4, mindset: -2 } },
-              { npcFavor: 'grinder', delta: 8 },
-              { npcStage: 'grinder', stage: 'layoff_pending' },
+              { npcFavor: 'grinder', delta: 6 },
+              { npcStage: 'grinder', stage: 'drifting' },
               { setFlag: 'grinder_resume_help' },
             ],
           },
@@ -2189,11 +2205,13 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
-            text: '你点了赞，关掉朋友圈。不是不想问，只是有些比较一旦开口，就会显得自己太狼狈。',
+            outcomeTag: 'grinder_cool',
+            text: '你点了赞，关掉朋友圈。不是不想问，只是有些比较一旦开口，就会显得自己太狼狈。那条工牌照片你其实截了图，又默默删掉了。',
             effects: [
               { stats: { mindset: -1 } },
               { npcFavor: 'grinder', delta: -2 },
-              { npcStage: 'grinder', stage: 'layoff_pending' },
+              { npcStage: 'grinder', stage: 'drifting' },
+              { setFlag: 'grinder_silent_2018' },
             ],
           },
         ],
@@ -2335,11 +2353,26 @@ export const workEvents: GameEvent[] = [
         text: '私聊问他要不要帮忙',
         outcomes: [
           {
+            // caught_up:这些年一直有联系,他愿意向你敞开
             weight: 1,
-            text: '他隔了很久回你：“没事，我先休息一下。”你们聊到深夜，第一次不是谁给谁建议，只是两个成年人互相确认还撑得住。',
+            condition: { npcStage: 'grinder', stage: 'caught_up' },
+            outcomeTag: 'grinder_warm',
+            text: '他几乎是秒回："我就知道你会问。"你们聊到深夜，从当年一起早起的日子，聊到今天谁也没料到的塌方。第一次不是谁给谁建议，只是两个一路互相追赶的人，确认对方还撑得住。',
             effects: [
               { stats: { mindset: 3, network: 3 } },
               { npcFavor: 'grinder', delta: 12 },
+              { npcStage: 'grinder', stage: 'mirror_friend' },
+            ],
+          },
+          {
+            // drifting:久未联系,他起初有点客气,但你的主动仍然接住了他
+            weight: 1,
+            condition: { npcStage: 'grinder', stage: 'drifting' },
+            outcomeTag: 'grinder_warm',
+            text: '他隔了很久才回你："没事，我先休息一下。"你们已经很久没这样说过话了，起初有点客气，聊着聊着才卸下来。有些关系断了很多年，也还能在对方最低谷时重新接上。',
+            effects: [
+              { stats: { mindset: 3, network: 2 } },
+              { npcFavor: 'grinder', delta: 8 },
               { npcStage: 'grinder', stage: 'mirror_friend' },
             ],
           },
@@ -2351,9 +2384,11 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'grinder_cool',
             text: '你发了一个抱抱的表情。他回了个笑脸。成年人之间的关心，有时薄得像一张贴纸。',
             effects: [
               { stats: { mindset: -1 } },
+              { npcFavor: 'grinder', delta: -2 },
               { npcStage: 'grinder', stage: 'distant_star' },
             ],
           },
@@ -2532,8 +2567,31 @@ export const workEvents: GameEvent[] = [
         text: '聊聊彼此这十年，认真地',
         outcomes: [
           {
+            // 全程一路同行(保研/大厂/被裁三处都暖回应过)才解锁的"真正的镜子"专属收束
             weight: 1,
-            condition: { npcStage: 'grinder', stage: 'mirror_friend' },
+            condition: {
+              all: [
+                { npcStage: 'grinder', stage: 'mirror_friend' },
+                { historyCount: { outcomeTag: 'grinder_warm', op: '>=', value: 3 } },
+              ],
+            },
+            outcomeTag: 'grinder_warm',
+            text: '他把十年一段段讲给你听，讲到某处忽然停下："其实每一步，我都在偷偷看你在干嘛。你早起那两周、你毕业时来问我、我被裁那晚你第一个私聊——我都记着。"你鼻子一酸。原来你以为的单向追赶，一直是两个人在互相打气。他举起杯："这辈子能有个一直较劲又一直惦记的人，值了。"',
+            effects: [
+              { stats: { mindset: 8, network: 5 } },
+              { npcFavor: 'grinder', delta: 12 },
+              { npcStage: 'grinder', stage: 'parallel_lives' },
+              { setFlag: 'grinder_true_mirror' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: {
+              all: [
+                { npcStage: 'grinder', stage: 'mirror_friend' },
+                { not: { historyCount: { outcomeTag: 'grinder_warm', op: '>=', value: 3 } } },
+              ],
+            },
             text: '从保研、大厂、被裁到现在，他把十年讲成了一部行业兴衰史，你听得比任何播客都认真。分开时他说："当年在学校，我一直拿你当参照物。"你笑了："巧了，我也是。"两个互相较劲了十年的人，终于承认对方是自己的镜子。',
             effects: [
               { stats: { mindset: 6, network: 4 } },

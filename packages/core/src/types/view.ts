@@ -35,6 +35,7 @@ export type ViewModel =
     }
   | {
       kind: 'NPC_SELECTION';
+      requiredNpcs: { id: string; name: string; description: string }[];
       npcs: { id: string; name: string; description: string }[];
       pickCount: number;
     }

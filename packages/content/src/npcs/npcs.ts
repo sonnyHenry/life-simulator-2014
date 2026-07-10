@@ -86,7 +86,13 @@ export const npcs: NpcDef[] = [
         advanceWhen: { year: { from: 2018, to: 2019 } },
         eventId: 'ev_npc_grinder_big_tech',
       },
-      layoff_pending: {
+      // 2018 大厂事件按早期选择分叉出的两个中期 stage,均在 2022 复用同一被裁事件:
+      // caught_up = 一路并肩追赶;drifting = 渐行渐远。
+      caught_up: {
+        advanceWhen: { year: { from: 2022, to: 2022 } },
+        eventId: 'ev_npc_grinder_layoff',
+      },
+      drifting: {
         advanceWhen: { year: { from: 2022, to: 2022 } },
         eventId: 'ev_npc_grinder_layoff',
       },
