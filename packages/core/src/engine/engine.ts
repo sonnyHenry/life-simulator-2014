@@ -23,6 +23,14 @@ const TRAIT_PICK_COUNT = 2;
 const REQUIRED_NPC_ID = 'first_love';
 const OPTIONAL_NPC_COUNT = 1;
 
+const RELATIONSHIP_WARM_MILESTONES: Readonly<Record<string, number>> = {
+  love: 3,
+  roommate: 3,
+  mentor: 2,
+  grinder: 3,
+  hometown: 2,
+};
+
 const CROSSROAD_OPTIONS = [
   {
     id: 'postgrad',
@@ -291,11 +299,25 @@ export function createEngine(pack: ContentPack): Engine {
       case 'OUTCOME':
         const latestEntry = state.history[state.history.length - 1];
         const relationshipTag = latestEntry?.kind === 'event' ? latestEntry.outcomeTag : undefined;
-        const relationshipHint = relationshipTag?.endsWith('_warm')
-          ? '这段关系记住了你的靠近。多年后的某个选项，也许会因此不同。'
-          : relationshipTag?.endsWith('_cool')
-            ? '这段关系记住了这次退后。距离不会立刻显现，但会留在以后。'
-            : undefined;
+        const relationshipMatch = relationshipTag?.match(/^([a-z]+)_(warm|cool)$/);
+        let relationshipHint: string | undefined;
+        if (relationshipMatch) {
+          const prefix = relationshipMatch[1]!;
+          const temperature = relationshipMatch[2]!;
+          const relationshipEntries = state.history.filter(entry =>
+            entry.kind === 'event' && entry.outcomeTag?.startsWith(`${prefix}_`),
+          );
+          if (relationshipEntries.length === 1) {
+            relationshipHint = '你的选择会被这段关系记住，并可能影响多年后的相处。';
+          } else if (temperature === 'warm') {
+            const warmCount = relationshipEntries.filter(entry =>
+              entry.kind === 'event' && entry.outcomeTag === `${prefix}_warm`,
+            ).length;
+            if (warmCount === RELATIONSHIP_WARM_MILESTONES[prefix]) {
+              relationshipHint = '一路积累的默契，正在改变这段关系未来的走向。';
+            }
+          }
+        }
         return {
           kind: 'OUTCOME',
           text: renderText(state.pendingOutcome?.text ?? '', state),

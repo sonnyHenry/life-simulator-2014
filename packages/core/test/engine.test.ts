@@ -906,3 +906,35 @@ describe('event presentation variants', () => {
     throw new Error('never reached EVENT view');
   });
 });
+
+describe('relationship outcome hints', () => {
+  function outcomeView(tags: string[]) {
+    const engine = createEngine(miniPack());
+    const state = engine.start(7);
+    state.screen = 'OUTCOME';
+    state.pendingOutcome = { text: '关系结果', deltas: {} };
+    state.history = tags.map((outcomeTag, index) => ({
+      kind: 'event' as const,
+      year: 2014 + index,
+      eventId: `relationship_${index}`,
+      choiceId: 'choice',
+      outcomeTag,
+    }));
+    const view = engine.view(state);
+    if (view.kind !== 'OUTCOME') throw new Error('expected OUTCOME view');
+    return view;
+  }
+
+  it('explains relationship memory only on the first tagged outcome', () => {
+    expect(outcomeView(['love_warm']).relationshipHint).toContain('你的选择会被这段关系记住');
+    expect(outcomeView(['love_warm', 'love_cool']).relationshipHint).toBeUndefined();
+  });
+
+  it('shows a milestone hint exactly when a route reaches its warm threshold', () => {
+    expect(outcomeView(['love_warm', 'love_cool', 'love_warm']).relationshipHint).toBeUndefined();
+    expect(outcomeView(['love_warm', 'love_cool', 'love_warm', 'love_warm']).relationshipHint)
+      .toContain('正在改变这段关系未来的走向');
+    expect(outcomeView(['love_warm', 'love_warm', 'love_warm', 'love_warm']).relationshipHint)
+      .toBeUndefined();
+  });
+});
