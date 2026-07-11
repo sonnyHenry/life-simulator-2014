@@ -26,7 +26,7 @@ import { incomes } from './economy/incomes';
 export const contentPack: ContentPack = {
   meta: {
     id: 'base',
-    version: '0.51.0',
+    version: '0.52.0',
     title: '2014：我的十二年',
     fallbackEndingId: 'end_ordinary',
     examQuestionCount: 7,

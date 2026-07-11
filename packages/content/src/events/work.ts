@@ -755,6 +755,38 @@ export const workEvents: GameEvent[] = [
         ],
       },
       {
+        id: 'psy_phd_social',
+        text: '出国读博，在心理学院研究社会心理学',
+        visibleIf: { major: '心理学' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有立刻走进招聘会，而是接下了一所海外大学心理学院的博士 offer。你想研究群体、偏见和社会认同：人为什么会被别人改变，又如何改变别人。行李箱里塞着文献和电饭煲，一段三年的博士生活开始了。',
+            effects: [
+              { stats: { knowledge: 7, network: 4, money: -8000, mindset: 2 } },
+              { setFlag: 'psy_phd' },
+              { setFlag: 'psy_phd_social' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'psy_phd_ob',
+        text: '出国读博，在商学院研究组织行为学',
+        visibleIf: { major: '心理学' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有立刻走进招聘会，而是接下了一所海外大学商学院的博士 offer。你想研究领导力、团队和职场动机：心理学走进公司之后，究竟会变成什么。行李箱里塞着文献和正装，一段三年的博士生活开始了。',
+            effects: [
+              { stats: { knowledge: 6, network: 6, money: -8000, mindset: 2 } },
+              { setFlag: 'psy_phd' },
+              { setFlag: 'psy_phd_ob' },
+            ],
+          },
+        ],
+      },
+      {
         id: 'local',
         text: '不进本行，先找份工作糊口',
         outcomes: [

@@ -1,12 +1,131 @@
 import type { GameEvent } from '@life-sim/core';
 
-// 心理学线专属里程碑事件(7 个,2018-2026 全程覆盖,与金融/医学线对齐)。
+// 心理学线包含从业与海外博士两条路线,2018-2026 全程覆盖。
 // 这条线的时代锚点:2017 咨询师资格证取消后的考证乱象、2020 疫情心理热线、
 // 2021 双减与学生心理健康新政、2023 后疫情咨询需求爆发、2024 行业规范化。
 // 主题与其他线刻意区分:别的线卷的是钱和编制,这条线卷的是"共情也是体力活"。
 // 子状态 flag:psy_school(学校心理老师)/ psy_counselor(咨询机构)/
 // psy_industry(转行 HR·用研)/ psy_private_practice(个人执业)。
 export const careerPsychologyEvents: GameEvent[] = [
+  {
+    id: 'ev_psy_phd_year_2022',
+    pools: ['work'],
+    category: 'career',
+    title: '博士一年级的语法',
+    text: '出国读博的第一年，你先学会的不是理论，而是一套新语法：组会里的“interesting”未必是夸奖，导师邮件里的“maybe”往往是重做。你一边补统计、申请伦理审查，一边在超市里认新的食物标签。三年倒计时已经开始，没有人等你慢慢适应。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'psy_phd' }, { not: { flag: 'psy_phd_completed' } }, { year: { from: 2022, to: 2022 } }] },
+    contextLines: [
+      { condition: { flag: 'psy_phd_social' }, text: '你在心理学院里把“群体如何改变个人”拆成可验证的假设。' },
+      { condition: { flag: 'psy_phd_ob' }, text: '你在商学院里发现，同一个心理变量换上“组织”两字，就会进入另一套对话。' },
+    ],
+    choices: [
+      {
+        id: 'methods', text: '先把方法和数据练硬', outcomes: [{
+          weight: 1,
+          text: '你把计量课程、预注册和复现代码啃了一遍。第一个项目还没有好故事，但数据经得起别人问。',
+          effects: [{ stats: { knowledge: 8, mindset: -3, health: -2 } }, { setFlag: 'psy_phd_methods' }],
+        }],
+      },
+      {
+        id: 'network', text: '先走出工位，进入学术网络', outcomes: [{
+          weight: 1,
+          text: '你参加了几次工作坊，从不敢开口变成能在茶歇时用两分钟讲清自己的问题。合作的种子，往往不在正式报告里。',
+          effects: [{ stats: { network: 8, knowledge: 4, money: -3000, mindset: 2 } }, { setFlag: 'psy_phd_networked' }],
+        }],
+      },
+    ],
+  },
+  {
+    id: 'ev_psy_phd_year_2023',
+    pools: ['work'],
+    category: 'career',
+    tier: 'major',
+    title: '第一篇论文的来回',
+    text: '2023年，你的第一篇论文终于投了出去。几个月后审稿意见回来，三个审稿人像在评论三篇不同的文章：一个要你重做实验，一个质疑理论，还有一个建议你引用他自己。导师只说：“能修，就不算坏消息。”毕业钟已经走过了一半。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'psy_phd' }, { not: { flag: 'psy_phd_completed' } }, { year: { from: 2023, to: 2023 } }] },
+    choices: [
+      {
+        id: 'revise', text: '拆开意见，一条条回应', outcomes: [{
+          weight: 1,
+          text: '你补了一轮数据，重写了理论部分，回信长得快赶上论文本身。“接收”邮件到的那天，你没有欢呼，只是趴在桌上睡了很久。',
+          effects: [{ stats: { knowledge: 9, mindset: 4, health: -4 } }, { setFlag: 'psy_phd_published' }],
+        }],
+      },
+      {
+        id: 'pivot', text: '收缩问题，先保证三年内毕业', outcomes: [{
+          weight: 1,
+          text: '你砍掉了最野心勃勃的部分，把论文改成一个更窄、但能完成的问题。学术训练的一部分，是知道什么时候不再追求完美。',
+          effects: [{ stats: { knowledge: 5, mindset: 5, health: 2 } }, { setFlag: 'psy_phd_on_time' }],
+        }],
+      },
+    ],
+  },
+  {
+    id: 'ev_psy_phd_graduation_2024',
+    pools: ['work'],
+    category: 'career',
+    tier: 'major',
+    title: '博士毕业之后',
+    text: '2024年，三年到了。答辩结束，你终于被称作“博士”，但这个称呼没有自带下一站。邮箱里同时躺着博后邀请、国内高校招聘和海外教职与研究岗的截止日期。你已经用三年回答了一个研究问题，现在要回答自己往哪里去。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'psy_phd' }, { not: { flag: 'psy_phd_completed' } }, { year: { from: 2024, to: 2024 } }] },
+    contextLines: [
+      { condition: { flag: 'psy_phd_social' }, text: '你的学位来自心理学院，履历上写着社会心理学。' },
+      { condition: { flag: 'psy_phd_ob' }, text: '你的学位来自商学院，履历上写着组织行为学。' },
+    ],
+    choices: [
+      {
+        id: 'postdoc', text: '继续做博后，边做研究边准备下一轮求职', outcomes: [{
+          weight: 1,
+          text: '你接下了博后合同。这不是学生身份的简单延长，而是一段有截止日期的学术工作：要发文章、建立自己的方向，也要提前准备下一轮申请。你决定一直做到这段十二年时间线的结尾。',
+          effects: [{ stats: { knowledge: 7, network: 5, mindset: -2 } }, { setFlag: 'postgrad_done' }, { setFlag: 'psy_phd_completed' }, { setFlag: 'psy_postdoc' }],
+        }],
+      },
+      {
+        id: 'domestic', text: '直接找工作，回国投高校和研究岗', outcomes: [{
+          weight: 1,
+          text: '你把简历、研究计划和试讲 PPT 投向国内。时差让面试常在深夜，而“青年教师”四个字背后还跟着考核、基金和非升即走。你还是选择回去，把这些年学到的问题带回更熟悉的语境。',
+          effects: [{ stats: { money: 12000, network: 6, mindset: 3 } }, { setFlag: 'postgrad_done' }, { setFlag: 'psy_phd_completed' }, { setFlag: 'psy_phd_job_domestic' }],
+        }],
+      },
+      {
+        id: 'abroad', text: '直接找工作，留在国外投高校和研究岗', outcomes: [{
+          weight: 1,
+          text: '你把地图当成求职网站的筛选器，一个城市一个城市地投。你熟悉这套学术语言，也清楚留下意味着签证、距离和更长的不确定。最后你选择在国外继续建立自己的研究生活。',
+          effects: [{ stats: { money: 18000, network: 8, mindset: 1 } }, { setFlag: 'postgrad_done' }, { setFlag: 'psy_phd_completed' }, { setFlag: 'psy_phd_job_abroad' }],
+        }],
+      },
+    ],
+  },
+  {
+    id: 'ev_psy_phd_after_2025',
+    pools: ['work'],
+    category: 'career',
+    title: '下一份申请材料',
+    text: '2025年，学术路线没有因为拿到博士学位就变得笃定。你的日历里还是排着论文、会议和申请截止日，只是每一项都更像一份真正的工作。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'psy_phd_completed' }, { year: { from: 2025, to: 2025 } }] },
+    choices: [
+      { id: 'postdoc', text: '把博后项目和求职材料并行推进', visibleIf: { flag: 'psy_postdoc' }, outcomes: [{ weight: 1, text: '你白天推项目，晚上改研究陈述。博后不是候车室，但你必须在列车进站前先修好下一段轨道。', effects: [{ stats: { knowledge: 7, network: 5, health: -3, mindset: -2 } }, { setFlag: 'psy_postdoc_job_ready' }] }] },
+      { id: 'domestic', text: '在国内的新岗位上站稳', visibleIf: { flag: 'psy_phd_job_domestic' }, outcomes: [{ weight: 1, text: '你开始备课、带学生、申项目，也学会在会议和表格之间护住研究时间。回国不是回到原点，是换了一套新坐标。', effects: [{ stats: { knowledge: 4, network: 6, mindset: 3, health: -2 } }] }] },
+      { id: 'abroad', text: '在国外的新岗位上站稳', visibleIf: { flag: 'psy_phd_job_abroad' }, outcomes: [{ weight: 1, text: '你继续用第二语言上课、合作和谈未来。环境已不再陌生，但签证邮件每次跳出，还是会让心里紧一下。', effects: [{ stats: { knowledge: 5, network: 5, money: 6000, mindset: 1 } }] }] },
+    ],
+  },
+  {
+    id: 'ev_psy_phd_finale_2026',
+    pools: ['work'],
+    category: 'career',
+    title: '把人当作问题，也当作答案',
+    text: '2026年，你回看这条比预想更长的路：心理学本科、三年硕士、三年海外博士，然后是博后或一份真正的学术工作。你还在研究人，却比当年更清楚：人不会被一个模型解释完，职业也不会被一张学位证安排好。你能做的，是继续提出更好的问题。',
+    mandatory: true,
+    trigger: { all: [{ flag: 'psy_phd_completed' }, { year: { from: 2026, to: 2026 } }] },
+    choices: [
+      { id: 'social', text: '继续研究人与群体如何彼此塑造', visibleIf: { flag: 'psy_phd_social' }, outcomes: [{ weight: 1, text: '你的问题仍然关于偏见、认同和群体，只是现在，你已经有能力让这些问题被更多人严肃对待。', effects: [{ stats: { knowledge: 5, mindset: 6 } }, { setFlag: 'psy_phd_line_complete' }] }] },
+      { id: 'ob', text: '继续研究组织里真正发生的事', visibleIf: { flag: 'psy_phd_ob' }, outcomes: [{ weight: 1, text: '你的问题仍然关于领导、团队和动机，只是现在，你已经能在心理学与商业之间搭起自己的桥。', effects: [{ stats: { knowledge: 4, network: 2, mindset: 6 } }, { setFlag: 'psy_phd_line_complete' }] }] },
+    ],
+  },
   {
     id: 'ev_psy_first_job_2018',
     pools: ['work'],

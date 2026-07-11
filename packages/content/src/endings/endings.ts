@@ -168,6 +168,15 @@ export const endings: EndingDef[] = [
     shareCard: { tone: 'triumph', tagline: '那一年请战的人里，有你一个。' },
   },
   {
+    id: 'end_psychology_researcher',
+    title: '把“人”做成一生的课题',
+    text: '你从心理学院或商学院的一张工位出发，用三年海外博士训练学会把模糊的人性问题变成可检验的证据。毕业后，你或在博后合同里为下一站做准备，或在国内外的新岗位上继续研究。学术没有给你一个干净的答案，它给了你一套追问到底的方法。',
+    category: 'final',
+    priority: 105,
+    condition: { all: [{ flag: 'psy_phd_completed' }, { flag: 'psy_phd_line_complete' }] },
+    shareCard: { tone: 'triumph', tagline: '人没有标准答案，但你学会了怎样追问。' },
+  },
+  {
     id: 'end_psychology_listener',
     title: '倾听者',
     text: '十二年前，这个专业最常被问的是"能算命吗"；十二年后，你的预约表排到了下个月。热线、双减、需求爆发、行业整顿，每一站你都在场。你没有治好这个时代的焦虑，但你陪很多人在焦虑里坐稳了。这门手艺没有让你大富大贵——它只是让一些人的深夜，比原来好过了一点。',
