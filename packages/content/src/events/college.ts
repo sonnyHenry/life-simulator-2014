@@ -15,6 +15,7 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'roommate_warm',
             text: '你把半学期攒的生活费拍了出来，他激动得差点从阳台跳下去。接下来的几个月：你们熬夜印传单，在每栋宿舍楼下贴到被宿管追；拉了十几个接单群，你的头像挂着“客服 2 号”；晚高峰你骑着借来的电动车送奶茶，雨天单量翻倍，你在雨衣里一边骂一边笑。赚的钱刚够回本，但期末总结的时候，他在群里发：“感谢创始团队。”创始团队，一共三个人，车是借的，公章是刻章店最便宜的那种。你知道这词有点虚，可那年春天听着，是真的热。',
             effects: [
               { moneyCost: { rate: 0.08, max: 1500, roundTo: 100, reason: 'investment' } },
@@ -32,6 +33,7 @@ export const collegeEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'roommate_cool',
             text: '你没把生活费掏出来，但陪他把 PPT 改了两个通宵：逻辑理顺了，错别字挑干净了，连配色都换成了不那么土的蓝。他说理解，真的，家里给的钱是有数的，谁都一样。项目后来真做起来了一阵，接单群热热闹闹。只是他们开会的时候，不会每次都叫你了；庆功的烧烤局，你是从朋友圈知道的。没有人做错什么。只是人和人的分岔，有时就是从那句“我先不参与”开始的——当时听起来，它明明只是一个财务决定。',
             effects: [
               { stats: { network: 3, mindset: -1 } },
@@ -739,7 +741,7 @@ export const collegeEvents: GameEvent[] = [
             weight: 1,
             condition: { stat: 'mindset', op: '>=', value: 50 },
             text: '操场很暗，你们并排走着，你把准备了一路的话说得乱七八糟，重点大概是那句“我喜欢你，不是朋友的那种”。{{ta}}停下来，沉默了很久，久到你开始盘算怎么把话收回去。然后{{ta}}说：“我等你这句话，等了一个学期了。”那天晚上你们在操场走了十圈，路灯把两个影子拉得很长。回宿舍的路上你一个人笑出了声，被查寝的宿管阿姨看了一眼。你不在乎。十九岁的那个晚上，你觉得整个世界都在替你高兴。',
-            outcomeTag: 'success',
+            outcomeTag: 'love_warm',
             effects: [
               { stats: { mindset: 10 } },
               { setFlag: 'in_love' },
@@ -752,7 +754,8 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你说完了。风把操场边的梧桐吹得哗哗响，{{ta}}低着头踢了踢脚下的塑胶跑道，然后说：“你是个很好的人……”后面的话你其实没听清，也不需要听清了。你们又并排走了半圈，谁都没说话，像在给这段还没开始的关系送行。那周你没去社团，点名表上第一次有了你的缺勤。室友问你怎么了，你说没事，降温了，嗓子疼。有些疼确实说不清位置，只能随便指一个。',
-            outcomeTag: 'failure',
+            // 表白失败也算 love_warm:统计的是“对这段关系是否用了心”,不是结果好坏。
+            outcomeTag: 'love_warm',
             effects: [
               { stats: { mindset: -8 } },
               { npcFavor: 'first_love', delta: -8 },
@@ -770,7 +773,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 3,
             text: '你注意过{{ta}}所有细微的时刻：值班表上悄悄换到和你同一天、消息回得越来越快、上次活动散场时那句没说完的“其实我……”。所以今晚你下了楼，走到第三圈，你说：“我们别绕圈子了，好不好？”{{ta}}愣了一下，然后笑了：“我以为你要装傻装到毕业。”操场的灯十二点准时熄了，黑暗里{{ta}}牵住了你的手。心思细的人错过很多睡眠，但今晚，没有错过这个。',
-            outcomeTag: 'success',
+            outcomeTag: 'love_warm',
             effects: [
               { stats: { mindset: 10 } },
               { setFlag: 'in_love' },
@@ -783,7 +786,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你读懂了很多信号，但没算到操场今晚有夜跑打卡活动。人声鼎沸里，那句话你说了一半就咽了回去。{{ta}}等了一会儿，说“回去吧，明天还有课”。后来你们谁都没再提这个晚上。心思细腻的另一面是：连错过，你都感受得格外清楚。',
-            outcomeTag: 'failure',
+            outcomeTag: 'love_warm',
             effects: [
               { stats: { mindset: -3 } },
               { npcFavor: 'first_love', delta: -2 },
@@ -800,6 +803,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你回了个“没干嘛，准备睡了”，然后在黑暗里睁着眼睛躺了一个多小时。第二天你在日记本里写了很长一段，没有署名，也没有结论。后来社团换届，你们渐渐不在同一个活动里了，偶尔在食堂遇见，还是会打招呼，还是会笑。只是很多年以后，你整理旧物翻到那一页，还是会停下来想：如果那晚下楼了，会怎样？日记本不会回答。它只负责替你保管那些没敢寄出的东西。',
+            outcomeTag: 'love_cool',
             effects: [
               { stats: { mindset: 2 } },
               { npcStage: 'first_love', stage: 'missed' },
@@ -824,6 +828,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '后来你经历过更贵的跨年：江边的酒店、有观景位的餐厅、提前一个月订的位子。但每次零点倒数，你想起的都是那家小饭馆，和那句“明年也要这样”。有些夜晚在发生的时候，你就知道自己会记它很多年。',
+            outcomeTag: 'love_warm',
             effects: [{ stats: { mindset: 4 } }, { npcFavor: 'first_love', delta: 6 }],
           },
         ],
@@ -845,6 +850,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你说：“异地就异地。别人撑不过去，是别人。”{{ta}}在屏幕那头哭了，一边哭一边骂你说得轻巧，一边骂一边点头。后来的日子确实不轻巧：每天的晚安视频、每月一次的高铁、错开的加班和假期，还有见面那天在出站口一眼认出对方的瞬间。高铁票根在你抽屉里越攒越厚，你用皮筋把它们捆成一小沓，像捆着一段咬着牙没松手的时间。累是真的累。但每次检票口的门打开，你又觉得，都值。',
+            outcomeTag: 'love_warm',
             effects: [
               { stats: { mindset: 4, knowledge: -3 } },
               { npcFavor: 'first_love', delta: 8 },
@@ -861,6 +867,7 @@ export const collegeEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你沉默了太久。久到{{ta}}先笑了一下，说：“没事，我就是随口一问。”你们又聊了几句打包和天气，然后互道晚安。那是你们最后一次超过十分钟的通话。之后的聊天越来越短，回复的间隔越来越长，最后停在一句“最近挺忙的”，谁都没有再往下接。没有争吵，没有摊牌，甚至没有一句正式的再见。很多年后你才明白：有些关系不是断掉的，是两个都不敢先开口的人，一起把它放凉的。',
+            outcomeTag: 'love_cool',
             effects: [
               { stats: { mindset: -5 } },
               { setFlag: 'in_love', value: false },

@@ -35,8 +35,8 @@ export type ViewModel =
     }
   | {
       kind: 'NPC_SELECTION';
-      requiredNpcs: { id: string; name: string; description: string }[];
-      npcs: { id: string; name: string; description: string }[];
+      requiredNpcs: { id: string; name: string; description: string; routeLabel: string }[];
+      npcs: { id: string; name: string; description: string; routeLabel: string }[];
       pickCount: number;
     }
   | {
@@ -59,7 +59,7 @@ export type ViewModel =
       major: boolean;
       choices: { id: string; text: string }[];
     }
-  | { kind: 'OUTCOME'; text: string; deltas: StatDeltas }
+  | { kind: 'OUTCOME'; text: string; deltas: StatDeltas; relationshipHint?: string }
   | {
       kind: 'SETTLEMENT';
       year: number;
@@ -84,6 +84,16 @@ export type ViewModel =
       historyLength: number;
       /** 历年年末金钱快照,供结局页/分享图做趋势展示 */
       moneyTrend: { year: number; money: number }[];
+      /** 本局真正完成的 NPC 关系收束,由核心层统一解释内部 flags。 */
+      relationships: {
+        npcId: string;
+        name: string;
+        title: string;
+        text: string;
+        warmCount: number;
+        coolCount: number;
+        moments: string[];
+      }[];
       shareCard: {
         title: string;
         tagline: string;
@@ -94,6 +104,8 @@ export type ViewModel =
         traits: string[];
         /** 2023 年形成的成年性格路线 */
         traitEvolutions: string[];
+        /** 分享卡和分享文案使用的精简关系称号。 */
+        relationships: string[];
         /** 2018 年选择的人生目标,旧存档可能为空 */
         goal?: string;
       };

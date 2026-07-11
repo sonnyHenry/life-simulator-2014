@@ -329,7 +329,16 @@ interface BatchStats {
   byBackground: Map<string, { count: number; moneySum: number; mindsetSum: number; scoreSum: number }>;
   byCareer: Map<string, { count: number; moneySum: number; mindsetSum: number; scoreSum: number }>;
   mindsetYearly: Map<number, number[]>;
+  npcStats: Map<string, { active: number; completed: number; special: number; stages: Map<string, number> }>;
 }
+
+const NPC_SPECIAL_FLAGS: Record<string, string[]> = {
+  first_love: ['love_true_companion', 'love_history_closure'],
+  roommate: ['roommate_true_partner'],
+  grinder: ['grinder_true_mirror'],
+  hometown_friend: ['hometown_true_friend'],
+  mentor: ['mentor_true_legacy'],
+};
 
 function runBatch(runs: number, baseSeed: number, strategy: Strategy): BatchStats {
   const stats: BatchStats = {
@@ -346,6 +355,7 @@ function runBatch(runs: number, baseSeed: number, strategy: Strategy): BatchStat
     byBackground: new Map(),
     byCareer: new Map(),
     mindsetYearly: new Map(),
+    npcStats: new Map(),
   };
   const earlyEndingIds = new Set(
     contentPack.endings.filter(e => e.category === 'early').map(e => e.id),
@@ -375,6 +385,17 @@ function runBatch(runs: number, baseSeed: number, strategy: Strategy): BatchStat
     stats.moneySamples.push(fs.stats.money);
     stats.mindsetSamples.push(fs.stats.mindset);
     if (earlyEndingIds.has(result.endingId)) stats.earlyEndingCount++;
+
+    for (const npcDef of contentPack.npcs) {
+      const npc = fs.npcs[npcDef.id];
+      if (!npc) continue;
+      const row = stats.npcStats.get(npcDef.id) ?? { active: 0, completed: 0, special: 0, stages: new Map() };
+      row.active++;
+      row.stages.set(npc.stage, (row.stages.get(npc.stage) ?? 0) + 1);
+      if (!npcDef.stages[npc.stage]?.eventId) row.completed++;
+      if ((NPC_SPECIAL_FLAGS[npcDef.id] ?? []).some(flag => Boolean(fs.flags[flag]))) row.special++;
+      stats.npcStats.set(npcDef.id, row);
+    }
 
     const bgKey =
       backgroundLabels.get(fs.profile.background ?? '') ?? fs.profile.background ?? '未知';
@@ -433,6 +454,17 @@ function printBatch(s: BatchStats): void {
   );
   console.log(`提前结局占比: ${((s.earlyEndingCount / s.runs) * 100).toFixed(1)}%`);
 
+  console.log('\nNPC 关系完成率:');
+  for (const npc of contentPack.npcs) {
+    const row = s.npcStats.get(npc.id);
+    if (!row) continue;
+    const stages = [...row.stages.entries()].sort((a, b) => b[1] - a[1])
+      .map(([stage, count]) => `${stage} ${((count / row.active) * 100).toFixed(1)}%`).join(' / ');
+    console.log(
+      `  ${npc.name}:激活 ${row.active} · 收官 ${((row.completed / row.active) * 100).toFixed(1)}% · 专属关系 ${((row.special / row.active) * 100).toFixed(1)}% · stage ${stages}`,
+    );
+  }
+
   const printGroups = (
     label: string,
     map: BatchStats['byBackground'],
@@ -482,12 +514,37 @@ function runCheck(s: BatchStats): void {
   if (s.earlyEndingCount / s.runs > 0.1) {
     failures.push(`提前结局占比过高(>10%): ${((s.earlyEndingCount / s.runs) * 100).toFixed(1)}%`);
   }
+  for (const npc of contentPack.npcs) {
+    const row = s.npcStats.get(npc.id);
+    if (!row || row.active === 0) {
+      failures.push(`NPC 从未激活: ${npc.id}`);
+      continue;
+    }
+    const completionRate = row.completed / row.active;
+    const minimumCompletion = npc.id === 'first_love' ? 0.9 : 0.85;
+    if (completionRate < minimumCompletion) {
+      failures.push(
+        `NPC 收官率过低(<${(minimumCompletion * 100).toFixed(0)}%): ${npc.id} ${(completionRate * 100).toFixed(1)}%`,
+      );
+    }
+    const specialRate = row.special / row.active;
+    if (specialRate < 0.03 || specialRate > 0.3) {
+      failures.push(`NPC 专属关系命中率超出 3%-30%: ${npc.id} ${(specialRate * 100).toFixed(1)}%`);
+    }
+    for (const [stage, count] of row.stages) {
+      if (!npc.stages[stage]?.eventId) continue;
+      const stuckRate = count / row.active;
+      if (stuckRate > 0.1) {
+        failures.push(`NPC 非终态滞留率过高(>10%): ${npc.id}.${stage} ${(stuckRate * 100).toFixed(1)}%`);
+      }
+    }
+  }
   console.log('');
   if (failures.length > 0) {
     for (const f of failures) console.log(`❌ ${f}`);
     process.exit(1);
   }
-  console.log('✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)');
+  console.log('✅ 分布与 NPC 关系门禁通过(全覆盖、全可达、结局分布、收官率、专属关系率、stage 滞留率均达标)');
 }
 
 function main(): void {

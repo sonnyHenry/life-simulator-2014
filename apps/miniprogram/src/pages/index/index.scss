@@ -372,6 +372,78 @@
   text-align: left;
 }
 
+.relationship-summary {
+  margin: 16px 0 4px;
+  text-align: left;
+}
+
+.relationship-card {
+  margin-top: 10px;
+  padding: 14px;
+  border-left: 3px solid #b9833a;
+  border-radius: 4px 10px 10px 4px;
+  background: #fbf6e9;
+}
+
+.relationship-name {
+  color: #8a8577;
+  font-size: 12px;
+}
+
+.relationship-title {
+  margin: 3px 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.relationship-text {
+  color: #3f382f;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.route-label {
+  width: fit-content;
+  margin: 4px 0 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eee3c7;
+  color: #765b28;
+  font-size: 12px;
+}
+
+.relationship-hint {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f6efdd;
+  color: #765b28;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.relationship-ledger {
+  margin-top: 8px;
+  color: #8a8577;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.share-relationship-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.share-relationship-badge {
+  padding: 4px 8px;
+  border: 1px solid #8a6a2f;
+  border-radius: 999px;
+  color: #8a6a2f;
+  font-size: 12px;
+}
+
 .share-card {
   border-radius: 12px;
   border: 1px solid #e3d6b4;

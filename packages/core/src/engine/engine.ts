@@ -228,11 +228,13 @@ export function createEngine(pack: ContentPack): Engine {
             id: npc.id,
             name: npc.name,
             description: npc.description ?? '也许会在未来十二年里与你反复相遇。',
+            routeLabel: npc.routeLabel ?? '长期关系',
           })),
           npcs: optionalNpcs.map(npc => ({
             id: npc.id,
             name: npc.name,
             description: npc.description ?? '也许会在未来十二年里与你反复相遇。',
+            routeLabel: npc.routeLabel ?? '长期关系',
           })),
           pickCount: Math.min(OPTIONAL_NPC_COUNT, optionalNpcs.length),
         };
@@ -287,10 +289,18 @@ export function createEngine(pack: ContentPack): Engine {
         };
       }
       case 'OUTCOME':
+        const latestEntry = state.history[state.history.length - 1];
+        const relationshipTag = latestEntry?.kind === 'event' ? latestEntry.outcomeTag : undefined;
+        const relationshipHint = relationshipTag?.endsWith('_warm')
+          ? '这段关系记住了你的靠近。多年后的某个选项，也许会因此不同。'
+          : relationshipTag?.endsWith('_cool')
+            ? '这段关系记住了这次退后。距离不会立刻显现，但会留在以后。'
+            : undefined;
         return {
           kind: 'OUTCOME',
           text: renderText(state.pendingOutcome?.text ?? '', state),
           deltas: state.pendingOutcome?.deltas ?? {},
+          relationshipHint,
         };
       case 'SETTLEMENT':
         return {
@@ -307,6 +317,32 @@ export function createEngine(pack: ContentPack): Engine {
         if (!ending) throw new Error(`ENDING screen with unknown ending: ${state.endingId}`);
         const { score, grade } = computeScore(state);
         const goal = pack.lifeGoals.find(item => item.id === state.flags.life_goal);
+        const relationshipDefinitions = [
+          {
+            flag: 'love_true_companion', tagPrefix: 'love', npcId: 'first_love', name: '初恋', title: '一起抵达的人',
+            text: '异地、车票和等待都没有被浪漫化，但你们还是把“以后”过成了共同生活。',
+          },
+          {
+            flag: 'love_history_closure', tagPrefix: 'love', npcId: 'first_love', name: '初恋', title: '认真告别的人',
+            text: '你们认真爱过，所以最后的不打扰不是逃避，而是替那段感情守住边界。',
+          },
+          {
+            flag: 'grinder_true_mirror', tagPrefix: 'grinder', npcId: 'grinder', name: '卷王同学', title: '真正的镜子',
+            text: '你们互相追赶了十年，也在对方跑不动的时候，成为那个没有走开的人。',
+          },
+          {
+            flag: 'hometown_true_friend', tagPrefix: 'hometown', npcId: 'hometown_friend', name: '县城发小', title: '没有走散的人',
+            text: '你们走上不同的路，却仍能在多年以后接住十年前没有说完的半句话。',
+          },
+          {
+            flag: 'roommate_true_partner', tagPrefix: 'roommate', npcId: 'roommate', name: '创业室友', title: '没散的创始团队',
+            text: '第一家公司早就倒了，但一起冒过险、收过场的人，始终留在彼此的人生里。',
+          },
+          {
+            flag: 'mentor_true_legacy', tagPrefix: 'mentor', npcId: 'mentor', name: '职场贵人', title: '传下去的那支笔',
+            text: '他曾经替你圈出真正属于你的判断；后来，你也成为了能接住别人的人。',
+          },
+        ];
         return {
           kind: 'ENDING',
           endingId: ending.id,
@@ -317,6 +353,22 @@ export function createEngine(pack: ContentPack): Engine {
           grade,
           historyLength: state.history.length,
           moneyTrend: state.yearlySnapshots ?? [],
+          relationships: relationshipDefinitions
+            .filter(relationship => Boolean(state.flags[relationship.flag]))
+            .map(({ flag: _flag, tagPrefix, ...relationship }) => {
+              const entries = state.history.filter(entry =>
+                entry.kind === 'event' && entry.outcomeTag?.startsWith(`${tagPrefix}_`),
+              );
+              return {
+                ...relationship,
+                warmCount: entries.filter(entry => entry.kind === 'event' && entry.outcomeTag === `${tagPrefix}_warm`).length,
+                coolCount: entries.filter(entry => entry.kind === 'event' && entry.outcomeTag === `${tagPrefix}_cool`).length,
+                moments: entries.slice(-3).map(entry => {
+                  if (entry.kind !== 'event') return '';
+                  return pack.events.find(event => event.id === entry.eventId)?.title ?? entry.eventId;
+                }).filter(Boolean),
+              };
+            }),
           shareCard: {
             title: ending.title,
             tagline: ending.shareCard?.tagline ?? '普通人的十二年，也有自己的重量。',
@@ -327,6 +379,9 @@ export function createEngine(pack: ContentPack): Engine {
             traitEvolutions: pack.traitEvolutions
               .filter(evolution => Boolean(state.flags[evolution.id]))
               .map(evolution => evolution.label),
+            relationships: relationshipDefinitions
+              .filter(relationship => Boolean(state.flags[relationship.flag]))
+              .map(relationship => `${relationship.name}·${relationship.title}`),
             goal: goal?.label,
           },
         };

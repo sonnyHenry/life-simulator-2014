@@ -179,6 +179,8 @@ export interface NpcDef {
   name: string;
   /** 重点关系选择页展示的一句话人物介绍 */
   description?: string;
+  /** 重点关系的玩法方向,用于选择页帮助玩家有意识地选线。 */
+  routeLabel?: string;
   initialStage: string;
   initialFavor: number;
   stages: Record<string, { advanceWhen?: Condition; eventId?: string }>;

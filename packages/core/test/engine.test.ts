@@ -311,6 +311,24 @@ describe('event scheduling variety', () => {
     expect(mindsetView.score).toBe(10);
   });
 
+  it('exposes completed NPC relationships on the ending view', () => {
+    const pack = miniPack();
+    const engine = createEngine(pack);
+    const state = engine.start(42);
+    state.screen = 'ENDING';
+    state.endingId = 'end_fallback';
+    state.flags.roommate_true_partner = true;
+    state.flags.mentor_true_legacy = true;
+    const view = engine.view(state);
+    expect(view.kind).toBe('ENDING');
+    if (view.kind !== 'ENDING') return;
+    expect(view.relationships.map(relationship => relationship.npcId)).toEqual(['roommate', 'mentor']);
+    expect(view.relationships.map(relationship => relationship.title)).toEqual([
+      '没散的创始团队',
+      '传下去的那支笔',
+    ]);
+  });
+
   it('limits eligible NPC stage events to one per round and defers the rest', () => {
     const pack = miniPack();
     pack.events = ['ev_npc_a', 'ev_npc_b', 'ev_npc_c'].map(id => ({
@@ -385,6 +403,29 @@ describe('event scheduling variety', () => {
       state.triggeredEventIds.push(picked[0]!);
     }
     expect(new Set(seen)).toEqual(new Set(['ev_npc_a', 'ev_npc_b', 'ev_npc_c']));
+    expect(state.pendingNpcEvents).toHaveLength(0);
+  });
+
+  it('drops a deferred NPC event when another effect has already changed that NPC stage', () => {
+    const pack = miniPack();
+    pack.events = [{
+      id: 'ev_stale_npc', pools: [], title: '旧阶段事件', text: '不应再出现',
+      choices: [{ id: 'ok', text: '好', outcomes: [{ weight: 1, text: '好', effects: [] }] }],
+    }];
+    pack.npcs = [{
+      id: 'friend', name: '朋友', initialFavor: 10, initialStage: 'start',
+      stages: {
+        start: { advanceWhen: { year: { from: 2014, to: 2014 } }, eventId: 'ev_stale_npc' },
+        changed: {},
+      },
+    }];
+    const state = createEngine(pack).start(7);
+    state.npcs = { friend: { favor: 10, stage: 'changed' } };
+    state.pendingNpcEvents = [{ npcId: 'friend', eventId: 'ev_stale_npc' }];
+    state.date.year = 2015;
+    const phase = pack.timeline.find(p => p.kind === 'rounds')!;
+    const picked = pickRoundEvents(state, pack, new Rng(7), phase);
+    expect(picked).not.toContain('ev_stale_npc');
     expect(state.pendingNpcEvents).toHaveLength(0);
   });
 

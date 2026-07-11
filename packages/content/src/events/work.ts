@@ -2324,16 +2324,38 @@ export const workEvents: GameEvent[] = [
     text: '从操场上的那个晚上算起，你们已经走了六年多。异地熬过来了，后来终于挪到了同一座城市；合租的房子换过三次，每次搬家都扔掉一点旧东西，又莫名其妙多出一点共同的东西。你们吵过一次很凶的架，冷战三天，最后是谁先低头的，现在两个人都说是对方。这天晚饭后散步，路过一家婚纱摄影店，橱窗里的灯还亮着，{{ta}}的脚步没停，眼睛停了一下。走出去半条街，{{ta}}忽然说：“我爸妈问，我们到底什么打算。”路灯把你们的影子投在地上，挨得很近。你们站了一会儿，谁都没先开口。',
     choices: [
       {
-        id: 'a',
+        id: 'a_true_companion',
         text: '把那捆攒下的高铁票放到桌上：“下一站，民政局”',
+        visibleIf: { historyCount: { outcomeTag: 'love_warm', op: '>=', value: 3 } },
         outcomes: [
           {
             weight: 1,
             text: '你从抽屉里拿出那捆高铁票，最早一张的字已经褪色：“当年说异地能撑过去，不是随口说的。下一站，民政局。”{{ta}}笑你求婚道具太寒酸，笑着笑着眼睛却红了。领证那天，你们把最新一张车票和两本红本子放在一起拍了照。六年前检票口前说过的话，终于有了抵达记录。',
+            outcomeTag: 'love_warm',
             effects: [
               { moneyCost: { rate: 0.2, max: 40000, roundTo: 1000, reason: 'family' } },
               { stats: { mindset: 12, network: 5 } },
               { npcFavor: 'first_love', delta: 20 },
+              { npcStage: 'first_love', stage: 'married' },
+              { setFlag: 'love_true_companion' },
+              { schedule: { eventId: 'ev_married_first_year', afterRounds: 1 } },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'a',
+        text: '认真谈清未来：“如果你愿意，我们去领证”',
+        visibleIf: { not: { historyCount: { outcomeTag: 'love_warm', op: '>=', value: 3 } } },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你没有准备漂亮的道具，只把这些年的犹豫和打算一件件说清楚。{{ta}}听完，问：“所以你的答案是？”你说：“是。不是等万事俱备，是从今天开始一起准备。”领证那天没有戏剧性的眼泪，你们在民政局门口拍了一张有点逆光的合照。后来再看，仍然觉得那天的两个人很勇敢。',
+            outcomeTag: 'love_warm',
+            effects: [
+              { moneyCost: { rate: 0.2, max: 40000, roundTo: 1000, reason: 'family' } },
+              { stats: { mindset: 10, network: 5 } },
+              { npcFavor: 'first_love', delta: 18 },
               { npcStage: 'first_love', stage: 'married' },
               { schedule: { eventId: 'ev_married_first_year', afterRounds: 1 } },
             ],
@@ -2347,6 +2369,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你说想再等等，等工作再稳定一点，存款再厚一点，“我想给你一个更好的开始”。{{ta}}点点头，说理解，还反过来安慰你说不着急。那天晚上你们像平常一样回家、洗漱、道晚安，好像什么都没发生。也确实什么都没发生——这正是问题所在。那晚之后，“以后”这个词在你们的对话里出现得越来越少，{{ta}}爸妈的电话{{ta}}开始去阳台接。有些等待是储蓄，利息是两个人一起攒的底气；有些等待是消耗，磨掉的是对方眼里的光。当时的你，分不清这两种等待的区别。',
+            outcomeTag: 'love_cool',
             effects: [
               { stats: { mindset: -4 } },
               { npcFavor: 'first_love', delta: -10 },
@@ -2402,6 +2425,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             condition: { flag: 'roommate_startup_joined' },
+            outcomeTag: 'roommate_warm',
             text: '你下了单，备注写了句“创始团队前来验货”。他在直播里念到这条备注时愣了一下，笑着说：“这是我第一个合伙人。”当晚他给你转了 888，你退回去，留了句：下次上新叫我。',
             effects: [
               { stats: { mindset: 6, network: 5 } },
@@ -2412,6 +2436,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             condition: { not: { flag: 'roommate_startup_joined' } },
+            outcomeTag: 'roommate_warm',
             text: '你买了两箱橙子，顺手转发了直播间。他私信你：“谢了兄弟。”橙子很甜，你想起大学阳台上那份没入伙的商业计划书，忽然有点感慨：他一直在场上，你一直在看台。',
             effects: [
               { stats: { mindset: 3 } },
@@ -2427,6 +2452,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'roommate_cool',
             text: '你点了个赞，继续刷下一条。后来他的直播间慢慢做起来了，你们的聊天记录停在去年的“新年快乐”。有些人没有走散，只是走远。',
             effects: [
               { stats: { network: -1 } },
@@ -2596,6 +2622,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'hometown_warm',
             text: '你说：“以前总顾着讲自己的世界，你这些年怎么过的，我其实漏掉了很多。”他看了你一会儿，把杯子推过来：“那就从我爸住院那年讲起，挺长的。”这一次你没有急着拿自己的经历作比较。烧烤摊打烊时，你们才讲到去年。错过的年份不能重来，但关系可以从愿意听的这一刻重新长出来。',
             effects: [
               { stats: { mindset: 5 } },
@@ -2652,6 +2679,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'mentor_warm',
             text: '前辈把你的方案翻回第一页，圈出三处：“这三处是你的判断，剩下的是平台资源。以后每做完一个项目，都这样分一次。”你把那张写满红圈的首页留了下来。后来偶尔请教，他总先问同一句：“这次，哪部分真正属于你？”',
             effects: [
               { stats: { knowledge: 4, network: 6, mindset: 2 } },
@@ -2669,6 +2697,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'mentor_cool',
             text: '你礼貌道谢，没有再联系。后来你偶尔想起那次谈话，才发现有些门不是一直开着的。',
             effects: [
               { stats: { knowledge: 2 } },
@@ -2680,41 +2709,113 @@ export const workEvents: GameEvent[] = [
     ],
   },
   {
-    id: 'ev_npc_mentor_advice',
+    id: 'ev_npc_mentor_test',
     pools: [],
     category: 'npc',
-    title: '前辈的临别赠言',
-    text: '2024年，前辈准备离开这家公司。临走前他请你喝咖啡，说：“别把平台给你的东西，误认成自己的能力。但也别低估你扛过来的东西。”',
+    tier: 'major',
+    title: '这次由你来复盘',
+    text: '一次关键项目出了问题，会上每个人都在解释自己为什么没错。前辈没有替你收场，只把白板笔递过来：“这次你来复盘。别急着找责任人，先告诉大家，下一次怎么不再犯。”你忽然意识到，他前几次圈出你的判断，不只是为了教你做方案。他在看你能不能接住一件没有标准答案、也可能得罪人的事。',
     choices: [
       {
         id: 'a',
-        text: '拿出当年那张红圈方案，请他再看一次',
+        text: '接过白板笔，把自己的误判也写上去',
         outcomes: [
           {
             weight: 1,
-            text: '你把保存多年的方案首页推过去。前辈看见那些红圈，笑了：“还留着？”你把这些年真正属于自己的能力一项项写在背面。他划掉两个虚荣头衔，留下三项能带走的本事：“现在不用我告诉你了。”第一次见面时他替你分清平台和能力；临别时，这道题你已经会自己做。',
+            outcomeTag: 'mentor_warm',
+            text: '你先写下自己的误判，再把团队每个人真正做对的部分标出来。会议结束时，没有人被推出来祭旗，却有了三条能执行的改法。前辈最后一个离开，只说：“肯把自己的名字写进问题里，才有资格把别人的名字写进功劳簿。”从那以后，他不再逐句改你的方案，而是把更难的判断交给你。',
             effects: [
-              { stats: { knowledge: 6, network: 3, mindset: 4 } },
-              { npcFavor: 'mentor', delta: 8 },
-              { npcStage: 'mentor', stage: 'ally' },
-              { setFlag: 'mentor_lesson' },
+              { stats: { knowledge: 5, network: 5, mindset: 3 } },
+              { npcFavor: 'mentor', delta: 12 },
+              { npcStage: 'mentor', stage: 'trusted_ally' },
+              { setFlag: 'mentor_owned_mistake' },
             ],
           },
         ],
       },
       {
         id: 'b',
-        text: '感谢他，但继续按原计划走',
+        text: '借前辈的权威压住争议，先把项目推进',
         outcomes: [
           {
-            weight: 2,
-            text: '你感谢了他，也没有立刻改变。不是所有建议都会马上生效，有些话要过几年才听得懂。',
-            effects: [{ stats: { mindset: 1 } }, { npcStage: 'mentor', stage: 'ally' }],
+            weight: 1,
+            outcomeTag: 'mentor_cool',
+            text: '你说“这是前辈认可的方向”，会议很快安静下来，项目也按时继续。前辈没有当场拆台。散会后他却把白板笔收回去：“借我的名字能赢一次会，赢不了下一次判断。”此后他仍会给你资源和建议，只是不再把最模糊的题交给你。你们保持联系，也保持了边界。',
+            effects: [
+              { stats: { knowledge: 2, network: 3, mindset: -1 } },
+              { npcFavor: 'mentor', delta: -5 },
+              { npcStage: 'mentor', stage: 'transactional' },
+              { setFlag: 'mentor_borrowed_authority' },
+            ],
           },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ev_npc_mentor_advice',
+    pools: [],
+    category: 'npc',
+    title: '前辈的临别赠言',
+    text: '前辈准备离开这家公司。临走前他请你喝咖啡，说：“别把平台给你的东西，误认成自己的能力。但也别低估你扛过来的东西。”',
+    choices: [
+      {
+        id: 'a_true_legacy',
+        text: '把白板笔和红圈方案放在桌上：“这次换我接住别人”',
+        visibleIf: {
+          all: [
+            { npcStage: 'mentor', stage: 'trusted_ally' },
+            { historyCount: { outcomeTag: 'mentor_warm', op: '>=', value: 2 } },
+          ],
+        },
+        outcomes: [
           {
             weight: 1,
-            text: '你按原计划走完了这一年。年底复盘，你发现自己当初的几个判断并没有错——前辈的话是地图，但路终究是自己脚下这条。信別人之前先信过自己，这一年不亏。',
-            effects: [{ stats: { knowledge: 2, mindset: 3 } }, { npcStage: 'mentor', stage: 'ally' }],
+            outcomeTag: 'mentor_warm',
+            text: '你把保存多年的方案首页和那支白板笔放在桌上。背面已经写满这些年真正属于你的判断，也记着几个被你认真带过的新人。前辈看了很久，把笔推回来：“我当年不是想让你一直来问我。我是在等你也能接住一个人。”你点头。贵人真正留下的不是一次内推，而是一种会继续向下传递的耐心。',
+            effects: [
+              { stats: { knowledge: 7, network: 6, mindset: 5 } },
+              { npcFavor: 'mentor', delta: 12 },
+              { npcStage: 'mentor', stage: 'ally' },
+              { setFlag: 'mentor_lesson' },
+              { setFlag: 'mentor_true_legacy' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'a_boundary',
+        text: '不再借他的名字，讲清楚这次自己的判断',
+        visibleIf: { npcStage: 'mentor', stage: 'transactional' },
+        outcomes: [
+          {
+            weight: 1,
+            outcomeTag: 'mentor_warm',
+            text: '你没有再拿“前辈说过”给自己的判断加码，而是把赞成和反对的理由都讲清楚。前辈听完点点头：“这次是你的答案。”你们没有变成亲密的师徒，却终于从资源交换走到可以平等讨论。边界没有消失，只是不再挡在你前面。',
+            effects: [
+              { stats: { knowledge: 5, network: 3, mindset: 4 } },
+              { npcFavor: 'mentor', delta: 8 },
+              { npcStage: 'mentor', stage: 'ally' },
+              { setFlag: 'mentor_earned_independence' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'a_missed',
+        text: '发出那封迟到了几年的请教邮件',
+        visibleIf: { npcStage: 'mentor', stage: 'missed' },
+        outcomes: [
+          {
+            weight: 1,
+            outcomeTag: 'mentor_warm',
+            text: '你承认当年怕麻烦别人，所以把那扇门留在了身后。邮件发出两天后，前辈只回了一句话：“问题还在，就不算太晚。”你们没有补回错过的几年，但约了一次咖啡。贵人不是随叫随到的人；有时只是你终于学会，在门还看得见时认真敲一次。',
+            effects: [
+              { stats: { knowledge: 3, network: 4, mindset: 4 } },
+              { npcFavor: 'mentor', delta: 10 },
+              { npcStage: 'mentor', stage: 'ally' },
+              { setFlag: 'mentor_late_reconnect' },
+            ],
           },
         ],
       },
@@ -2758,6 +2859,7 @@ export const workEvents: GameEvent[] = [
                 { not: { historyCount: { outcomeTag: 'grinder_warm', op: '>=', value: 3 } } },
               ],
             },
+            outcomeTag: 'grinder_warm',
             text: '从保研、大厂、被裁到现在，他把十年讲成了一部行业兴衰史，你听得比任何播客都认真。分开时他说："当年在学校，我一直拿你当参照物。"你笑了："巧了，我也是。"两个互相较劲了十年的人，终于承认对方是自己的镜子。',
             effects: [
               { stats: { mindset: 6, network: 4 } },
@@ -2768,6 +2870,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             condition: { npcStage: 'grinder', stage: 'distant_star' },
+            outcomeTag: 'grinder_warm',
             text: '你们不算熟络，这顿饭一开始有点客气。聊到第二杯，他忽然说："2022年我被裁那阵子，你发的那个表情，我看了好几遍。"你有点愧疚当年只发了个表情，他摆摆手："那时候谁说什么都没用，但有人吱一声，就不一样。"',
             effects: [
               { stats: { mindset: 4, network: 3 } },
@@ -2783,6 +2886,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'grinder_cool',
             text: '你那阵子正忙，饭吃了不到一小时就散了。回去的路上你想，有些人注定只能陪你走一段——他是你青春里的计时器，现在你们都不需要计时了。',
             effects: [
               { stats: { mindset: 1, network: -1 } },
@@ -2800,7 +2904,16 @@ export const workEvents: GameEvent[] = [
     category: 'npc',
     title: '朋友圈的红点',
     text: '深夜刷朋友圈，一条动态跳出来：是{{ta}}。照片里{{ta}}站在一个你不认识的城市街头，笑得和当年一样，身边的人和生活都换了一轮。你的拇指在屏幕上停了几秒——你们已经很多年没说过话了，久到连"在吗"都显得突兀。',
+    presentationVariants: [
+      {
+        // steady_long 是走到过求婚前夜、最后被“再等等”放凉的一段,与 missed/separated 的“多年未联系”不同,需要专属开场。
+        condition: { npcStage: 'first_love', stage: 'steady_long' },
+        title: '朋友圈的红点',
+        text: '深夜刷朋友圈，一条动态跳出来：是{{ta}}。你们最终没有走到民政局——那句“再等我稳定一点”之后，对话越来越短，最后是{{ta}}先提的分开，平静得像在确认一件早就知道的事。照片里{{ta}}在一个新的城市，笑得和当年检票口外一样。你的拇指停在屏幕上，停了很久。',
+      },
+    ],
     contextLines: [
+      { condition: { npcStage: 'first_love', stage: 'steady_long' }, text: '抽屉深处还压着那捆用皮筋扎着的高铁票。你说“再等等”之后，它再没有添过新的一张。' },
       { condition: { flag: 'love_unsent_diary' }, text: '抽屉里的大学日记还夹在那一页：“如果今晚下楼，会怎样。”十年过去，这句话终于等到了一个很轻的回答机会。' },
       { condition: { flag: 'love_silence_separated' }, text: '你记得最后那场视频通话：两个人都在等对方先说未来，最后只剩屏幕右上角不断增加的通话时长。' },
       { condition: { flag: 'love_confession_failed' }, text: '操场上那句“你是个很好的人”早已不再刺耳，但你的手指仍记得当时攥紧又松开的感觉。' },
@@ -2814,6 +2927,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '你找出大学日记本，那页还停在“如果今晚下楼，会怎样”。十年后你终于没有再把心意只留在纸上——你点了赞。第二天{{ta}}回赞了你半年前的一条动态。没有对话，也不需要对话；那个从未寄出的答案，终于以最轻的方式抵达过一次。',
+            outcomeTag: 'love_warm',
             effects: [{ stats: { mindset: 4 } }, { npcStage: 'first_love', stage: 'memory' }],
           },
         ],
@@ -2831,6 +2945,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '当年操场上，你至少把喜欢说出口了；今天也不必把一个赞想得太重。几分钟后，{{ta}}发来一句：“好久不见。”你们聊了半小时，全是安全话题。结束时谁都没说“下次约”。你放下手机，忽然庆幸青春里那次笨拙的坦白——遗憾还在，但没有欠下一句没说的话。',
+            outcomeTag: 'love_warm',
             effects: [{ stats: { mindset: 5, network: 1 } }, { npcStage: 'first_love', stage: 'memory' }],
           },
         ],
@@ -2843,7 +2958,25 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             text: '输入框亮着，你终于补上当年视频里没能说出的完整句子：“那时候不是不爱，是我不敢答应未来。祝你幸福。”{{ta}}过了很久回：“我后来明白了。你也要幸福。”这不是复合，也不是重新开始，只是两个成年人替当年沉默的自己，把那场迟到多年的告别说完。',
+            outcomeTag: 'love_warm',
             effects: [{ stats: { mindset: 6 } }, { npcStage: 'first_love', stage: 'memory' }],
+          },
+        ],
+      },
+      {
+        id: 'a_steady_long',
+        text: '翻出那捆没等到下一站的高铁票，发一句“对不起，也谢谢你”',
+        visibleIf: { npcStage: 'first_love', stage: 'steady_long' },
+        outcomes: [
+          {
+            weight: 1,
+            text: '你把那捆高铁票从抽屉深处拿出来，一张张数过去——最早的一张字迹已经褪光了。当年你们赢过异地，却输给了一句“再等等”。你发过去：“对不起，让你等在原地那么久。也谢谢你，陪我走了最难的那几年。”{{ta}}回得很快：“票留着吧。那几年是真的。”你把票放回抽屉。没能抵达的车票，也记录过认真出发的人。',
+            outcomeTag: 'love_warm',
+            effects: [
+              { stats: { mindset: 5 } },
+              { npcFavor: 'first_love', delta: 4 },
+              { npcStage: 'first_love', stage: 'memory' },
+            ],
           },
         ],
       },
@@ -2853,7 +2986,21 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            // L4 回响:love_warm 累积 >=2(至少真正在一起爱过一段)时,连“不打扰”都有不同的质感。
+            condition: { historyCount: { outcomeTag: 'love_warm', op: '>=', value: 2 } },
+            text: '你没有点赞，把手机扣在床头。你们是认真爱过的——操场上的十圈、小饭馆里那句“明年也要这样”，每一段你都没有敷衍过。所以此刻的不打扰不是逃避，是你替那段感情做的最后一件认真的事。你睡得很安稳，梦里没有遗憾来敲门。',
+            outcomeTag: 'love_cool',
+            effects: [
+              { stats: { mindset: 3 } },
+              { npcStage: 'first_love', stage: 'memory' },
+              { setFlag: 'love_history_closure' },
+            ],
+          },
+          {
+            weight: 1,
+            condition: { not: { historyCount: { outcomeTag: 'love_warm', op: '>=', value: 2 } } },
             text: '你没有点赞，把手机扣在床头。青春的那一页不需要仪式感地合上，它早就合上了，你只是偶尔路过时多看了一眼封面。你睡得比想象中安稳。',
+            outcomeTag: 'love_cool',
             effects: [{ stats: { mindset: 2 } }, { npcStage: 'first_love', stage: 'memory' }],
           },
         ],
@@ -2869,12 +3016,47 @@ export const workEvents: GameEvent[] = [
     text: '2025年，创业室友约你吃饭。十年前他在宿舍里跟你画"改变世界"的大饼，后来创业黄了、直播带货、几起几落。这次见面，他递给你一张新名片——一家小而稳的供应链公司，"这次不画饼了，就是门生意"。他说这些年最感谢的是当年宿舍里那些愿意听他吹牛的人："梦想没成，但听众都还在。"',
     choices: [
       {
+        id: 'a_true_partner',
+        text: '翻开旧账本：“创始团队，申请重新报到”',
+        visibleIf: {
+          all: [
+            { npcStage: 'roommate', stage: 'livestream_comeback' },
+            { historyCount: { outcomeTag: 'roommate_warm', op: '>=', value: 3 } },
+          ],
+        },
+        outcomes: [
+          {
+            weight: 1,
+            outcomeTag: 'roommate_warm',
+            text: '你从包里拿出那本皱巴巴的旧账本。最后一页还写着“项目散了，朋友不散”。他盯着那行字看了很久，忽然把新名片夹进去：“2015 年你敢投生活费，2017 年陪我收拾烂摊子，2020 年又替我转直播。你不是听众，你一直是合伙人。”你们没有谈股份，也没有再画三年上市的大饼。只是十年后终于确认：第一家公司早就倒了，创始团队没有散。',
+            effects: [
+              { stats: { mindset: 8, network: 6 } },
+              { npcFavor: 'roommate', delta: 15 },
+              { npcStage: 'roommate', stage: 'old_friend' },
+              { setFlag: 'roommate_true_partner' },
+            ],
+          },
+        ],
+      },
+      {
         id: 'a',
         text: '举杯，敬这十年的折腾',
+        visibleIf: {
+          any: [
+            { npcStage: 'roommate', stage: 'faded' },
+            {
+              all: [
+                { npcStage: 'roommate', stage: 'livestream_comeback' },
+                { not: { historyCount: { outcomeTag: 'roommate_warm', op: '>=', value: 3 } } },
+              ],
+            },
+          ],
+        },
         outcomes: [
           {
             weight: 1,
             condition: { npcStage: 'roommate', stage: 'livestream_comeback' },
+            outcomeTag: 'roommate_warm',
             text: '从创业计划书到直播间再到这张名片，你算是全程见证了他的十年。他给你倒满，说："下次融资……开玩笑的，没有下次融资了。"你们笑作一团。有的人用十年撞了一路南墙,最后撞出了一扇自己的门。',
             effects: [
               { stats: { mindset: 5, network: 4 } },
@@ -2885,6 +3067,7 @@ export const workEvents: GameEvent[] = [
           {
             weight: 1,
             condition: { npcStage: 'roommate', stage: 'faded' },
+            outcomeTag: 'roommate_warm',
             text: '你们已经很多年没正经聊过天了，这顿饭却出乎意料地不尴尬。他把这些年的起落讲成段子，你把职场的荒诞讲成相声。散场时他说："当年在宿舍，我就觉得你会一直是我朋友。"迟到了很多年的这顿饭，把断掉的线又接上了。',
             effects: [
               { stats: { mindset: 4, network: 5 } },
@@ -2900,6 +3083,7 @@ export const workEvents: GameEvent[] = [
         outcomes: [
           {
             weight: 1,
+            outcomeTag: 'roommate_warm',
             text: '他愣了一下，从手机备忘录里翻出一张照片——那份计划书他一直存着。"你看这页，\'三年上市\'，哈哈哈。"你们对着那页PPT笑了很久。笑完他说："不过说真的，谢谢你当年没笑我。"你想说其实你笑了，最后只是碰了碰他的杯子。',
             effects: [
               { stats: { mindset: 6, network: 3 } },

@@ -353,6 +353,7 @@ function NpcSelectionScreen(props: { view: Extract<ViewModel, { kind: 'NPC_SELEC
         {requiredNpcs.map(npc => (
           <View key={npc.id} className="trait-card trait-selected">
             <Text className="trait-title">必然同行 · {npc.name}</Text>
+            <Text className="route-label block">{npc.routeLabel}</Text>
             <Text className="block">{npc.description}</Text>
           </View>
         ))}
@@ -363,6 +364,7 @@ function NpcSelectionScreen(props: { view: Extract<ViewModel, { kind: 'NPC_SELEC
             onClick={() => toggle(npc.id)}
           >
             <Text className="trait-title">{selected.includes(npc.id) ? '✓ ' : ''}{npc.name}</Text>
+            <Text className="route-label block">{npc.routeLabel}</Text>
             <Text className="block">{npc.description}</Text>
           </View>
         ))}
@@ -463,6 +465,9 @@ function OutcomeScreen(props: { view: Extract<ViewModel, { kind: 'OUTCOME' }> })
   return (
     <Card>
       <Text className="event-text block">{props.view.text}</Text>
+      {props.view.relationshipHint && (
+        <Text className="relationship-hint block">✦ {props.view.relationshipHint}</Text>
+      )}
       <DeltaChips deltas={props.view.deltas} />
       <ContinueButton onClick={() => act({ type: 'CONTINUE' })} />
     </Card>
@@ -550,6 +555,22 @@ function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' }> }) {
       <Text className="kicker">你的结局</Text>
       <Text className="ending-title">{props.view.title}</Text>
       <Text className="event-text block ending-text">{props.view.text}</Text>
+      {props.view.relationships.length > 0 && (
+        <View className="relationship-summary">
+          <Text className="kicker block">同行的人</Text>
+          {props.view.relationships.map(relationship => (
+            <View className="relationship-card" key={relationship.npcId}>
+              <Text className="relationship-name block">{relationship.name}</Text>
+              <Text className="relationship-title block">{relationship.title}</Text>
+              <Text className="relationship-text block">{relationship.text}</Text>
+              <Text className="relationship-ledger block">
+                靠近 {relationship.warmCount} 次 · 退后 {relationship.coolCount} 次
+                {relationship.moments.length > 0 ? ` · ${relationship.moments.join(' / ')}` : ''}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
       <View className={`share-card tone-${props.view.shareCard.tone}`}>
         <View className="share-card-head">
           <Text>{props.view.shareCard.years}</Text>
@@ -569,6 +590,13 @@ function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' }> }) {
           <Text className="share-traits block">
             特质:{props.view.shareCard.traits.join(' × ')}
           </Text>
+        )}
+        {props.view.shareCard.relationships.length > 0 && (
+          <View className="share-relationship-badges">
+            {props.view.shareCard.relationships.map(relationship => (
+              <Text className="share-relationship-badge" key={relationship}>{relationship}</Text>
+            ))}
+          </View>
         )}
         <View className="share-score">
           <Text className="share-grade">成绩：{props.view.grade}</Text>
@@ -631,7 +659,7 @@ export default function Index() {
   useShareAppMessage(() => ({
     title:
       view.kind === 'ENDING'
-        ? `我在《2014：我的十二年》达成了「${view.title}」，总分 ${view.score}`
+        ? `我在《2014：我的十二年》达成了「${view.title}」，总分 ${view.score}${view.shareCard.relationships.length ? `，同行的人：${view.shareCard.relationships.join('、')}` : ''}`
         : '《2014：我的十二年》——替一个普通人过完这十二年',
     path: '/pages/index/index',
   }));

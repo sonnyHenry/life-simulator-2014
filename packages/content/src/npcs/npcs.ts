@@ -5,6 +5,7 @@ export const npcs: NpcDef[] = [
     id: 'roommate',
     name: '创业室友',
     description: '永远在折腾新点子。你可能陪他创业，也可能只在多年后听说他的消息。',
+    routeLabel: '创业共同体',
     initialFavor: 20,
     initialStage: 'freshman',
     stages: {
@@ -43,6 +44,7 @@ export const npcs: NpcDef[] = [
     id: 'first_love',
     name: '初恋',
     description: '从大学操场开始的一段关系，可能走过异地，也可能只剩朋友圈里的红点。',
+    routeLabel: '亲密关系',
     initialFavor: 10,
     initialStage: 'club_acquaintance',
     stages: {
@@ -67,7 +69,12 @@ export const npcs: NpcDef[] = [
         eventId: 'ev_love_marriage',
       },
       married: {},
-      steady_long: {},
+      // steady_long = 求婚时说“再等等”,之后感情放凉;2024 与 missed/separated 汇入同一收官事件,
+      // 由 ev_npc_first_love_2024 的 steady_long 专属开场与选项承接。
+      steady_long: {
+        advanceWhen: { year: { from: 2024, to: 2024 } },
+        eventId: 'ev_npc_first_love_2024',
+      },
       memory: {},
     },
   },
@@ -75,6 +82,7 @@ export const npcs: NpcDef[] = [
     id: 'grinder',
     name: '卷王同学',
     description: '你的镜像和参照物：保研、大厂、裁员，每一步都让人忍不住比较。',
+    routeLabel: '竞争与镜像',
     initialFavor: 15,
     initialStage: 'freshman',
     stages: {
@@ -111,6 +119,7 @@ export const npcs: NpcDef[] = [
     id: 'hometown_friend',
     name: '县城发小',
     description: '留在家乡的老朋友。你们走向不同城市，也会在春节饭桌上互相打量。',
+    routeLabel: '故乡与归属',
     initialFavor: 25,
     initialStage: 'home',
     stages: {
@@ -140,14 +149,16 @@ export const npcs: NpcDef[] = [
     id: 'mentor',
     name: '职场贵人',
     description: '需要足够人脉才会真正遇见的人，可能给你一次内推，也可能与你擦肩而过。',
+    routeLabel: '职场传承',
     initialFavor: 0,
     initialStage: 'unknown',
     stages: {
       unknown: {
         advanceWhen: {
           all: [
-            { stat: 'network', op: '>=', value: 24 },
-            { year: { from: 2019, to: 2023 } },
+            // 选择贵人线后仍需经营人脉,但门槛不应高到近两成玩家整局停在 unknown。
+            { stat: 'network', op: '>=', value: 18 },
+            { year: { from: 2019, to: 2022 } },
             // 读研在读期间(postgrad 已设、尚未 postgrad_done)不触发职场贵人;
             // 读研毕业(2021 起 postgrad_done)与直接工作的玩家不受影响。
             { any: [{ not: { flag: 'postgrad' } }, { flag: 'postgrad_done' }] },
@@ -159,12 +170,23 @@ export const npcs: NpcDef[] = [
         advanceWhen: {
           all: [
             { npcFavor: 'mentor', op: '>=', value: 20 },
-            { year: { from: 2024, to: 2024 } },
+            { year: { from: 2023, to: 2024 } },
           ],
         },
+        eventId: 'ev_npc_mentor_test',
+      },
+      trusted_ally: {
+        advanceWhen: { year: { from: 2025, to: 2026 } },
         eventId: 'ev_npc_mentor_advice',
       },
-      missed: {},
+      transactional: {
+        advanceWhen: { year: { from: 2025, to: 2026 } },
+        eventId: 'ev_npc_mentor_advice',
+      },
+      missed: {
+        advanceWhen: { year: { from: 2025, to: 2026 } },
+        eventId: 'ev_npc_mentor_advice',
+      },
       ally: {},
     },
   },

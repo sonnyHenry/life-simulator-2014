@@ -660,7 +660,7 @@ class LifeSimMiniGame {
     for (const npc of view.requiredNpcs) {
       y = this.drawButton(
         `必然同行 · ${npc.name}`,
-        npc.description,
+        `${npc.routeLabel} · ${npc.description}`,
         panel.contentX,
         y,
         panel.contentWidth,
@@ -672,7 +672,7 @@ class LifeSimMiniGame {
       const picked = this.npcSelection.includes(npc.id);
       y = this.drawButton(
         `${picked ? '✓ ' : ''}${npc.name}`,
-        npc.description,
+        `${npc.routeLabel} · ${npc.description}`,
         panel.contentX,
         y,
         panel.contentWidth,
@@ -805,6 +805,13 @@ class LifeSimMiniGame {
       lineHeight: 30,
       color: '#3f382f',
     }) + 18;
+    if (view.relationshipHint) {
+      y = this.drawWrappedText(`✦ ${view.relationshipHint}`, panel.contentX, y, panel.contentWidth, {
+        size: 13,
+        lineHeight: 21,
+        color: '#9a6f2d',
+      }) + 14;
+    }
     y = this.drawDeltaChips(view.deltas, panel.contentX, y, panel.contentWidth) + 16;
     y = this.drawButton('继续', '', panel.contentX, y, panel.contentWidth, () =>
       this.act({ type: 'CONTINUE' }),
@@ -833,6 +840,34 @@ class LifeSimMiniGame {
       lineHeight: 26,
       color: '#3f382f',
     }) + 18;
+    if (view.relationships.length > 0) {
+      y = this.drawKicker('同行的人', panel, y);
+      for (const relationship of view.relationships) {
+        this.drawText(relationship.name, panel.contentX + 12, y + 14, {
+          size: 12,
+          color: '#8f8269',
+          maxWidth: panel.contentWidth - 24,
+        });
+        y = this.drawWrappedText(relationship.title, panel.contentX + 12, y + 38, panel.contentWidth - 24, {
+          size: 18,
+          lineHeight: 24,
+          weight: '700',
+          color: '#fff7e8',
+        });
+        y = this.drawWrappedText(relationship.text, panel.contentX + 12, y + 6, panel.contentWidth - 24, {
+          size: 14,
+          lineHeight: 22,
+          color: '#d8c9a5',
+        }) + 18;
+        y = this.drawWrappedText(
+          `靠近 ${relationship.warmCount} 次 · 退后 ${relationship.coolCount} 次${relationship.moments.length ? ` · ${relationship.moments.join(' / ')}` : ''}`,
+          panel.contentX + 12,
+          y,
+          panel.contentWidth - 24,
+          { size: 12, lineHeight: 19, color: '#8f8269' },
+        ) + 14;
+      }
+    }
     y = this.drawShareCard(view, panel.contentX, y, panel.contentWidth) + 20;
     y = this.drawStatsGrid(view.stats, panel.contentX, y, panel.contentWidth) + 22;
     y = this.drawButton('微信分享', '', panel.contentX, y, panel.contentWidth, () =>
@@ -858,7 +893,8 @@ class LifeSimMiniGame {
     const hasTraits = view.shareCard.traits.length > 0;
     const hasGoal = Boolean(view.shareCard.goal);
     const hasEvolution = view.shareCard.traitEvolutions.length > 0;
-    const cardHeight = 178 + (hasTraits ? 20 : 0) + (hasGoal ? 20 : 0) + (hasEvolution ? 20 : 0);
+    const hasRelationships = view.shareCard.relationships.length > 0;
+    const cardHeight = 178 + (hasTraits ? 20 : 0) + (hasGoal ? 20 : 0) + (hasEvolution ? 20 : 0) + (hasRelationships ? 20 : 0);
     const toneColor =
       view.shareCard.tone === 'triumph'
         ? '#2e6b57'
@@ -905,6 +941,14 @@ class LifeSimMiniGame {
     }
     if (hasTraits) {
       this.drawText(`特质:${view.shareCard.traits.join(' × ')}`, x + 16, cy, {
+        size: 12,
+        color: '#d8c9a5',
+        maxWidth: width - 32,
+      });
+      cy += 20;
+    }
+    if (hasRelationships) {
+      this.drawText(`同行的人:${view.shareCard.relationships.join(' × ')}`, x + 16, cy, {
         size: 12,
         color: '#d8c9a5',
         maxWidth: width - 32,
@@ -1240,6 +1284,7 @@ class LifeSimMiniGame {
       ...(view.shareCard.goal ? [`人生目标:${view.shareCard.goal}`] : []),
       ...(view.shareCard.traitEvolutions.length > 0 ? [`性格成长:${view.shareCard.traitEvolutions.join(' × ')}`] : []),
       ...(view.shareCard.traits.length > 0 ? [`特质:${view.shareCard.traits.join(' × ')}`] : []),
+      ...(view.shareCard.relationships.length > 0 ? [`同行的人:${view.shareCard.relationships.join(' × ')}`] : []),
       `人生总分 ${view.score}(${view.grade} 级)`,
       `学识${stats.knowledge} 金钱¥${formatMoney(stats.money)} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
       `人生编号 #${view.shareCard.seed}`,

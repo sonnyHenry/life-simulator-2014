@@ -15,6 +15,7 @@ export interface ShareImageData {
   traits?: string[];
   goal?: string;
   traitEvolutions?: string[];
+  relationships?: string[];
 }
 
 const TONE_COLORS: Record<ShareImageData['tone'], { bg: string; border: string; accent: string }> = {
@@ -119,10 +120,15 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   const tagLines = wrapText(ctx, data.tagline, W - 180, 3);
   ctx.font = font(28);
   const textLines = wrapText(ctx, data.text, W - 160, 10);
+  ctx.font = font(25);
+  const relationshipLines = data.relationships?.length
+    ? wrapText(ctx, `同行的人:${data.relationships.join(' × ')}`, W - 160, 3)
+    : [];
 
   const tagY = 180 + titleLines.length * 84 + 24;
   const textY = tagY + tagLines.length * 52 + 36;
-  const scoreY = textY + textLines.length * 46 + 44;
+  const relationshipY = textY + textLines.length * 46 + 30;
+  const scoreY = relationshipY + relationshipLines.length * 38 + 44;
   const H = scoreY + 480;
 
   // 设高度会清空画布并重置绘制状态,之后逐块重设
@@ -184,6 +190,16 @@ export function renderShareImage(data: ShareImageData): HTMLCanvasElement {
   for (const line of textLines) {
     ctx.fillText(line, W / 2, y);
     y += 46;
+  }
+
+  if (relationshipLines.length > 0) {
+    ctx.fillStyle = colors.accent;
+    ctx.font = font(25, 600);
+    y = relationshipY;
+    for (const line of relationshipLines) {
+      ctx.fillText(line, W / 2, y);
+      y += 38;
+    }
   }
 
   // 总分 + 评级

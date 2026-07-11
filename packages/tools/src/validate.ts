@@ -56,6 +56,23 @@ for (const event of contentPack.events) {
     }
   }
 }
+
+// NPC 温度标签采用“靠近/疏远”语义。一个事件一旦开始使用某条人物线的温度标签，
+// 所有 outcome 都必须标注同一前缀，防止新增条件变体时悄悄漏出 historyCount 统计。
+const NPC_TAG_PREFIXES = ['grinder', 'hometown', 'roommate', 'love', 'mentor'] as const;
+for (const event of contentPack.events) {
+  const outcomes = event.choices.flatMap(choice => choice.outcomes);
+  for (const prefix of NPC_TAG_PREFIXES) {
+    if (!outcomes.some(outcome => outcome.outcomeTag?.startsWith(`${prefix}_`))) continue;
+    for (const choice of event.choices) {
+      for (const outcome of choice.outcomes) {
+        if (outcome.outcomeTag !== `${prefix}_warm` && outcome.outcomeTag !== `${prefix}_cool`) {
+          error(`NPC temperature tag missing/invalid: ${event.id}.${choice.id} expected ${prefix}_warm/cool`);
+        }
+      }
+    }
+  }
+}
 for (const application of contentPack.applications) {
   for (const effect of [...(application.effects ?? []), ...(application.failEffects ?? [])]) {
     if ('schedule' in effect) scheduledEventIds.add(effect.schedule.eventId);

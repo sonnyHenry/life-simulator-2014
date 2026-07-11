@@ -460,6 +460,78 @@ h2 {
   background: #fff8e8;
 }
 
+.relationship-summary {
+  margin: 18px 0 6px;
+  text-align: left;
+}
+
+.relationship-card {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border-left: 3px solid #b9833a;
+  border-radius: 4px 10px 10px 4px;
+  background: #fbf6e9;
+}
+
+.relationship-card span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.relationship-card h3 {
+  margin: 3px 0 6px;
+  font-size: 17px;
+}
+
+.relationship-card p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.route-label {
+  display: inline-block;
+  margin: 2px 0 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #eee3c7;
+  color: #765b28;
+  font-size: 12px;
+}
+
+.relationship-hint {
+  margin: 14px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f6efdd;
+  color: #765b28;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.relationship-ledger {
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.share-relationship-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.share-relationship-badges span {
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: #8a6a2f;
+  font-size: 12px;
+}
+
 .share-card.tone-triumph {
   background: #eef6ed;
   border-color: #c9dfcb;

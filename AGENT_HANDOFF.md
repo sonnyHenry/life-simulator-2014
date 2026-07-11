@@ -691,29 +691,46 @@ pnpm --filter @life-sim/miniprogram build:weapp
 
 ## 最近一次验证结果
 
-最近一次完整验证通过(M5 第四十六轮高频小回响覆盖后):
+第六十一、六十三至六十五轮由 Codex 合并完成,内容版本 0.47.0 → 0.51.0。⑥①专属关系 3%-30% 区间已作为门禁固化,当前五线均达标;⑥③结局“同行的人”升级为关系档案,展示本线 warm/cool 次数与最近三个关键事件;⑥④ OUTCOME ViewModel 新增不剧透的 `relationshipHint`,warm 提示“记住靠近”、cool 提示“记住退后”,Web/小程序/小游戏同步展示;⑥⑤ Web 与小程序分享卡把关系称号改为徽章组,Web 分享图和小游戏 Canvas 保留专属关系视觉行。关系档案与提示均由核心层生成,端口不重复解释 outcomeTag。
+
+第六十与六十二轮由 Codex 合并完成,内容版本 0.46.0 → 0.47.0。贵人 `unknown` 相遇门槛从 network>=24 调至 >=18(首轮试调 >=20 时 10000 局 unknown 仍为 10.7%,未通过新门禁),降低“玩家主动选线但整局不出现”的概率;触发年份、读研门控和后续三段状态机不变。simulate `--check` 正式加入 NPC 质量门禁:初恋收官率>=90%、可选 NPC>=85%、专属关系命中率 3%-30%、任一带后续 eventId 的非终态 stage 滞留率<=10%。这些指标不再只是报告,回归时越界会直接退出失败。
+
+第五十五至五十九轮由 Codex 合并完成,内容版本 0.41.0 → 0.46.0。⑤分享卡与复制文案加入“同行的人”关系称号,Web 分享图同步绘制;⑥ simulate 新增每条 NPC 的激活数、终态收官率、专属关系命中率与最终 stage 分布;⑦ core 新增陈旧 pending NPC 事件测试,与既有同年限流/跨年顺延测试共同覆盖调度压力;⑧ validate 新增 NPC 温度标签完整性规则,某事件一旦使用人物前缀,所有 outcome 必须为同前缀 `_warm/_cool`;⑨ NpcDef/ViewModel 新增 `routeLabel`,选择页在三端显示亲密关系/创业共同体/竞争与镜像/故乡与归属/职场传承,帮助玩家有意识地选线。
+
+第五十四轮由 Codex 完成,内容版本 0.40.0 → 0.41.0。ENDING ViewModel 新增 `relationships`,核心层统一把六个 NPC 专属 flags 解释为玩家可见的“同行的人”卡片(初恋同时支持共同抵达与认真告别两种收束)。Web、小程序、小游戏结局页同步渲染人物名、关系称号和回响文案;未命中专属关系时不显示空模块。core 新增单测,断言内部 flags 会稳定映射成对应关系卡,避免各端自行判断状态。
+
+第五十三轮由 Codex 完成,内容版本 0.39.0 → 0.40.0。新增 `packages/tools/src/verify-npcs.ts` 并接入 tools 的 `test` script,因此根目录 `pnpm test` 会同时运行 core 单测和 NPC 内容专项验证。验证直接读取正式 contentPack,为卷王/发小/初恋/室友/贵人构造阈值前后的 history,断言专属选项与普通兜底互斥,实际应用专属 outcome 后检查最终 stage 与 `grinder_true_mirror/hometown_true_friend/love_true_companion/love_history_closure/roommate_true_partner/mentor_true_legacy` flags。后续修改人物线条件、选项 ID 或效果时会在常规测试阶段直接失败。
+
+第五十二轮由 Codex 完成,内容版本 0.38.0 → 0.39.0。贵人线从 2 节点扩为 3 节点:初识补 `mentor_warm/cool`;新增 2023-2024《这次由你来复盘》,按“承担自己的误判并分享功劳/借前辈权威压住争议”真分叉为 `trusted_ally/transactional`;2025-2026 临别收官同时承接 `trusted_ally/transactional/missed`。`trusted_ally + mentor_warm>=2` 解锁传承专属选项并写入 `mentor_true_legacy`,普通边界修复和迟到重连各有独立可见选项。贵人 stage 从 `unknown/available/missed/ally` 加厚为 `unknown/available/trusted_ally/transactional/missed/ally`。
+
+第五十一轮由 Codex 完成,内容版本 0.37.0 → 0.38.0。室友状态机的 2015 入伙/旁观、2017 失败后陪伴/复盘、2020 转发直播/划走三次互动均补齐 `roommate_warm/roommate_cool`;2025《十年后的合伙人》在 `livestream_comeback + roommate_warm>=3` 时显示“创始团队，申请重新报到”专属选项并写入 `roommate_true_partner`。普通重逢使用互斥 `not historyCount` 兜底,`faded` 重连保持独立,避免专属结局被随机稀释。
+
+第五十轮由 Codex 接续 Claude Code 的初恋线改动完成,内容版本 0.36.0 → 0.37.0。2016 操场、冬夜、2018 异地、2022-2023 领证与 2024 收官均补齐 `love_warm/love_cool`;领证时 `love_warm>=3` 解锁高铁票专属选项并写入 `love_true_companion`,普通领证选项用互斥 `not historyCount` 兜底。`missed/separated/steady_long` 均在 2024 汇入《朋友圈的红点》,其中“不打扰”按 `love_warm>=2` 使用互斥结局文案,累积暖意路径写入 `love_history_closure`。`steady_long` 不再成为死 stage,新增专属开场、高铁票上下文与告别选项。
+
+最近一次类型、测试、内容校验与三端构建通过(M5 第六十五轮关系反馈/分享视觉后);最近一次 10000 局门禁为第六十二轮,第六十三至六十五轮只改变只读 ViewModel 与 UI:
 
 - `pnpm typecheck`
-- `pnpm test`(31 通过)
+- `pnpm test`(core 33 通过 + NPC 专项验证通过)
 - `pnpm validate`
 - `pnpm simulate -n 10000 --check`(CI 实跑档位)
 
-最近一次 `pnpm validate`:
+第六十五轮 `pnpm validate`:
 
 ```text
-校验内容包 base@0.36.0
-事件 187, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6, 特质成长 12, 人生目标 5
+校验内容包 base@0.51.0
+事件 188, 结局 26, NPC 5, 题目 37, 收入规则 24, 特质 6, 特质成长 12, 人生目标 5
 完成: 0 errors, 0 warnings
 ```
 
-最近一次 `pnpm simulate -n 10000 --check`(与 `.github/workflows/deploy.yml` 一致的档位):
+第六十二轮 `pnpm simulate -n 10000 --check`(与 `.github/workflows/deploy.yml` 一致的档位):
 
 ```text
-事件覆盖: 187/187
-26 结局全可达;最大单一结局 23.0%,兜底 1.7%
+事件覆盖: 188/188
+26 结局全可达;最大单一结局 22.9%,兜底 1.4%
 提前结局占比: 5.1%
-金钱分位: p10=¥139200 p50=¥250700 p90=¥451700 · 心态分位: p10=25 p50=57 p90=93
-✅ 分布目标校验通过(全覆盖、全可达、无结局>40%、兜底≤35%、提前结局≤10%)
+贵人收官率 87.9%,unknown 滞留 7.5%,专属关系 21.4%;其余四线收官率 94.5%-96.9%
+金钱分位: p10=¥141700 p50=¥251800 p90=¥452000 · 心态分位: p10=26 p50=58 p90=94
+✅ 分布与 NPC 关系门禁通过
 ```
 
 **注意:n=1000/n=300 档位已不再可靠**——139 事件 + 20 结局中存在命中率 ~0.1% 的展示性稀有结局(end_early_retire、end_cashflow_break),固定种子下任何 RNG 流偏移(改题数、加事件、加职业线都会偏移)都会让小样本随机漏采:n=1000 曾稳定命中,第二十七轮加 14 事件 + 心理学线后 n=1000 掉到 0、n=3000 仍漏、n=5000 起 4-5 局、n=10000 达 8-11 局。CI 与本地可达性验证一律用 n=10000。

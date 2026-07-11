@@ -264,6 +264,7 @@ export function NpcSelectionScreen(props: {
         {requiredNpcs.map(npc => (
           <div className="trait-card selected" key={npc.id}>
             <h3>必然同行 · {npc.name}</h3>
+            <span className="route-label">{npc.routeLabel}</span>
             <p>{npc.description}</p>
           </div>
         ))}
@@ -275,6 +276,7 @@ export function NpcSelectionScreen(props: {
             onClick={() => toggle(npc.id)}
           >
             <h3>{selected.includes(npc.id) ? '✓ ' : ''}{npc.name}</h3>
+            <span className="route-label">{npc.routeLabel}</span>
             <p>{npc.description}</p>
           </button>
         ))}

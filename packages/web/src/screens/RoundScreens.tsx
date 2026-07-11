@@ -40,6 +40,7 @@ export function OutcomeScreen(props: { view: Extract<ViewModel, { kind: 'OUTCOME
   return (
     <Card>
       <p className="event-text">{props.view.text}</p>
+      {props.view.relationshipHint && <p className="relationship-hint">✦ {props.view.relationshipHint}</p>}
       <DeltaChips deltas={props.view.deltas} />
       <ContinueButton onClick={() => act({ type: 'CONTINUE' })} />
     </Card>
@@ -106,12 +107,16 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
   const evolutionLine = props.view.shareCard.traitEvolutions.length > 0
     ? `性格成长:${props.view.shareCard.traitEvolutions.join(' × ')}`
     : null;
+  const relationshipLine = props.view.shareCard.relationships.length > 0
+    ? `同行的人:${props.view.shareCard.relationships.join(' × ')}`
+    : null;
   const shareText = [
     `我在《2014：我的十二年》里达成结局：${props.view.title}`,
     props.view.shareCard.tagline,
     ...(goalLine ? [goalLine] : []),
     ...(evolutionLine ? [evolutionLine] : []),
     ...(traitLine ? [traitLine] : []),
+    ...(relationshipLine ? [relationshipLine] : []),
     `人生总分 ${props.view.score}（成绩：${props.view.grade} 级）`,
     `学识${stats.knowledge} 金钱¥${stats.money.toLocaleString()} 心态${stats.mindset} 人脉${stats.network} 健康${stats.health}`,
     `人生编号 #${seed}`,
@@ -139,6 +144,7 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         traits: props.view.shareCard.traits,
         goal: props.view.shareCard.goal,
         traitEvolutions: props.view.shareCard.traitEvolutions,
+        relationships: props.view.shareCard.relationships,
         stats,
         score: props.view.score,
         grade: props.view.grade,
@@ -153,6 +159,22 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
       <p className="kicker">你的结局</p>
       <h1 className="ending-title">{props.view.title}</h1>
       <p className="event-text ending-text">{props.view.text}</p>
+      {props.view.relationships.length > 0 && (
+        <section className="relationship-summary">
+          <p className="kicker">同行的人</p>
+          {props.view.relationships.map(relationship => (
+            <article className="relationship-card" key={relationship.npcId}>
+              <span>{relationship.name}</span>
+              <h3>{relationship.title}</h3>
+              <p>{relationship.text}</p>
+              <div className="relationship-ledger">
+                靠近 {relationship.warmCount} 次 · 退后 {relationship.coolCount} 次
+                {relationship.moments.length > 0 && ` · ${relationship.moments.join(' / ')}`}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
       <div className={`share-card tone-${props.view.shareCard.tone}`}>
         <div className="share-card-head">
           <span>{props.view.shareCard.years}</span>
@@ -163,6 +185,11 @@ export function EndingScreen(props: { view: Extract<ViewModel, { kind: 'ENDING' 
         {goalLine && <p className="share-traits">{goalLine}</p>}
         {evolutionLine && <p className="share-traits">{evolutionLine}</p>}
         {traitLine && <p className="share-traits">{traitLine}</p>}
+        {props.view.shareCard.relationships.length > 0 && (
+          <div className="share-relationship-badges">
+            {props.view.shareCard.relationships.map(relationship => <span key={relationship}>{relationship}</span>)}
+          </div>
+        )}
         <div className="share-score">
           <span className="share-grade">成绩：{props.view.grade}</span>
           <span>人生总分 {props.view.score}</span>
